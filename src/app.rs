@@ -88,8 +88,18 @@ pub fn HomePage() -> impl IntoView {
     // Creates a reactive value to update the button
     let (count, set_count) = create_signal(0);
     let on_click = move |_| set_count.update(|count| *count += 1);
+    let mut vec = Vec::new();
+    for _ in 0..320 {
+        vec.push(
+            view! {
+                <a id="shop_selector" class:red=move|| {count() % 2 == 1} href="/shop/pet">"Pet Shop"</a>
+                <a id="shop_selector" class:red=move|| {count() % 2 == 1} href="/shop/food">"Food Shop"</a>
+            }
+        )
+    }
 
     view! {
+        {vec}
         <a id="shop_selector" class:red=move|| {count() % 2 == 1} href="/shop/pet">"Pet Shop"</a>
         <a id="shop_selector" class:red=move|| {count() % 2 == 1} href="/shop/food">"Food Shop"</a>
         <button id="test" on:click=on_click>"Click Me: " {count}</button>
@@ -170,45 +180,41 @@ pub fn FooterBar() -> impl IntoView {
 
 #[component]
 pub fn NavBar(selected: CurrentPage) -> impl IntoView {
-    let (menu_open, set_menu_open) = create_signal(false);
-    let toggle_menu = move |_| set_menu_open.update(|open| *open = !*open);
-
     view! {
         <nav class="navbar">
             <div class="logo-container">
-                <img src="/main_logo.svg" alt="Farmtasker Logo"/>
+                <a href="/">
+                    <img src="/main_logo.svg" alt="Farmtasker Logo"/>
+                </a>
             </div>
             <h4 class="title-text">"Farmtasker Shop"</h4>
-            <button class="menu-toggle" on:click=toggle_menu>
-                {move || if menu_open.get() { "Close" } else { "Menu" }}
-            </button>
-            <ul class="nav_buttons" class:open=move || menu_open.get()>
+            <ul class="nav_buttons">
                 <li>
                     <a class:current=move || {
                         matches!(selected, CurrentPage::HomePage)
                     }
-                        href="/" id=r"button_left">"Home"</a>
+                        href="/" id="button_left">"Home"</a>
                 </li>
                 <li>
                     <a
                     class:current=move || {
                         matches!(selected, CurrentPage::PetShop)
                     }
-                        href="/shop/pet" id=r"button_middle">"Pet Shop"</a>
+                        href="/shop/pet" id="button_middle">"Pet Shop"</a>
                 </li>
                 <li>
                     <a
                     class:current=move || {
                         matches!(selected, CurrentPage::FoodShop)
                     }
-                        href="/shop/food" id=r"button_middle">"Food Shop"</a>
+                        href="/shop/food" id="button_middle">"Food Shop"</a>
                 </li>
                 <li>
                     <a
                     class:current=move || {
                         matches!(selected, CurrentPage::About)
                     }
-                        href="/about" id=r"button_right">"About Us"</a>
+                        href="/about" id="button_right">"About Us"</a>
                 </li>
             </ul>
         </nav>
