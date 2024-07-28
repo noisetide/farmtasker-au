@@ -19,16 +19,20 @@ wasm-bindgen = "=0.2.92"
 thiserror = "1"
 tracing = { version = "0.1", optional = true }
 http = "1"
-# async-stripe = { version = "0.37.1", features = ["runtime-tokio-hyper"] }
+async-stripe = { version = "0.37.1", features = ["runtime-tokio-hyper"], optional = true }
 surrealdb = "1.5.4"
 serde_json = "1.0.120"
 serde = { version = "1.0.204", features = ["derive"] }
 tokio = { version = "1.39.2", features = ["rt"] }
+log = "0.4.22"
+tracing-subscriber = "0.3.18"
+axum-extra = "0.9.3"
 
 [features]
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
     "dep:axum",
+    "dep:async-stripe",
 
     "dep:tower",
     "dep:tower-http",
@@ -67,7 +71,7 @@ style-file = "style/main.scss"
 assets-dir = "public"
 
 # The IP and port (ex: 127.0.0.1:3000) where the server serves the content. Use it in your server setup.
-site-addr = "0.0.0.0:3000"
+site-addr = "0.0.0.0:4444"
 
 # The port to use for automatic reload monitoring
 reload-port = 3001

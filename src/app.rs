@@ -2,12 +2,12 @@ use crate::error_template::{AppError, ErrorTemplate};
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
+use log::*;
 
 #[component]
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
-
     view! {
 
 
@@ -29,12 +29,30 @@ pub fn App() -> impl IntoView {
         }>
             <main>
                 <Routes>
-                    <Route path="/" view=|| view! { <GlobalPage current_page=CurrentPage::HomePage/> }/>
-                    <Route path="/shop/pet" view=|| view! { <GlobalPage current_page=CurrentPage::PetShop/> }/>
-                    <Route path="/shop/food" view=|| view! { <GlobalPage current_page=CurrentPage::FoodShop/> }/>
-                    <Route path="/about" view=|| view! { <GlobalPage current_page=CurrentPage::About/> }/>
-                    <Route path="/privacy" view=|| view! { <GlobalPage current_page=CurrentPage::PrivacyPolicy/> }/>
-                    <Route path="/terms" view=|| view! { <GlobalPage current_page=CurrentPage::TermsOfService/> }/>
+                    <Route path="/" view=move || view! {
+                            <GlobalPage current_page=CurrentPage::HomePage/>
+                        }
+                    />
+                    <Route path="/shop/pet" view=move || view! {
+                            <GlobalPage current_page=CurrentPage::PetShop/>
+                        }
+                    />
+                    <Route path="/shop/food" view=move || view! {
+                            <GlobalPage current_page=CurrentPage::FoodShop/>
+                        }
+                    />
+                    <Route path="/about" view=move || view! {
+                            <GlobalPage current_page=CurrentPage::About/>
+                        }
+                    />
+                    <Route path="/privacy" view=move || view! {
+                            <GlobalPage current_page=CurrentPage::PrivacyPolicy/>
+                        }
+                    />
+                    <Route path="/terms" view=move || view! {
+                            <GlobalPage current_page=CurrentPage::TermsOfService/>
+                        }
+                    />
                 </Routes>
             </main>
         </Router>
@@ -88,18 +106,8 @@ pub fn HomePage() -> impl IntoView {
     // Creates a reactive value to update the button
     let (count, set_count) = create_signal(0);
     let on_click = move |_| set_count.update(|count| *count += 1);
-    let mut vec = Vec::new();
-    for _ in 0..320 {
-        vec.push(
-            view! {
-                <a id="shop_selector" class:red=move|| {count() % 2 == 1} href="/shop/pet">"Pet Shop"</a>
-                <a id="shop_selector" class:red=move|| {count() % 2 == 1} href="/shop/food">"Food Shop"</a>
-            }
-        )
-    }
 
     view! {
-        {vec}
         <a id="shop_selector" class:red=move|| {count() % 2 == 1} href="/shop/pet">"Pet Shop"</a>
         <a id="shop_selector" class:red=move|| {count() % 2 == 1} href="/shop/food">"Food Shop"</a>
         <button id="test" on:click=on_click>"Click Me: " {count}</button>
@@ -132,7 +140,7 @@ pub fn PrivacyPolicy() -> impl IntoView {
             <h1>"Privacy Policy"</h1>
             <p>
                 "Our Privacy Policy is currently being prepared and will be available soon. If you have any questions, please contact us at "
-                <a href="mailto:info@farmtasker.au">"info@farmtasker.au"</a>
+                <a href="mailto:info@farmtasker.au">" info@farmtasker.au"</a>
                 "."
             </p>
         </div>
@@ -146,7 +154,7 @@ pub fn TermsOfService() -> impl IntoView {
             <h1>"Terms of Service"</h1>
             <p>
                 "Our Terms of Service are currently being prepared and will be available soon. If you have any questions, please contact us at "
-                <a href="mailto:info@farmtasker.au">"info@farmtasker.au"</a>
+                <a href="mailto:info@farmtasker.au">" info@farmtasker.au"</a>
                 "."
             </p>
         </div>
@@ -159,7 +167,7 @@ pub fn FooterBar() -> impl IntoView {
         <footer class="footerbar">
             <div class="footer-content">
                 <div class="footer-section">
-                    <p>"© 2024 Farmtasker. All rights reserved."</p>
+                    <p>"© 2024 FARMTASKER PTY LTD. All rights reserved."</p>
                 </div>
                 <div class="footer-section">
                     <p>
@@ -167,12 +175,12 @@ pub fn FooterBar() -> impl IntoView {
                         <a href="mailto:info@farmtasker.au">"info@farmtasker.au"</a>
                     </p>
                 </div>
-                <div class="footer-section">
-                    <p>
-                        <a href="/privacy">"Privacy Policy"</a> |
-                        <a href="/terms">"Terms of Service"</a>
-                    </p>
-                </div>
+                // <div class="footer-section">
+                //     <p>
+                //         <a href="/privacy">"Privacy Policy"</a> |
+                //         <a href="/terms">"Terms of Service"</a>
+                //     </p>
+                // </div>
             </div>
         </footer>
     }
