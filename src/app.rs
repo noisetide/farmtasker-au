@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::error_template::{AppError, ErrorTemplate};
 use leptos::*;
 use leptos_meta::*;

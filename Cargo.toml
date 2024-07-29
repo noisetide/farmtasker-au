@@ -2,31 +2,34 @@
 name = "farmtasker-au"
 version = "0.1.0"
 edition = "2021"
+resolver = "2"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-axum = { version = "0.7", optional = true }
+http = "1"
+thiserror = "1"
+serde_json = "1.0.120"
+serde = { version = "1.0.204", features = ["derive"] }
 console_error_panic_hook = "0.1"
 leptos = { version = "0.6", features = ["nightly"] }
 leptos_axum = { version = "0.6", optional = true }
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
-tower = { version = "0.4", optional = true }
-tower-http = { version = "0.5", features = ["fs"], optional = true }
 wasm-bindgen = "=0.2.92"
-thiserror = "1"
 tracing = { version = "0.1", optional = true }
-http = "1"
-async-stripe = { version = "0.37.1", features = ["runtime-tokio-hyper"], optional = true }
-surrealdb = "1.5.4"
-serde_json = "1.0.120"
-serde = { version = "1.0.204", features = ["derive"] }
-tokio = { version = "1.39.2", features = ["rt"] }
 log = "0.4.22"
 tracing-subscriber = "0.3.18"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+axum = { version = "0.7", optional = true }
+tower = { version = "0.4", optional = true }
+tower-http = { version = "0.5", features = ["fs"], optional = true }
+surrealdb = "1.5.4"
 axum-extra = "0.9.3"
+tokio = { version = "1.39.2", default-features = false, features = ["rt"] }
+async-stripe = { version = "0.37.1", features = ["runtime-tokio-hyper-rustls"], optional = true }
 
 [features]
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
@@ -42,6 +45,7 @@ ssr = [
     "leptos_router/ssr",
     "dep:tracing",
 ]
+
 
 # Defines a size-optimized profile for the WASM bundle in release mode
 [profile.wasm-release]
