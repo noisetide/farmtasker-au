@@ -5,6 +5,7 @@ use log::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 // use log::*;
+use crate::AppState;
 use serde::{Deserialize, Serialize};
 use stripe::{Metadata, *};
 
@@ -17,7 +18,7 @@ use axum::{
 };
 
 pub async fn stripe_sync(
-    // Extension(shared_state): Extension<Arc<AppState>>,
+    Extension(shared_state): Extension<Arc<AppState>>,
     client: stripe::Client,
 ) -> Result<Json<serde_json::Value>> {
     todo!();
