@@ -93,9 +93,11 @@ where
     IV: IntoView,
 {
     view! {
-        <div class="pager-bg">
-            <div class="pager">
-                <div class="pager-content">{page()}</div>
+        <div class="page">
+            <div class="pager-bg">
+                <div class="pager">
+                    <div class="pager-content">{page()}</div>
+                </div>
             </div>
         </div>
     }
@@ -104,14 +106,19 @@ where
 /// Renders the home page of your application.
 #[component]
 pub fn HomePage() -> impl IntoView {
-    // Creates a reactive value to update the button
-    let (count, set_count) = create_signal(0);
-    let on_click = move |_| set_count.update(|count| *count += 1);
-
     view! {
-        <a id="shop_selector" class:red=move|| {count() % 2 == 1} href="/shop/pet">"Pet Shop"</a>
-        <a id="shop_selector" class:red=move|| {count() % 2 == 1} href="/shop/food">"Food Shop"</a>
-        <button id="test" on:click=on_click>"Click Me: " {count}</button>
+        <div id="shop_selector2" class="shop_selector_container">
+            <a href="/shop/food">
+                <p class="shop_selector_title">"Online Shop"</p>
+                <img src="/button_farm_to_table.png" alt="Food Shop"/>
+            </a>
+        </div>
+        <div id="shop_selector1" class="shop_selector_container">
+            <a href="/shop/pet">
+                <p class="shop_selector_title">"Online Shop"</p>
+                <img src="/button_pet_food_shop.png" alt="Pet Shop"/>
+            </a>
+        </div>
     }
 }
 
@@ -196,7 +203,7 @@ pub fn NavBar(selected: CurrentPage) -> impl IntoView {
                     <img src="/main_logo.svg" alt="Farmtasker Logo"/>
                 </a>
             </div>
-            <h4 class="title-text">"Farmtasker Shop"</h4>
+            <h4 class="title-text">"Marketplace for farmers & pet food manufacturers"</h4>
             <ul class="nav_buttons">
                 <li>
                     <a class:current=move || {
@@ -207,16 +214,16 @@ pub fn NavBar(selected: CurrentPage) -> impl IntoView {
                 <li>
                     <a
                     class:current=move || {
-                        matches!(selected, CurrentPage::PetShop)
+                        matches!(selected, CurrentPage::FoodShop)
                     }
-                        href="/shop/pet" id="button_middle">"Pet Shop"</a>
+                        href="/shop/food" id="button_middle">"Food Shop"</a>
                 </li>
                 <li>
                     <a
                     class:current=move || {
-                        matches!(selected, CurrentPage::FoodShop)
+                        matches!(selected, CurrentPage::PetShop)
                     }
-                        href="/shop/food" id="button_middle">"Food Shop"</a>
+                        href="/shop/pet" id="button_middle">"Pet Shop"</a>
                 </li>
                 <li>
                     <a

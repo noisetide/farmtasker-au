@@ -81,12 +81,12 @@ pub async fn stripe_sync(
         i.default_price = None;
     }
 
-    let data = GlobalData::new(
+    let data = StripeData::new(
         list_of_products_from_stripe_api.clone(),
         list_of_customers_from_stripe_api.clone(),
     );
 
-    // match shared_state.persist.save::<GlobalData>("data", data) {
+    // match shared_state.persist.save::<StripeData>("data", data) {
     //     Ok(_) => {
     //         let list_data = shared_state.persist.list().expect("Could not load data!");
 
@@ -116,26 +116,26 @@ pub async fn stripe_sync(
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct GlobalData {
+pub struct StripeData {
     products: Vec<DbProduct>,
     customers: Vec<DbCustomer>,
 }
 
-impl GlobalData {
+impl StripeData {
     pub fn new(products: List<Product>, customers: List<Customer>) -> Self {
-        GlobalData {
+        StripeData {
             products: products.data.into_iter().map(|x| x.into()).collect(),
             customers: customers.data.into_iter().map(|x| x.into()).collect(),
         }
     }
     pub fn update_products(self, products: List<Product>) -> Self {
-        GlobalData {
+        StripeData {
             products: products.data.into_iter().map(|x| x.into()).collect(),
             customers: self.customers,
         }
     }
     pub fn update_customers(self, customers: List<Customer>) -> Self {
-        GlobalData {
+        StripeData {
             products: self.products,
             customers: customers.data.into_iter().map(|x| x.into()).collect(),
         }

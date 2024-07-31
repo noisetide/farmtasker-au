@@ -28,7 +28,7 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 
-    // let appdata = GlobalData::default();
+    // let appdata: StripeData = StripeData::);
     // let appdata = Arc::new(appdata);
 
     let key = std::env::var("REMOVED").unwrap();
@@ -39,8 +39,9 @@ async fn main() {
     let app = Router::new()
         .leptos_routes(&leptos_options, routes, App)
         .fallback(file_and_error_handler)
-        .with_state(leptos_options);
-    // .with_state(&appdata.clone());
+        .with_state(leptos_options)
+        // .with_state(&appdata.clone())
+    ;
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     logging::log!("listening on http://{}", &addr);
