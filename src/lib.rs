@@ -15,7 +15,8 @@ pub fn hydrate() {
 }
 
 #[cfg(feature = "ssr")]
-#[derive(Default, serde::Serialize, serde::Deserialize, Clone, Copy, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct AppState {
     pub id: u64,
+    pub stripe_data: sync::StripeData,
 }

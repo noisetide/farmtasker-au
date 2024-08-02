@@ -25,15 +25,19 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 
-    let mut appstate = Arc::new(Mutex::new(AppState { id: 54 }));
+    let key = std::env::var("REMOVED").expect("couldn't get env var REMOVED");
+    let stripe_client = stripe::Client::new(key);
 
-    let mut stater = *appstate.lock().unwrap();
-    stater.id = 5;
-    info!("This Runs... {:#?}", &appstate);
+    let mut appstate = Arc::new(Mutex::new(AppState {
+        id: 0,
+        stripe_data: crate::sync::StripeData::new_fetch(&stripe_client)
+            .await
+            .expect("Could not fetch data from stripe api"),
+    }));
 
-    let key = std::env::var("REMOVED").unwrap();
+    appstate.lock().unwrap().id = 5;
 
-    let stripe_client = Client::new(key);
+    info!("This Runs... {:?}", &appstate);
 
     sync::stripe_sync(Extension(appstate.clone()), stripe_client);
 

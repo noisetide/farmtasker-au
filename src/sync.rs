@@ -7,7 +7,6 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use stripe::{Metadata, *};
 
-#[cfg(feature = "ssr")]
 use axum::{
     extract::{FromRequest, State},
     response::*,
@@ -15,7 +14,7 @@ use axum::{
 };
 
 pub async fn stripe_sync(
-    Extension(shared_state): Extension<Arc<Mutex<AppState>>>,
+    Extension(state): Extension<Arc<Mutex<AppState>>>,
     client: stripe::Client,
 ) -> Result<Json<serde_json::Value>> {
     todo!();
@@ -113,7 +112,7 @@ pub async fn stripe_sync(
     // }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StripeData {
     products: Vec<DbProduct>,
     customers: Vec<DbCustomer>,
@@ -137,6 +136,35 @@ impl StripeData {
             products: self.products,
             customers: customers.data.into_iter().map(|x| x.into()).collect(),
         }
+    }
+    pub async fn new_fetch(client: &Client) -> Result<Self> {
+        let mut product_list_params = ListProducts::new();
+        product_list_params.active = Some(true);
+        product_list_params.expand = &["data.default_price"];
+
+        let mut list_of_products_from_stripe_api =
+            match Product::list(&client, &product_list_params).await {
+                Ok(list) => list,
+                Err(err) => {
+                    log::error!("{:#?}", err);
+                    return Err(ErrorResponse::from(Json::from(err.to_string())));
+                }
+            };
+
+        let customer_list_params = ListCustomers::new();
+        let list_of_customers_from_stripe_api =
+            match Customer::list(&client, &customer_list_params).await {
+                Ok(list) => list,
+                Err(err) => {
+                    log::error!("{:#?}", err);
+                    return Err(ErrorResponse::from(Json::from(err.to_string())));
+                }
+            };
+
+        Ok(StripeData::new(
+            list_of_products_from_stripe_api,
+            list_of_customers_from_stripe_api,
+        ))
     }
 }
 
