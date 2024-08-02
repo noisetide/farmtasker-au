@@ -1,25 +1,16 @@
 #![allow(unused)]
-use axum::Router;
 use axum::*;
 use farmtasker_au::app::*;
 use farmtasker_au::fileserv::file_and_error_handler;
+use farmtasker_au::sync::*;
 use farmtasker_au::*;
 use leptos::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
-use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use stripe::*;
-
-pub mod sync;
-use sync::*;
-
-#[derive(Default, Serialize, Deserialize, Clone, Copy, Debug)]
-pub struct AppState {
-    id: i32,
-}
-
 use tracing::*;
 use tracing_subscriber;
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
@@ -34,7 +25,10 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 
-    let mut appstate = Arc::new(AppState { id: 54 });
+    let mut appstate = Arc::new(Mutex::new(AppState { id: 54 }));
+
+    let mut stater = *appstate.lock().unwrap();
+    stater.id = 5;
     info!("This Runs... {:#?}", &appstate);
 
     let key = std::env::var("REMOVED").unwrap();

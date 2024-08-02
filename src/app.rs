@@ -1,9 +1,12 @@
 #![allow(unused)]
 use crate::error_template::{AppError, ErrorTemplate};
+#[cfg(feature = "ssr")]
+use axum::Extension;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 use log::*;
+use std::sync::{Arc, Mutex};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -54,6 +57,10 @@ pub fn App() -> impl IntoView {
                             <GlobalPage current_page=CurrentPage::TermsOfService/>
                         }
                     />
+                    <Route path="/shop/cart" view=move || view! {
+                            <GlobalPage current_page=CurrentPage::ShoppingCart/>
+                        }
+                    />
                 </Routes>
             </main>
         </Router>
@@ -68,6 +75,7 @@ pub enum CurrentPage {
     About,
     PrivacyPolicy,
     TermsOfService,
+    ShoppingCart,
 }
 
 #[component]
@@ -81,9 +89,16 @@ pub fn GlobalPage(current_page: CurrentPage) -> impl IntoView {
                 CurrentPage::About => { || view!{ <crate::app::About/> } }
                 CurrentPage::PrivacyPolicy => { || view!{ <crate::app::PrivacyPolicy/> } }
                 CurrentPage::TermsOfService => { || view!{ <crate::app::TermsOfService/> } }
+                CurrentPage::ShoppingCart => { || view! { <crate::app::ShoppingCart/> } }
+                _ => { || view!{ <crate::app::Blank/> } }
             }/>
         <FooterBar/>
     }
+}
+
+#[component]
+pub fn Blank() -> impl IntoView {
+    view! {}
 }
 
 #[component]
@@ -170,6 +185,15 @@ pub fn TermsOfService() -> impl IntoView {
 }
 
 #[component]
+pub fn ShoppingCart() -> impl IntoView {
+    view! {
+        <div>
+            "Shopping cart"
+        </div>
+    }
+}
+
+#[component]
 pub fn FooterBar() -> impl IntoView {
     view! {
         <footer class="footerbar">
@@ -231,6 +255,13 @@ pub fn NavBar(selected: CurrentPage) -> impl IntoView {
                         matches!(selected, CurrentPage::About)
                     }
                         href="/about" id="button_right">"About Us"</a>
+                </li>
+                <li>
+                    <a
+                    class:current=move || {
+                        matches!(selected, CurrentPage::ShoppingCart)
+                    }
+                        href="/shop/cart" id="button_right">"🛒"</a>
                 </li>
             </ul>
         </nav>

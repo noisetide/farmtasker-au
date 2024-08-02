@@ -47,7 +47,9 @@ a {
 /* Navbar styles */
 .navbar {
   background-color: $main-color;
+
   padding: 0.1rem;
+  padding-right: 3rem;
   color: white;
   display: flex;
   flex-direction: row;
@@ -72,12 +74,14 @@ a {
       position: top;
       margin: 0;
       padding: 0;
+      padding-right: 0;
     }
 
     @include respond-to(mobile) {
       position: top;
       margin: 0;
       padding: 0;
+      padding-right: 0;
     }
   }
 
@@ -197,6 +201,7 @@ a {
 
   .pager-bg {
     min-height: 20rem;
+    min-width: 90vw;
     margin: 0;
     padding: 0;
     background-image: url('/pager_bg.jpg');

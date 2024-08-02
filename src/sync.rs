@@ -1,16 +1,13 @@
 #![allow(unused)]
+use crate::*;
 use http::StatusCode;
 use leptos::error::Error;
-use log::*;
-use std::collections::HashMap;
-use std::sync::Arc;
-// use log::*;
-use crate::AppState;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use stripe::{Metadata, *};
 
-use farmtasker_au::*;
-
+#[cfg(feature = "ssr")]
 use axum::{
     extract::{FromRequest, State},
     response::*,
@@ -18,7 +15,7 @@ use axum::{
 };
 
 pub async fn stripe_sync(
-    Extension(shared_state): Extension<Arc<AppState>>,
+    Extension(shared_state): Extension<Arc<Mutex<AppState>>>,
     client: stripe::Client,
 ) -> Result<Json<serde_json::Value>> {
     todo!();
@@ -31,17 +28,17 @@ pub async fn stripe_sync(
         match Customer::list(&client, &customer_list_params).await {
             Ok(list) => list,
             Err(err) => {
-                error!("{:#?}", err);
+                log::error!("{:#?}", err);
                 return Err(ErrorResponse::from(Json::from(err.to_string())));
             }
         };
 
     match list_of_customers_from_stripe_api.data.len() {
         0 => {
-            info!("No Customers");
+            log::info!("No Customers");
         }
         x if x > 0 => {
-            info!("Customers#: {:?}", x);
+            log::info!("Customers#: {:?}", x);
         }
         _ => {}
     }
@@ -54,7 +51,7 @@ pub async fn stripe_sync(
         match Product::list(&client, &product_list_params).await {
             Ok(list) => list,
             Err(err) => {
-                error!("{:#?}", err);
+                log::error!("{:#?}", err);
                 return Err(ErrorResponse::from(Json::from(err.to_string())));
             }
         };
@@ -66,7 +63,7 @@ pub async fn stripe_sync(
         .into_object()
         .unwrap();
 
-    info!("First api default price: {:?}", &listed_price);
+    log::info!("First api default price: {:?}", &listed_price);
 
     let saver: DbPrice = DbPrice::from(listed_price);
 
@@ -76,7 +73,7 @@ pub async fn stripe_sync(
 
     // let loaded_price = shared_state.persist.load::<Saver>("price").unwrap();
 
-    // info!("First load default price: {:#?}", loaded_price);
+    // log::info!("First load default price: {:#?}", loaded_price);
 
     for i in list_of_products_from_stripe_api.data.iter_mut() {
         i.default_price = None;
@@ -91,14 +88,14 @@ pub async fn stripe_sync(
     //     Ok(_) => {
     //         let list_data = shared_state.persist.list().expect("Could not load data!");
 
-    //         info!("Saved Data: {:#?}", list_data);
+    //         log::info!("Saved Data: {:#?}", list_data);
 
     //         // print out 10 products from stripe api
     //         // for (n, x) in list_of_products_from_stripe_api.data.iter().enumerate() {
     //         //     if n >= 10 {
     //         //         break;
     //         //     }
-    //         //     info!(
+    //         //     log::info!(
     //         //         "{n}: {:#?}, [{:?}]",
     //         //         x.name.clone().unwrap_or_default(),
     //         //         x.default_price.clone().unwrap_or_default().into_object()
@@ -110,7 +107,7 @@ pub async fn stripe_sync(
     //         ))
     //     }
     //     Err(err) => {
-    //         error!("{err:#?}");
+    //         log::error!("{err:#?}");
     //         Err(ErrorResponse::from(err.to_string()))
     //     }
     // }
