@@ -17,27 +17,25 @@ leptos = { version = "0.6", features = ["nightly"] }
 leptos_axum = { version = "0.6", optional = true }
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
-wasm-bindgen = "=0.2.92"
 tracing = { version = "0.1", optional = true }
 log = "0.4.22"
 tracing-subscriber = "0.3.18"
+wasm-bindgen = "0.2.92"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+axum = { version = "0.7", features = ["macros"]}
 inquire = "0.7.5"
-axum = { version = "0.7", optional = true }
+async-stripe = { version = "*", default-features = false, features = ["runtime-tokio-hyper-rustls"]}
 tower = { version = "0.4", optional = true }
 tower-http = { version = "0.5", features = ["fs"], optional = true }
 surrealdb = "1.5.4"
 axum-extra = "0.9.3"
-tokio = { version = "1.39.2", default-features = false, features = ["rt"] }
-async-stripe = { version = "0.37.1", features = ["runtime-tokio-hyper-rustls"], optional = true }
+tokio = { version = "1.39.2", default-features = false, features = ["rt"],optional = true }
 
 [features]
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
-    "dep:async-stripe",
-    "dep:axum",
-
+    "dep:tokio",
     "dep:tower",
     "dep:tower-http",
     "dep:leptos_axum",

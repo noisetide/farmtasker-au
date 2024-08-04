@@ -1,12 +1,10 @@
 #![allow(unused)]
 use crate::error_template::{AppError, ErrorTemplate};
-#[cfg(feature = "ssr")]
-use axum::Extension;
+
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 use log::*;
-use std::sync::{Arc, Mutex};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -120,8 +118,7 @@ where
 
 /// Renders the home page of your application.
 #[component]
-pub fn HomePage(// appstate: axum::Extension(Arc<Mutex<farmtasker_au::AppState>>)
-) -> impl IntoView {
+pub fn HomePage() -> impl IntoView {
     view! {
         <div id="shop_selector2" class="shop_selector_container">
             <a href="/shop/food">
@@ -185,11 +182,28 @@ pub fn TermsOfService() -> impl IntoView {
     }
 }
 
+// #[server]
+// pub async fn axum_extract() -> Result<crate::synchro::StripeData, ServerFnError> {
+//     use axum::{extract::Query, http::Method};
+//     use leptos_axum::extract;
+
+//     let (method, query): (Method, Query<StripeData>) = extract().await?;
+
+//     Ok(format!("{method:?} and {query:?}"))
+// }
+
 #[component]
 pub fn ShoppingCart() -> impl IntoView {
+    #[cfg(feature = "ssr")]
+    let state = use_context::<crate::AppState>().unwrap();
+
+    #[cfg(feature = "ssr")]
     view! {
         <div>
-            "Shopping cart"
+            {format!(
+                "Shopping cart {:#?}",
+                state.stripe_data
+            )}
         </div>
     }
 }
