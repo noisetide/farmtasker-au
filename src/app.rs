@@ -120,7 +120,8 @@ where
 
 /// Renders the home page of your application.
 #[component]
-pub fn HomePage() -> impl IntoView {
+pub fn HomePage(// appstate: axum::Extension(Arc<Mutex<farmtasker_au::AppState>>)
+) -> impl IntoView {
     view! {
         <div id="shop_selector2" class="shop_selector_container">
             <a href="/shop/food">

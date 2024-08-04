@@ -18,5 +18,6 @@ pub fn hydrate() {
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct AppState {
     pub id: u64,
+    pub stripe_api_key: String,
     pub stripe_data: sync::StripeData,
 }
