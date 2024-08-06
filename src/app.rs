@@ -1,6 +1,7 @@
 #![allow(unused)]
 use crate::error_template::{AppError, ErrorTemplate};
 
+use crate::AppState;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -10,6 +11,10 @@ use log::*;
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
+
+    // let (current_page, set_current_page) = create_signal(CurrentPage::HomePage);
+    // provide_context(current_page);
+
     view! {
 
 
@@ -182,27 +187,18 @@ pub fn TermsOfService() -> impl IntoView {
     }
 }
 
-// #[server]
-// pub async fn axum_extract() -> Result<crate::synchro::StripeData, ServerFnError> {
-//     use axum::{extract::Query, http::Method};
-//     use leptos_axum::extract;
-
-//     let (method, query): (Method, Query<StripeData>) = extract().await?;
-
-//     Ok(format!("{method:?} and {query:?}"))
-// }
-
 #[component]
 pub fn ShoppingCart() -> impl IntoView {
-    #[cfg(feature = "ssr")]
     let state = use_context::<crate::AppState>().unwrap();
+
+    provide_context(state.clone());
 
     #[cfg(feature = "ssr")]
     view! {
         <div>
             {format!(
-                "Shopping cart {:#?}",
-                state.stripe_data
+                "{:#?}",
+                    state.stripe_data
             )}
         </div>
     }

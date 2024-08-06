@@ -12,11 +12,11 @@ pub fn hydrate() {
     leptos::mount_to_body(App);
 }
 
-#[cfg(feature = "ssr")]
-#[derive(axum::extract::FromRef, serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct AppState {
     pub id: u64,
     pub stripe_api_key: String,
+    #[cfg(feature = "ssr")]
     pub stripe_data: sync::StripeData,
 }
 
