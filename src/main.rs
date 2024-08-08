@@ -5,19 +5,19 @@ fn main() {}
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use axum::routing::post;
-    use axum::*;
-    use core::panic;
-    use farmtasker_au::app::*;
-    use farmtasker_au::fileserv::file_and_error_handler;
-    use leptos::*;
-    use leptos_axum::{generate_route_list, LeptosRoutes};
-    use std::borrow::BorrowMut;
-    use std::io::{BufRead, BufReader};
-    use std::sync::{Arc, Mutex};
-    use stripe::*;
-    use tracing::*;
-    use tracing_subscriber;
+    pub use axum::routing::post;
+    pub use axum::*;
+    pub use core::panic;
+    pub use farmtasker_au::app::*;
+    pub use farmtasker_au::fileserv::file_and_error_handler;
+    pub use leptos::*;
+    pub use leptos_axum::{generate_route_list, LeptosRoutes};
+    pub use std::borrow::BorrowMut;
+    pub use std::io::{BufRead, BufReader};
+    pub use std::sync::{Arc, Mutex};
+    pub use stripe::*;
+    pub use tracing::*;
+    pub use tracing_subscriber;
 
     tracing_subscriber::fmt::init();
 
@@ -37,7 +37,7 @@ async fn main() {
     let mut appstate = farmtasker_au::AppState {
         id: 0,
         stripe_api_key: key.to_string(),
-        stripe_data: farmtasker_au::sync::StripeData::new_fetch()
+        stripe_data: farmtasker_au::StripeData::new_fetch()
             .await
             .expect("Could not fetch data from stripe api"),
     };
@@ -48,14 +48,7 @@ async fn main() {
         tracing::info!(
             "Product: {:#?} - {:#?}$ AUD",
             i.name,
-            i.default_price
-                .clone()
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .unit_amount
-                .unwrap() as f64
-                / 100.0
+            i.default_price.clone().unwrap().unit_amount.unwrap() as f64 / 100.0
         );
     }
     tracing::info!("Total Products: {:}", products.len());

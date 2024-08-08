@@ -137,6 +137,10 @@ a {
           }
         }
 
+        &:active {
+          background-color: lighten($main-color, 40%);
+        }
+
         &:hover {
           background-color: lighten($main-color, 10%);
         }
