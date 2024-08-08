@@ -10,6 +10,7 @@ async fn main() {
     pub use core::panic;
     pub use farmtasker_au::app::*;
     pub use farmtasker_au::fileserv::file_and_error_handler;
+    use farmtasker_au::StripeData;
     pub use leptos::*;
     pub use leptos_axum::{generate_route_list, LeptosRoutes};
     pub use std::borrow::BorrowMut;
@@ -53,6 +54,8 @@ async fn main() {
     }
     tracing::info!("Total Products: {:}", products.len());
 
+    let stripedata = StripeData::new_fetch().await.unwrap();
+
     // build our application with a route
     let app = Router::new()
         .leptos_routes_with_context(
@@ -60,15 +63,15 @@ async fn main() {
             routes,
             {
                 let appstate = appstate.clone();
-                move || provide_context(appstate.clone())
+                move || provide_context(stripedata.clone())
             },
             App,
         )
         // .leptos_routes(&leptos_options, routes, App)
         .fallback(file_and_error_handler)
         .with_state(leptos_options)
-        .route("/api/sync", post(farmtasker_au::sync::stripe_sync))
-        .layer(Extension(appstate));
+        .layer(Extension(appstate))
+        .route("/api/sync", post(farmtasker_au::sync::stripe_sync));
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     tracing::info!("listening on http://{}\n", &addr);

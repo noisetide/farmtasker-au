@@ -1,7 +1,7 @@
 #![allow(unused)]
 use crate::error_template::{AppError, ErrorTemplate};
 
-use crate::AppState;
+use crate::{AppState, StripeData};
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -36,34 +36,13 @@ pub fn App() -> impl IntoView {
         }>
             <main>
                 <Routes>
-                    <Route path="/" view=move || view! {
-                            <GlobalPage current_page=CurrentPage::HomePage/>
-                        }
-                    />
-                    <Route path="/shop/pet" view=move || view! {
-                            <GlobalPage current_page=CurrentPage::PetShop/>
-                        }
-                    />
-                    <Route path="/shop/food" view=move || view! {
-                            <GlobalPage current_page=CurrentPage::FoodShop/>
-                        }
-                    />
-                    <Route path="/about" view=move || view! {
-                            <GlobalPage current_page=CurrentPage::About/>
-                        }
-                    />
-                    <Route path="/privacy" view=move || view! {
-                            <GlobalPage current_page=CurrentPage::PrivacyPolicy/>
-                        }
-                    />
-                    <Route path="/terms" view=move || view! {
-                            <GlobalPage current_page=CurrentPage::TermsOfService/>
-                        }
-                    />
-                    <Route path="/shop/cart" view=move || view! {
-                            <GlobalPage current_page=CurrentPage::ShoppingCart/>
-                        }
-                    />
+                    <Route path="/" view=HomePage/>
+                    <Route path="/shop/pet" view=PetShop/>
+                    <Route path="/shop/food" view=FoodShop/>
+                    <Route path="/about" view=About/>
+                    <Route path="/privacy" view=PrivacyPolicy/>
+                    <Route path="/terms" view=TermsOfService/>
+                    <Route path="/shop/cart" view=ShoppingCart/>
                 </Routes>
             </main>
         </Router>
@@ -79,6 +58,7 @@ pub enum CurrentPage {
     PrivacyPolicy,
     TermsOfService,
     ShoppingCart,
+    None,
 }
 
 #[component]
@@ -125,6 +105,7 @@ where
 #[component]
 pub fn HomePage() -> impl IntoView {
     view! {
+    <NavBar selected=CurrentPage::HomePage/>
         <div id="shop_selector2" class="shop_selector_container">
             <a href="/shop/food">
                 <p class="shop_selector_title">"Online Shop"</p>
@@ -137,25 +118,32 @@ pub fn HomePage() -> impl IntoView {
                 <img src="/button_pet_food_shop.png" alt="Pet Shop"/>
             </a>
         </div>
+    <FooterBar/>
     }
 }
 
 #[component]
 pub fn PetShop() -> impl IntoView {
     view! {
-        <div>"PetShop!!!"</div>
+        <NavBar selected=CurrentPage::PetShop/>
+            <div>"PetShop!!!"</div>
+        <FooterBar/>
     }
 }
 #[component]
 pub fn FoodShop() -> impl IntoView {
     view! {
-        <div>"FoodShop!!!"</div>
+        <NavBar selected=CurrentPage::FoodShop/>
+            <div>"FoodShop!!!"</div>
+        <FooterBar/>
     }
 }
 #[component]
 pub fn About() -> impl IntoView {
     view! {
-        <div>"About!!!"</div>
+        <NavBar selected=CurrentPage::About/>
+            <div>"About!!!"</div>
+        <FooterBar/>
     }
 }
 
@@ -189,18 +177,14 @@ pub fn TermsOfService() -> impl IntoView {
 
 #[component]
 pub fn ShoppingCart() -> impl IntoView {
-    let state = use_context::<crate::AppState>().unwrap();
+    let state = use_context::<StripeData>();
 
-    provide_context(state.clone());
-
-    #[cfg(feature = "ssr")]
     view! {
-        <div>
-            {format!(
-                "{:#?}",
-                    state.stripe_data
-            )}
-        </div>
+        <NavBar selected=CurrentPage::None/>
+            <div>
+                { format!("{:?}", state)}
+            </div>
+        <FooterBar/>
     }
 }
 
