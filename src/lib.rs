@@ -9,7 +9,7 @@ pub mod stripe_retypes;
 pub fn hydrate() {
     use crate::app::*;
     console_error_panic_hook::set_once();
-    log::info!("Hello!");
+    leptos::logging::log!("Hello!");
     leptos::mount_to_body(App);
 }
 
@@ -20,6 +20,11 @@ pub struct AppState {
     pub id: u64,
     pub stripe_api_key: String,
     pub stripe_data: StripeData,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct TestState {
+    pub id: usize,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

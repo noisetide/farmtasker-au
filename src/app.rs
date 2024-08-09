@@ -1,7 +1,7 @@
 #![allow(unused)]
 use crate::error_template::{AppError, ErrorTemplate};
 
-use crate::{AppState, StripeData};
+use crate::*;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -12,8 +12,11 @@ pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
-    // let (current_page, set_current_page) = create_signal(CurrentPage::HomePage);
-    // provide_context(current_page);
+    let (current_page, set_current_page) = create_signal(CurrentPage::None);
+    provide_context(current_page);
+    provide_context(set_current_page);
+
+    // let state = expect_context::<u64>();
 
     view! {
 
@@ -34,23 +37,86 @@ pub fn App() -> impl IntoView {
             }
             .into_view()
         }>
+            <nav>
+                <NavBar/>
+            </nav>
             <main>
                 <Routes>
-                    <Route path="/" view=HomePage/>
-                    <Route path="/shop/pet" view=PetShop/>
-                    <Route path="/shop/food" view=FoodShop/>
-                    <Route path="/about" view=About/>
-                    <Route path="/privacy" view=PrivacyPolicy/>
-                    <Route path="/terms" view=TermsOfService/>
-                    <Route path="/shop/cart" view=ShoppingCart/>
+                    <Route path="/" view={
+                        move || {
+                            let setter = expect_context::<WriteSignal<CurrentPage>>();
+                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::HomePage);
+                            view! {
+                                <Pager page=HomePage/>
+                            }
+                        }
+                    }/>
+                    <Route path="/shop/pet" view={
+                        move || {
+                            let setter = expect_context::<WriteSignal<CurrentPage>>();
+                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::PetShop);
+                            view! {
+                                <Pager page=PetShop/>
+                            }
+                        }
+                    }/>
+                    <Route path="/shop/food" view={
+                        move || {
+                            let setter = expect_context::<WriteSignal<CurrentPage>>();
+                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::FoodShop);
+                            view! {
+                                <Pager page=FoodShop/>
+                            }
+                        }
+                    }/>
+                    <Route path="/about" view={
+                        move || {
+                            let setter = expect_context::<WriteSignal<CurrentPage>>();
+                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::About);
+                            view! {
+                                <Pager page=About/>
+                            }
+                        }
+                    }/>
+                    <Route path="/privacy" view={
+                        move || {
+                            let setter = expect_context::<WriteSignal<CurrentPage>>();
+                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::PrivacyPolicy);
+                            view! {
+                                <Pager page=PrivacyPolicy/>
+                            }
+                        }
+                    }/>
+                    <Route path="/terms" view={
+                        move || {
+                            let setter = expect_context::<WriteSignal<CurrentPage>>();
+                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::TermsOfService);
+                            view! {
+                                <Pager page=TermsOfService/>
+                            }
+                        }
+                    }/>
+                    <Route path="/shop/cart" view={
+                        move || {
+                            let setter = expect_context::<WriteSignal<CurrentPage>>();
+                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::ShoppingCart);
+                            view! {
+                                <Pager page=ShoppingCart/>
+                            }
+                        }
+                    }/>
                 </Routes>
             </main>
+            <nav>
+                <FooterBar/>
+            </nav>
         </Router>
     }
 }
 
 #[derive(Clone, Copy, Debug)]
 pub enum CurrentPage {
+    None,
     HomePage,
     PetShop,
     FoodShop,
@@ -58,30 +124,6 @@ pub enum CurrentPage {
     PrivacyPolicy,
     TermsOfService,
     ShoppingCart,
-    None,
-}
-
-#[component]
-pub fn GlobalPage(current_page: CurrentPage) -> impl IntoView {
-    view! {
-        <NavBar selected=current_page/>
-            <Pager page=match current_page {
-                CurrentPage::HomePage => { || view!{ <crate::app::HomePage/> } }
-                CurrentPage::PetShop => { || view!{ <crate::app::PetShop/> } }
-                CurrentPage::FoodShop => { || view!{ <crate::app::FoodShop/> } }
-                CurrentPage::About => { || view!{ <crate::app::About/> } }
-                CurrentPage::PrivacyPolicy => { || view!{ <crate::app::PrivacyPolicy/> } }
-                CurrentPage::TermsOfService => { || view!{ <crate::app::TermsOfService/> } }
-                CurrentPage::ShoppingCart => { || view! { <crate::app::ShoppingCart/> } }
-                _ => { || view!{ <crate::app::Blank/> } }
-            }/>
-        <FooterBar/>
-    }
-}
-
-#[component]
-pub fn Blank() -> impl IntoView {
-    view! {}
 }
 
 #[component]
@@ -105,7 +147,6 @@ where
 #[component]
 pub fn HomePage() -> impl IntoView {
     view! {
-    <NavBar selected=CurrentPage::HomePage/>
         <div id="shop_selector2" class="shop_selector_container">
             <a href="/shop/food">
                 <p class="shop_selector_title">"Online Shop"</p>
@@ -118,32 +159,25 @@ pub fn HomePage() -> impl IntoView {
                 <img src="/button_pet_food_shop.png" alt="Pet Shop"/>
             </a>
         </div>
-    <FooterBar/>
     }
 }
 
 #[component]
 pub fn PetShop() -> impl IntoView {
     view! {
-        <NavBar selected=CurrentPage::PetShop/>
-            <div>"PetShop!!!"</div>
-        <FooterBar/>
+        <div>"PetShop!!!"</div>
     }
 }
 #[component]
 pub fn FoodShop() -> impl IntoView {
     view! {
-        <NavBar selected=CurrentPage::FoodShop/>
-            <div>"FoodShop!!!"</div>
-        <FooterBar/>
+        <div>"FoodShop!!!"</div>
     }
 }
 #[component]
 pub fn About() -> impl IntoView {
     view! {
-        <NavBar selected=CurrentPage::About/>
-            <div>"About!!!"</div>
-        <FooterBar/>
+        <div>"About!!!"</div>
     }
 }
 
@@ -177,14 +211,11 @@ pub fn TermsOfService() -> impl IntoView {
 
 #[component]
 pub fn ShoppingCart() -> impl IntoView {
-    let state = use_context::<StripeData>();
-
+    let page = expect_context::<ReadSignal<CurrentPage>>();
     view! {
-        <NavBar selected=CurrentPage::None/>
-            <div>
-                { format!("{:?}", state)}
-            </div>
-        <FooterBar/>
+        <div>
+            <strong>{move || format!("{:#?}", page.get())}</strong>
+        </div>
     }
 }
 
@@ -214,49 +245,58 @@ pub fn FooterBar() -> impl IntoView {
 }
 
 #[component]
-pub fn NavBar(selected: CurrentPage) -> impl IntoView {
+pub fn NavBar() -> impl IntoView {
+    let selected = expect_context::<ReadSignal<CurrentPage>>();
+
     view! {
         <nav class="navbar">
             <div class="logo-container">
                 <a href="/">
-                    <img src="/main_logo.svg" alt="Farmtasker Logo"/>
+                    <img src="/main_logo.svg" alt="Farmtasker Logo" loading="lazy"/>
                 </a>
             </div>
             <h4 class="title-text">"Marketplace for farmers & pet food manufacturers"</h4>
             <ul class="nav_buttons">
                 <li>
                     <a class:current=move || {
-                        matches!(selected, CurrentPage::HomePage)
+                        matches!(selected.get(), CurrentPage::HomePage)
                     }
                         href="/" id="button_left">"Home"</a>
                 </li>
                 <li>
                     <a
                     class:current=move || {
-                        matches!(selected, CurrentPage::FoodShop)
+                        matches!(selected.get(), CurrentPage::FoodShop)
                     }
                         href="/shop/food" id="button_middle">"Food Shop"</a>
                 </li>
                 <li>
                     <a
                     class:current=move || {
-                        matches!(selected, CurrentPage::PetShop)
+                        matches!(selected.get(), CurrentPage::PetShop)
                     }
                         href="/shop/pet" id="button_middle">"Pet Shop"</a>
                 </li>
                 <li>
                     <a
                     class:current=move || {
-                        matches!(selected, CurrentPage::About)
+                        matches!(selected.get(), CurrentPage::About)
                     }
-                        href="/about" id="button_right">"About Us"</a>
+                        href="/about" id="button_middle">"About Us"</a>
                 </li>
                 <li>
                     <a
                     class:current=move || {
-                        matches!(selected, CurrentPage::ShoppingCart)
+                        matches!(selected.get(), CurrentPage::ShoppingCart)
                     }
-                        href="/shop/cart" id="button_right">"🛒"</a>
+                        href="/shop/cart" id="button_middle">"🛒"</a>
+                </li>
+                <li>
+                    <a
+                    class:current=move || {
+                        matches!(selected.get(), CurrentPage::TermsOfService)
+                    }
+                        href="/terms" id="button_right">"?"</a>
                 </li>
             </ul>
         </nav>

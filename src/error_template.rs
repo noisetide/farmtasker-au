@@ -52,7 +52,6 @@ pub fn ErrorTemplate(
     }
 
     view! {
-        <crate::app::NavBar selected=crate::app::CurrentPage::HomePage/>
         <crate::app::Pager page=|| { let errors = errors.clone();
             view! {
             <div class="error_pager">
@@ -75,6 +74,5 @@ pub fn ErrorTemplate(
                 />
             </div>
         }}/>
-        <crate::app::FooterBar/>
     }
 }
