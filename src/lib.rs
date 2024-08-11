@@ -1,3 +1,4 @@
+#![allow(unused)]
 pub mod app;
 pub mod error_template;
 #[cfg(feature = "ssr")]
@@ -9,17 +10,45 @@ pub mod stripe_retypes;
 pub fn hydrate() {
     use crate::app::*;
     console_error_panic_hook::set_once();
-    leptos::logging::log!("Hello!");
     leptos::mount_to_body(App);
 }
 
+#[leptos::server(
+      name = Stater,
+)]
+pub async fn stater() -> Result<serde_json::Value, leptos::ServerFnError> {
+    let state = match leptos::use_context::<Option<crate::AppState>>() {
+        Some(ok) => {
+            // leptos::logging::log!("GOT context AppState");
+            ok
+        }
+        None => {
+            // leptos::logging::log!("No context AppState");
+            None
+        }
+    };
+    let axum::extract::State(data): axum::extract::State<crate::AppState> =
+        leptos_axum::extract_with_state(match &state {
+            Some(x) => x,
+            None => &AppState {
+                stripe_api_key: None,
+                stripe_data: None,
+            },
+        })
+        .await?;
+
+    // log::info!("Server data: {:#?}", data.stripe_data.clone());
+    Ok(serde_json::json!({"test": "200", "data": data.stripe_data}))
+}
+
+use leptos::ServerFnError;
+use leptos_router::FromFormData;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct AppState {
-    pub id: u64,
-    pub stripe_api_key: String,
-    pub stripe_data: StripeData,
+    pub stripe_api_key: Option<String>,
+    pub stripe_data: Option<StripeData>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -33,30 +62,66 @@ pub struct StripeData {
     pub customers: Vec<stripe_retypes::DbCustomer>,
 }
 
+use log::*;
+#[leptos::server(
+    // name = FetchStripeData,
+    // endpoint = "fetch_stripe_data",
+)]
+pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
+    use stripe::*;
+    let client = Client::new(match std::env::var("REMOVED") {
+        Ok(ok) => ok,
+        Err(err) => {
+            log::error!("{:#?}", err);
+            return Err(ServerFnError::ServerError(err.to_string()));
+        }
+    });
+
+    let mut product_list_params = ListProducts::new();
+    product_list_params.active = Some(true);
+    product_list_params.expand = &["data.default_price"];
+
+    let list_of_products_from_stripe_api = match Product::list(&client, &product_list_params).await
+    {
+        Ok(list) => list,
+        Err(err) => {
+            log::error!("{:#?}", err);
+            return Err(ServerFnError::ServerError(err.to_string()));
+        }
+    };
+
+    let customer_list_params = ListCustomers::new();
+    let list_of_customers_from_stripe_api =
+        match Customer::list(&client, &customer_list_params).await {
+            Ok(list) => list,
+            Err(err) => {
+                log::error!("{:#?}", err);
+                return Err(ServerFnError::ServerError(err.to_string()));
+            }
+        };
+
+    info!("New fetch api call to Stripe...");
+    Ok(StripeData::new(
+        list_of_products_from_stripe_api,
+        list_of_customers_from_stripe_api,
+    ))
+}
+
 #[cfg(feature = "ssr")]
 pub mod sync {
     #![allow(unused)]
 
-    use crate::AppState;
+    use super::*;
     use axum::{
         response::{ErrorResponse, IntoResponse},
         Extension, Json,
     };
-    use http::StatusCode;
+    use leptos::ServerFnError;
     use log::*;
     use serde::{Deserialize, Serialize};
     use std::collections::HashMap;
-    use stripe::{
-        Address, CustomUnitAmount, Metadata, PriceBillingScheme, PriceId, RecurringAggregateUsage,
-        RecurringInterval, RecurringUsageType, *,
-    };
-    use stripe_retypes::{
-        DbAddress, DbCustomUnitAmount, DbPriceBillingScheme, DbPriceType, DbRecurring,
-        DbRecurringAggregateUsage, DbRecurringInterval, DbRecurringUsageType, DbShipping,
-    };
-
-    use super::*;
-    use crate::stripe_retypes::*;
+    use stripe::*;
+    use stripe_retypes::*;
 
     impl StripeData {
         pub fn new(products: List<Product>, customers: List<Customer>) -> Self {
@@ -65,42 +130,8 @@ pub mod sync {
                 customers: customers.data.into_iter().map(|x| x.into()).collect(),
             }
         }
-        pub async fn new_fetch() -> Result<Self, ErrorResponse> {
-            let client = Client::new(match std::env::var("REMOVED") {
-                Ok(ok) => ok,
-                Err(err) => err.to_string(),
-            });
-
-            let mut product_list_params = ListProducts::new();
-            product_list_params.active = Some(true);
-            product_list_params.expand = &["data.default_price"];
-
-            let list_of_products_from_stripe_api =
-                match Product::list(&client, &product_list_params).await {
-                    Ok(list) => list,
-                    Err(err) => {
-                        log::error!("{:#?}", err);
-                        return Err(ErrorResponse::from(Json::from(err.to_string())));
-                        // return Err(err);
-                    }
-                };
-
-            let customer_list_params = ListCustomers::new();
-            let list_of_customers_from_stripe_api =
-                match Customer::list(&client, &customer_list_params).await {
-                    Ok(list) => list,
-                    Err(err) => {
-                        log::error!("{:#?}", err);
-                        return Err(ErrorResponse::from(Json::from(err.to_string())));
-                        // return Err(err);
-                    }
-                };
-
-            info!("New fetch api call to Stripe...");
-            Ok(StripeData::new(
-                list_of_products_from_stripe_api,
-                list_of_customers_from_stripe_api,
-            ))
+        pub async fn new_fetch() -> Result<Self, ServerFnError> {
+            fetch_stripe_data().await
         }
     }
 
@@ -289,73 +320,84 @@ pub mod sync {
             }
         }
     }
-
-    pub async fn stripe_sync(
-        mut appstate: Extension<AppState>,
-    ) -> Result<impl IntoResponse, ErrorResponse> {
-        info!("Starting sync of local StripeData with Stripe API...");
-        let key = appstate.id.clone();
-        trace!("Here {:#?}", key);
-
-        let client = Client::new(std::env::var("REMOVED").unwrap().as_str());
-
-        let customer_list_params = ListCustomers::new();
-        let list_of_customers_from_stripe_api =
-            match Customer::list(&client, &customer_list_params).await {
-                Ok(list) => list,
-                Err(err) => {
-                    log::error!("{:#?}", err);
-                    return Err(ErrorResponse::from(Json::from(err.to_string())));
-                }
-            };
-
-        match list_of_customers_from_stripe_api.data.len() {
-            0 => {
-                log::info!("No Customers");
-            }
-            x if x > 0 => {
-                log::info!("Amount of Customers: {:?}", x);
-            }
-            _ => {}
-        };
-
-        let mut product_list_params = ListProducts::new();
-        product_list_params.active = Some(true);
-        product_list_params.expand = &["data.default_price"];
-
-        let list_of_products_from_stripe_api =
-            match Product::list(&client, &product_list_params).await {
-                Ok(list) => list,
-                Err(err) => {
-                    log::error!("{:#?}", err);
-                    return Err(ErrorResponse::from(Json::from(err.to_string())));
-                }
-            };
-
-        match list_of_products_from_stripe_api.data.len() {
-            0 => {
-                log::info!("No Products");
-            }
-            x if x > 0 => {
-                log::info!("Amount of Products#: {:?}", x);
-            }
-            _ => {}
-        };
-
-        let data = StripeData::new(
-            list_of_products_from_stripe_api.clone(),
-            list_of_customers_from_stripe_api.clone(),
-        );
-
-        info!("Updating local AppState with synced data from Stripe API");
-        appstate.stripe_data = data.clone();
-        let value = serde_json::json!({
-            "code": StatusCode::NO_CONTENT.to_string(),
-            "count": {
-                "products": data.clone().products.len(),
-                "customers": data.clone().customers.len()
-            }
-        });
-        Ok(Json::from(value))
-    }
 }
+
+// use leptos::*;
+// #[server (
+//     name = StripeSync,
+//     endpoint = "sync", // KINDA WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
+// )]
+// pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
+//     use log::*;
+//     use stripe::*;
+
+//     let state = leptos::expect_context::<crate::AppState>();
+//     let axum::extract::State(mut appstate): axum::extract::State<crate::AppState> =
+//         leptos_axum::extract_with_state(&state).await?;
+
+//     info!("Starting sync of local StripeData with Stripe API...");
+//     let key = appstate.id.clone();
+//     trace!("Here {:#?}", key);
+
+//     let client = Client::new(std::env::var("REMOVED").unwrap().as_str());
+
+//     let customer_list_params = ListCustomers::new();
+//     let list_of_customers_from_stripe_api =
+//         match Customer::list(&client, &customer_list_params).await {
+//             Ok(list) => list,
+//             Err(err) => {
+//                 log::error!("{:#?}", err);
+//                 return Err(ServerFnError::from(err));
+//             }
+//         };
+
+//     match list_of_customers_from_stripe_api.data.len() {
+//         0 => {
+//             log::info!("No Customers");
+//         }
+//         x if x > 0 => {
+//             log::info!("Amount of Customers: {:?}", x);
+//         }
+//         _ => {}
+//     };
+
+//     let mut product_list_params = ListProducts::new();
+//     product_list_params.active = Some(true);
+//     product_list_params.expand = &["data.default_price"];
+
+//     let list_of_products_from_stripe_api = match Product::list(&client, &product_list_params).await
+//     {
+//         Ok(list) => list,
+//         Err(err) => {
+//             log::error!("{:#?}", err);
+//             return Err(ServerFnError::from(err));
+//         }
+//     };
+
+//     match list_of_products_from_stripe_api.data.len() {
+//         0 => {
+//             log::info!("No Products");
+//         }
+//         x if x > 0 => {
+//             log::info!("Amount of Products#: {:?}", x);
+//         }
+//         _ => {}
+//     };
+
+//     let data = StripeData::new(
+//         list_of_products_from_stripe_api.clone(),
+//         list_of_customers_from_stripe_api.clone(),
+//     );
+
+//     info!("Updating local AppState with synced data from Stripe API");
+//     appstate.stripe_data = data.clone();
+
+//     let value = serde_json::json!({
+//         "code": http::StatusCode::NO_CONTENT.to_string(),
+//         "count": {
+//             "products": data.clone().products.len(),
+//             "customers": data.clone().customers.len()
+//         },
+//     });
+//     Ok(value)
+// }

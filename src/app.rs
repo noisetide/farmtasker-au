@@ -16,11 +16,10 @@ pub fn App() -> impl IntoView {
     provide_context(current_page);
     provide_context(set_current_page);
 
-    // let state = expect_context::<u64>();
+    let data = create_resource(|| (), move |_| async { stater().await });
+    provide_context(data);
 
     view! {
-
-
         // injects a stylesheet into the document <head>
         // id=leptos means cargo-leptos will hot-reload this stylesheet
         <Stylesheet id="leptos" href="/pkg/farmtasker-au.css"/>
@@ -41,76 +40,82 @@ pub fn App() -> impl IntoView {
                 <NavBar/>
             </nav>
             <main>
-                <Routes>
-                    <Route path="/" view={
-                        move || {
-                            let setter = expect_context::<WriteSignal<CurrentPage>>();
-                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::HomePage);
-                            view! {
-                                <Pager page=HomePage/>
-                            }
-                        }
-                    }/>
-                    <Route path="/shop/pet" view={
-                        move || {
-                            let setter = expect_context::<WriteSignal<CurrentPage>>();
-                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::PetShop);
-                            view! {
-                                <Pager page=PetShop/>
-                            }
-                        }
-                    }/>
-                    <Route path="/shop/food" view={
-                        move || {
-                            let setter = expect_context::<WriteSignal<CurrentPage>>();
-                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::FoodShop);
-                            view! {
-                                <Pager page=FoodShop/>
-                            }
-                        }
-                    }/>
-                    <Route path="/about" view={
-                        move || {
-                            let setter = expect_context::<WriteSignal<CurrentPage>>();
-                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::About);
-                            view! {
-                                <Pager page=About/>
-                            }
-                        }
-                    }/>
-                    <Route path="/privacy" view={
-                        move || {
-                            let setter = expect_context::<WriteSignal<CurrentPage>>();
-                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::PrivacyPolicy);
-                            view! {
-                                <Pager page=PrivacyPolicy/>
-                            }
-                        }
-                    }/>
-                    <Route path="/terms" view={
-                        move || {
-                            let setter = expect_context::<WriteSignal<CurrentPage>>();
-                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::TermsOfService);
-                            view! {
-                                <Pager page=TermsOfService/>
-                            }
-                        }
-                    }/>
-                    <Route path="/shop/cart" view={
-                        move || {
-                            let setter = expect_context::<WriteSignal<CurrentPage>>();
-                            setter.update(|page: &mut CurrentPage| *page = CurrentPage::ShoppingCart);
-                            view! {
-                                <Pager page=ShoppingCart/>
-                            }
-                        }
-                    }/>
-                </Routes>
+                <Routerer/>
             </main>
             <nav>
                 <FooterBar/>
             </nav>
         </Router>
+    }
+}
+#[component]
+pub fn Routerer() -> impl IntoView {
+    view! {
+        <Routes>
+            <Route path="/" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::HomePage);
+                    view! {
+                        <Pager page=HomePage/>
+                    }
+                }
+            }/>
+            <Route path="/shop/pet" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::PetShop);
+                    view! {
+                        <Pager page=PetShop/>
+                    }
+                }
+            }/>
+            <Route path="/shop/food" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::FoodShop);
+                    view! {
+                        <Pager page=FoodShop/>
+                    }
+                }
+            }/>
+            <Route path="/about" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::About);
+                    view! {
+                        <Pager page=About/>
+                    }
+                }
+            }/>
+            <Route path="/privacy" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::PrivacyPolicy);
+                    view! {
+                        <Pager page=PrivacyPolicy/>
+                    }
+                }
+            }/>
+            <Route path="/terms" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::TermsOfService);
+                    view! {
+                        <Pager page=TermsOfService/>
+                    }
+                }
+            }/>
+            <Route path="/shop/cart" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::ShoppingCart);
+                    view! {
+                        <Pager page=|| view!{<ShoppingCart/>}/>
+                    }
+                }
+            }/>
+        </Routes>
     }
 }
 
@@ -212,10 +217,15 @@ pub fn TermsOfService() -> impl IntoView {
 #[component]
 pub fn ShoppingCart() -> impl IntoView {
     let page = expect_context::<ReadSignal<CurrentPage>>();
+    let data = expect_context::<Resource<(), Result<serde_json::Value, ServerFnError>>>();
+
     view! {
-        <div>
-            <strong>{move || format!("{:#?}", page.get())}</strong>
-        </div>
+        <Suspense fallback=move || view! {"loading data"}>
+            {move || match data.get() {
+                None => view! { <p>"Loading..."</p> }.into_view(),
+                Some(data) => view! { <p> {format!("{:#?}", data)} </p> }.into_view()
+            }}
+        </Suspense>
     }
 }
 

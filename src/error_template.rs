@@ -16,7 +16,7 @@ impl AppError {
     }
 }
 
-// A basic function to display errors served by the error boundaries.
+// A basic function to display errors served by the error boundarjes.
 // Feel free to do more complicated things here than just displaying the error.
 #[component]
 pub fn ErrorTemplate(
@@ -38,7 +38,7 @@ pub fn ErrorTemplate(
         .into_iter()
         .filter_map(|(_k, v)| v.downcast_ref::<AppError>().cloned())
         .collect();
-    println!("Errors: {errors:#?}");
+    // println!("Errors: {errors:#?}");
 
     // Only the response code for the first error is actually sent from the server
     // this may be customized by the specific application

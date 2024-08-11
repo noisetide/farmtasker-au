@@ -2,25 +2,24 @@
 #[cfg(not(feature = "ssr"))]
 fn main() {}
 
+pub use axum::routing::post;
+pub use axum::*;
+pub use core::panic;
+pub use farmtasker_au::app::*;
+pub use farmtasker_au::fileserv::file_and_error_handler;
+use farmtasker_au::{StripeData, TestState};
+pub use leptos::*;
+pub use leptos_axum::{generate_route_list, LeptosRoutes};
+pub use std::borrow::BorrowMut;
+pub use std::io::{BufRead, BufReader};
+pub use std::sync::{Arc, Mutex};
+pub use stripe::{Metadata, *};
+pub use tracing::*;
+pub use tracing_subscriber;
+
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    #![allow(unused)]
-    pub use axum::routing::post;
-    pub use axum::*;
-    pub use core::panic;
-    pub use farmtasker_au::app::*;
-    pub use farmtasker_au::fileserv::file_and_error_handler;
-    use farmtasker_au::{StripeData, TestState};
-    pub use leptos::*;
-    pub use leptos_axum::{generate_route_list, LeptosRoutes};
-    pub use std::borrow::BorrowMut;
-    pub use std::io::{BufRead, BufReader};
-    pub use std::sync::{Arc, Mutex};
-    pub use stripe::*;
-    pub use tracing::*;
-    pub use tracing_subscriber;
-
     tracing_subscriber::fmt::init();
 
     // Setting get_configuration(None) means we'll be using cargo-leptos's env values
@@ -36,49 +35,50 @@ async fn main() {
     let key = std::env::var("REMOVED").expect("couldn't get env var REMOVED");
     let stripe_client = stripe::Client::new(key.clone());
 
-    // let mut appstate = farmtasker_au::AppState {
-    //     id: 0,
-    //     stripe_api_key: key.to_string(),
-    //     stripe_data: farmtasker_au::StripeData::new_fetch()
-    //         .await
-    //         .expect("Could not fetch data from stripe api"),
-    // };
-
-    let appstate: u64 = 9;
-
-    // appstate.id = 5;
+    let mut appstate = farmtasker_au::AppState {
+        stripe_api_key: Some(key.to_string()),
+        stripe_data: match farmtasker_au::StripeData::new_fetch().await {
+            Ok(ok) => Some(ok),
+            Err(err) => {
+                leptos::logging::log!("Can't fetch StripeData");
+                None
+            }
+        },
+    };
 
     // let stripedata = StripeData::new_fetch()
     //     .await
     //     .expect("Couldn't fetch StripeData");
 
-    // let products = &appstate.stripe_data.products;
-    // for i in products {
-    //     tracing::info!(
-    //         "Product: {:#?} - {:#?}$ AUD",
-    //         i.name,
-    //         i.default_price.clone().unwrap().unit_amount.unwrap() as f64 / 100.0
-    //     );
-    // }
-    // tracing::info!("Total Products: {:}", products.len());
+    let products = &appstate
+        .stripe_data
+        .clone()
+        .expect("No StripeData in AppState")
+        .products;
+    for i in products {
+        tracing::info!(
+            "Product: {:#?} - {:#?}$ AUD",
+            i.name,
+            i.default_price.clone().unwrap().unit_amount.unwrap() as f64 / 100.0
+        );
+    }
+    tracing::info!("Total Products: {:}", products.len());
 
     // build our application with a route
     let app = Router::new()
+        // .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
         .leptos_routes_with_context(
             &leptos_options,
             routes,
             {
                 let appstate = appstate.clone();
-                move || provide_context( appstate.clone() )
+                move || provide_context(Some(appstate.clone()))
             },
             App,
         )
-        // .leptos_routes(&leptos_options, routes, App)
         .fallback(file_and_error_handler)
         .with_state(leptos_options)
-        // .layer(Extension(appstate.clone()))
-        // .route("/api/sync", post(farmtasker_au::sync::stripe_sync));
-        ;
+        .layer(Extension(appstate.clone()));
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     tracing::info!("listening on http://{}\n", &addr);
