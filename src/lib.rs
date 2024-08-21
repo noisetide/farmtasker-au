@@ -12,11 +12,17 @@ pub fn hydrate() {
     console_error_panic_hook::set_once();
     leptos::mount_to_body(App);
 }
+#[leptos::server(
+    name = GetStripeKey
+)]
+pub async fn get_stripe_key() -> Result<String, leptos::ServerFnError> {
+    unimplemented!();
+}
 
 #[leptos::server(
       name = Stater,
 )]
-pub async fn stater() -> Result<serde_json::Value, leptos::ServerFnError> {
+pub async fn stater() -> Result<StripeData, leptos::ServerFnError> {
     let state = match leptos::use_context::<Option<crate::AppState>>() {
         Some(ok) => {
             // leptos::logging::log!("GOT context AppState");
@@ -27,7 +33,7 @@ pub async fn stater() -> Result<serde_json::Value, leptos::ServerFnError> {
             None
         }
     };
-    let axum::extract::State(data): axum::extract::State<crate::AppState> =
+    let axum::extract::State(appstate): axum::extract::State<crate::AppState> =
         leptos_axum::extract_with_state(match &state {
             Some(x) => x,
             None => &AppState {
@@ -38,7 +44,10 @@ pub async fn stater() -> Result<serde_json::Value, leptos::ServerFnError> {
         .await?;
 
     // log::info!("Server data: {:#?}", data.stripe_data.clone());
-    Ok(serde_json::json!({"test": "200", "data": data.stripe_data}))
+    appstate.stripe_data.ok_or_else(|| {
+        error!("No StripeData");
+        leptos::ServerFnError::ServerError("StripeData not found".into())
+    })
 }
 
 use leptos::ServerFnError;
@@ -52,8 +61,23 @@ pub struct AppState {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct TestState {
-    pub id: usize,
+pub struct ShoppingCart(Vec<String>);
+
+impl ShoppingCart {
+    pub fn add_product(&mut self, product_id: DbProduct) -> &mut Self {
+        self.0.push(product_id.id);
+        self
+    }
+    pub fn remove_product(&mut self, product_id: String) -> &mut Self {
+        self.0.retain(|item| item != &product_id);
+        self
+    }
+}
+
+impl Default for ShoppingCart {
+    fn default() -> Self {
+        ShoppingCart(Vec::<String>::new())
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -62,7 +86,44 @@ pub struct StripeData {
     pub customers: Vec<stripe_retypes::DbCustomer>,
 }
 
+#[leptos::server(
+    name = NewCheckoutSession,
+    // endpoint = "",
+)]
+pub async fn new_checkout_session(shopping_cart: ShoppingCart) -> Result<String, ServerFnError> {
+    use stripe::*;
+    let client = Client::new(match std::env::var("REMOVED") {
+        Ok(ok) => ok,
+        Err(err) => {
+            log::error!("{:#?}", err);
+            return Err(ServerFnError::ServerError(err.to_string()));
+        }
+    });
+
+    let checkout_session = {
+        let mut params = stripe::CreateCheckoutSession::new();
+        params.cancel_url = Some("http://farmtasker.au/cancel");
+        params.success_url = Some("http://test.com/success");
+        // params.customer = Some(customer.id);
+        params.customer = None;
+        params.mode = Some(stripe::CheckoutSessionMode::Payment);
+        params.line_items = Some(vec![CreateCheckoutSessionLineItems {
+            // quantity: Some(3),
+            // price: Some(price.id.to_string()),
+            ..Default::default()
+        }]);
+        params.expand = &["line_items", "line_items.data.price.product"];
+
+        stripe::CheckoutSession::create(&client, params).await?;
+    };
+    info!("Created checkout session: {:#?}", &checkout_session);
+
+    // unimplemented!();
+    Ok(format!("Created checkout session: {:#?}", checkout_session))
+}
+
 use log::*;
+use stripe_retypes::DbProduct;
 #[leptos::server(
     // name = FetchStripeData,
     // endpoint = "fetch_stripe_data",

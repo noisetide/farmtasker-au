@@ -7,6 +7,8 @@ use leptos_meta::*;
 use leptos_router::*;
 use log::*;
 
+pub type StripeDataRes = Resource<(), Result<StripeData, ServerFnError>>;
+
 #[component]
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
@@ -16,8 +18,8 @@ pub fn App() -> impl IntoView {
     provide_context(current_page);
     provide_context(set_current_page);
 
-    let data = create_resource(|| (), move |_| async { stater().await });
-    provide_context(data);
+    let stripe_data: StripeDataRes = create_resource(|| (), move |_| async { stater().await });
+    provide_context(stripe_data);
 
     view! {
         // injects a stylesheet into the document <head>
@@ -151,6 +153,7 @@ where
 /// Renders the home page of your application.
 #[component]
 pub fn HomePage() -> impl IntoView {
+    let data = expect_context::<StripeDataRes>();
     view! {
         <div id="shop_selector2" class="shop_selector_container">
             <a href="/shop/food">
@@ -171,12 +174,15 @@ pub fn HomePage() -> impl IntoView {
 pub fn PetShop() -> impl IntoView {
     view! {
         <div>"PetShop!!!"</div>
+        <ProductItems items_category="pet_food".to_string()/>
     }
 }
+
 #[component]
 pub fn FoodShop() -> impl IntoView {
     view! {
         <div>"FoodShop!!!"</div>
+        <ProductItems items_category="food".to_string()/>
     }
 }
 #[component]
@@ -215,19 +221,41 @@ pub fn TermsOfService() -> impl IntoView {
 }
 
 #[component]
-pub fn ShoppingCart() -> impl IntoView {
-    let page = expect_context::<ReadSignal<CurrentPage>>();
-    let data = expect_context::<Resource<(), Result<serde_json::Value, ServerFnError>>>();
+pub fn ProductItems(items_category: String) -> impl IntoView {
+    let stripe_data = expect_context::<StripeDataRes>();
+    let (items_category, set_items_category) = create_signal(items_category);
+    provide_context(items_category);
 
     view! {
         <Suspense fallback=move || view! {"loading data"}>
-            {move || match data.get() {
+            {move || match stripe_data.get() {
                 None => view! { <p>"Loading..."</p> }.into_view(),
-                Some(data) => view! { <p> {format!("{:#?}", data)} </p> }.into_view()
+                Some(stripe_data) => {
+                    let stripe_data: StripeData = stripe_data.expect("Resource StripeData is not here on 'get()'");
+                    let items_category = expect_context::<ReadSignal<String>>();
+
+                    view! {
+                        <ul class="product-list-ul-food">
+                            {stripe_data.products.into_iter()
+                                .filter(|product| {
+                                    product.metadata
+                                        .as_ref()
+                                        .and_then(|metadata| metadata.get("category"))
+                                        .map(|category| category == &items_category.get())
+                                        .unwrap_or(false)
+                                })
+                                .map(|product| view! { <li>{product.name}, {product.default_price.unwrap().unit_amount.unwrap() / 100}"$ AUD"</li>})
+                                .collect::<Vec<_>>()}
+                        </ul>
+                    }.into_view()
+                }
             }}
         </Suspense>
     }
 }
+
+#[component]
+pub fn ShoppingCart() -> impl IntoView {}
 
 #[component]
 pub fn FooterBar() -> impl IntoView {

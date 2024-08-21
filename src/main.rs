@@ -7,14 +7,13 @@ pub use axum::*;
 pub use core::panic;
 pub use farmtasker_au::app::*;
 pub use farmtasker_au::fileserv::file_and_error_handler;
-use farmtasker_au::{StripeData, TestState};
+pub use farmtasker_au::*;
 pub use leptos::*;
 pub use leptos_axum::{generate_route_list, LeptosRoutes};
 pub use std::borrow::BorrowMut;
 pub use std::io::{BufRead, BufReader};
 pub use std::sync::{Arc, Mutex};
 pub use stripe::{Metadata, *};
-pub use tracing::*;
 pub use tracing_subscriber;
 
 #[cfg(feature = "ssr")]
@@ -35,7 +34,7 @@ async fn main() {
     let key = std::env::var("REMOVED").expect("couldn't get env var REMOVED");
     let stripe_client = stripe::Client::new(key.clone());
 
-    let mut appstate = farmtasker_au::AppState {
+    let appstate = farmtasker_au::AppState {
         stripe_api_key: Some(key.to_string()),
         stripe_data: match farmtasker_au::StripeData::new_fetch().await {
             Ok(ok) => Some(ok),
@@ -53,7 +52,9 @@ async fn main() {
     let products = &appstate
         .stripe_data
         .clone()
-        .expect("No StripeData in AppState")
+        .expect(
+            "No StripeData in AppState. Check if the StripeData could be fetched from internet.",
+        )
         .products;
     for i in products {
         tracing::info!(

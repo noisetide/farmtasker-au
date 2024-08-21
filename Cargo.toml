@@ -24,20 +24,19 @@ wasm-bindgen = "0.2.92"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 axum = { version = "0.7", features = ["macros"]}
+axum_session = "0.14.2"
 inquire = "0.7.5"
-async-stripe = { version = "*", default-features = false, features = ["runtime-tokio-hyper-rustls"]}
-tower = { version = "0.4", optional = true }
-tower-http = { version = "0.5", features = ["fs"], optional = true }
-surrealdb = "1.5.4"
+async-stripe = { version = "*", features = ["runtime-tokio-hyper-rustls"]}
+tower = { version = "0.4"}
+tower-http = { version = "0.5", features = ["fs"]}
+# surrealdb = "1.5.4"
 axum-extra = "0.9.3"
-tokio = { version = "1.39.2", default-features = false, features = ["rt"],optional = true }
+tokio = { version = "1.39.2", default-features = true, features = ["rt", "rt-multi-thread"], optional = true }
 
 [features]
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
     "dep:tokio",
-    "dep:tower",
-    "dep:tower-http",
     "dep:leptos_axum",
     "leptos/ssr",
     "leptos_meta/ssr",
