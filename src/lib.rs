@@ -60,23 +60,22 @@ pub struct AppState {
     pub stripe_data: Option<StripeData>,
 }
 
+use std::collections::HashMap;
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct ShoppingCart(Vec<String>);
+pub struct ShoppingCart(HashMap<String, u8>);
 
 impl ShoppingCart {
     pub fn add_product(&mut self, product_id: DbProduct) -> &mut Self {
-        self.0.push(product_id.id);
-        self
+        unimplemented!();
     }
     pub fn remove_product(&mut self, product_id: String) -> &mut Self {
-        self.0.retain(|item| item != &product_id);
-        self
+        unimplemented!();
     }
 }
 
 impl Default for ShoppingCart {
     fn default() -> Self {
-        ShoppingCart(Vec::<String>::new())
+        ShoppingCart(HashMap::<String, u8>::new())
     }
 }
 
@@ -90,7 +89,9 @@ pub struct StripeData {
     name = NewCheckoutSession,
     // endpoint = "",
 )]
+#[cfg(feature = "ssr")]
 pub async fn new_checkout_session(shopping_cart: ShoppingCart) -> Result<String, ServerFnError> {
+    use app::ProductItemsPropsBuilder_Error_Missing_required_field_items_category;
     use stripe::*;
     let client = Client::new(match std::env::var("REMOVED") {
         Ok(ok) => ok,
@@ -100,18 +101,35 @@ pub async fn new_checkout_session(shopping_cart: ShoppingCart) -> Result<String,
         }
     });
 
+    let stripe_data: StripeData = stater().await?;
+
     let checkout_session = {
         let mut params = stripe::CreateCheckoutSession::new();
-        params.cancel_url = Some("http://farmtasker.au/cancel");
-        params.success_url = Some("http://test.com/success");
+        // params.cancel_url = Some("http://farmtasker.au/cancel"); // TODO!
+        // params.success_url = Some("http://farmtasker.au/success"); // TODO!
         // params.customer = Some(customer.id);
         params.customer = None;
         params.mode = Some(stripe::CheckoutSessionMode::Payment);
-        params.line_items = Some(vec![CreateCheckoutSessionLineItems {
-            // quantity: Some(3),
-            // price: Some(price.id.to_string()),
-            ..Default::default()
-        }]);
+        // params.line_items = Some(vec![stripe::CreateCheckoutSessionLineItems {
+        //     quantity: Some(3),
+        //     price: Some(price.id.to_string()),
+        //     ..Default::default()
+        // }]);
+        let mut vec_of_create_checkout_session_line_items =
+            Vec::<CreateCheckoutSessionLineItems>::new();
+
+        for (product_id, quantity) in &shopping_cart.0 {
+            if let Some(db_product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
+                let line_item = CreateCheckoutSessionLineItems {
+                    quantity: Some((*quantity).into()),
+                    price: Some(db_product.default_price.clone().expect("NO PRICE!").id),
+                    ..Default::default()
+                };
+                vec_of_create_checkout_session_line_items.push(line_item);
+            }
+        }
+
+        params.line_items = Some(vec_of_create_checkout_session_line_items);
         params.expand = &["line_items", "line_items.data.price.product"];
 
         stripe::CheckoutSession::create(&client, params).await?;
@@ -320,6 +338,12 @@ pub mod sync {
             }
         }
     }
+
+    // impl Into<Price> for DbPrice {
+    //     fn into(self) -> Price {
+    //         Price
+    //     }
+    // }
 
     impl Object for DbPrice {
         type Id = String;

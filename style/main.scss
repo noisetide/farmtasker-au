@@ -214,8 +214,9 @@ a {
     min-width: 90vw;
     margin: 0;
     padding: 0;
-    background-image: url('/pager_bg.jpg');
-    background-size: contain;
+    background-image: url('/pager_bg.webp');
+    width: 100%;
+    background-size: cover;
     background-repeat: no-repeat;
     background-position: top center;
     display: flex;

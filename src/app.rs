@@ -235,7 +235,7 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
                     let items_category = expect_context::<ReadSignal<String>>();
 
                     view! {
-                        <ul class="product-list-ul-food">
+                        <ul class="product-list-ul">
                             {stripe_data.products.into_iter()
                                 .filter(|product| {
                                     product.metadata
@@ -244,7 +244,19 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
                                         .map(|category| category == &items_category.get())
                                         .unwrap_or(false)
                                 })
-                                .map(|product| view! { <li>{product.name}, {product.default_price.unwrap().unit_amount.unwrap() / 100}"$ AUD"</li>})
+                                .map(|product| view! {
+                                    <li>
+                                        <div>
+                                            {product.name}, {product.default_price.unwrap().unit_amount.unwrap() / 100}"$ AUD"
+                                            <button on:click=move |_| {
+                                                leptos::logging::log!("Added to Cart! {:#?}", product.id);
+                                                // TODO make sessionned adding to cart
+                                            }>
+                                            "Add To Cart"
+                                            </button>
+                                        </div>
+                                    </li>
+                                })
                                 .collect::<Vec<_>>()}
                         </ul>
                     }.into_view()
