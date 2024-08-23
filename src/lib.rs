@@ -44,13 +44,21 @@ pub async fn stater() -> Result<StripeData, leptos::ServerFnError> {
         .await?;
 
     // log::info!("Server data: {:#?}", data.stripe_data.clone());
-    appstate.stripe_data.ok_or_else(|| {
-        error!("No StripeData");
-        leptos::ServerFnError::ServerError("StripeData not found".into())
-    })
+    match appstate.stripe_data {
+        Some(ok) => {
+            // info!("StripeData Loaded...");
+            Ok(ok)
+        }
+        None => {
+            error!("No StripeData!");
+            return Err(leptos::ServerFnError::ServerError(
+                "StripeData not found".into(),
+            ));
+        }
+    }
 }
 
-use leptos::ServerFnError;
+use leptos::{create_effect, ServerFnError};
 use leptos_router::FromFormData;
 use serde::{Deserialize, Serialize};
 
@@ -65,11 +73,30 @@ use std::collections::HashMap;
 pub struct ShoppingCart(HashMap<String, u8>);
 
 impl ShoppingCart {
-    pub fn add_product(&mut self, product_id: DbProduct) -> &mut Self {
-        unimplemented!();
+    pub fn add_single_product(&mut self, product_id: String) -> &mut Self {
+        // If the product is already in the cart, increase its quantity by 1
+        if let Some(quantity) = self.0.get_mut(&product_id) {
+            *quantity += 1;
+        } else {
+            // If the product is not in the cart, add it with a quantity of 1
+            self.0.insert(product_id, 1);
+        }
+        self
     }
-    pub fn remove_product(&mut self, product_id: String) -> &mut Self {
-        unimplemented!();
+    pub fn remove_single_product(&mut self, product_id: String) -> &mut Self {
+        // If the product is in the cart, adjust its quantity
+        if let Some(quantity) = self.0.get_mut(&product_id) {
+            if *quantity > 1 {
+                *quantity -= 1; // Decrease quantity by 1
+            } else {
+                self.0.remove(&product_id); // If quantity is 1, remove the product
+            }
+        }
+        self
+    }
+    pub fn delete_product(&mut self, product_id: String) -> &mut Self {
+        self.0.remove(&product_id);
+        self
     }
 }
 
@@ -119,10 +146,10 @@ pub async fn new_checkout_session(shopping_cart: ShoppingCart) -> Result<String,
             Vec::<CreateCheckoutSessionLineItems>::new();
 
         for (product_id, quantity) in &shopping_cart.0 {
-            if let Some(db_product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
+            if let Some(product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
                 let line_item = CreateCheckoutSessionLineItems {
                     quantity: Some((*quantity).into()),
-                    price: Some(db_product.default_price.clone().expect("NO PRICE!").id),
+                    price: Some(product.default_price.clone().expect("NO PRICE!").id),
                     ..Default::default()
                 };
                 vec_of_create_checkout_session_line_items.push(line_item);

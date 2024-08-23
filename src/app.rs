@@ -17,6 +17,9 @@ pub fn App() -> impl IntoView {
     let (current_page, set_current_page) = create_signal(CurrentPage::None);
     provide_context(current_page);
     provide_context(set_current_page);
+    let (shopping_cart, set_shopping_cart) = create_signal(ShoppingCart::default());
+    provide_context(shopping_cart);
+    provide_context(set_shopping_cart);
 
     let stripe_data: StripeDataRes = create_resource(|| (), move |_| async { stater().await });
     provide_context(stripe_data);
@@ -44,9 +47,9 @@ pub fn App() -> impl IntoView {
             <main>
                 <Routerer/>
             </main>
-            <nav>
+            <div>
                 <FooterBar/>
-            </nav>
+            </div>
         </Router>
     }
 }
@@ -153,7 +156,6 @@ where
 /// Renders the home page of your application.
 #[component]
 pub fn HomePage() -> impl IntoView {
-    let data = expect_context::<StripeDataRes>();
     view! {
         <div id="shop_selector2" class="shop_selector_container">
             <a href="/shop/food">
@@ -226,6 +228,11 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
     let (items_category, set_items_category) = create_signal(items_category);
     provide_context(items_category);
 
+    let shopping_cart = expect_context::<ReadSignal<ShoppingCart>>();
+    provide_context(shopping_cart);
+    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+    provide_context(set_shopping_cart);
+
     view! {
         <Suspense fallback=move || view! {"loading data"}>
             {move || match stripe_data.get() {
@@ -236,7 +243,8 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
 
                     view! {
                         <ul class="product-list-ul">
-                            {stripe_data.products.into_iter()
+                            {
+                                stripe_data.products.into_iter()
                                 .filter(|product| {
                                     product.metadata
                                         .as_ref()
@@ -244,20 +252,27 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
                                         .map(|category| category == &items_category.get())
                                         .unwrap_or(false)
                                 })
-                                .map(|product| view! {
-                                    <li>
-                                        <div>
-                                            {product.name}, {product.default_price.unwrap().unit_amount.unwrap() / 100}"$ AUD"
-                                            <button on:click=move |_| {
-                                                leptos::logging::log!("Added to Cart! {:#?}", product.id);
-                                                // TODO make sessionned adding to cart
-                                            }>
-                                            "Add To Cart"
-                                            </button>
-                                        </div>
-                                    </li>
+                                .map(|product| {
+                                    view! {
+                                        <li>
+                                            <div>
+                                                {product.name}, {product.default_price.unwrap().unit_amount.unwrap() / 100}"$ AUD"
+                                                <button on:click=move |_| {
+                                                    // TODO make sessionned adding to cart
+                                                    set_shopping_cart.update(|s| {
+                                                        s.add_single_product(product.id.clone());
+                                                    });
+                                                    // leptos::logging::log!("Added to Cart! {:#?}", product.id);
+                                                    // leptos::logging::log!("Shopping Cart: {:#?}", shopping_cart.get());
+                                                }>
+                                                "Add To Cart"
+                                                </button>
+                                            </div>
+                                        </li>
+                                    }
                                 })
-                                .collect::<Vec<_>>()}
+                                .collect::<Vec<_>>()
+                            }
                         </ul>
                     }.into_view()
                 }
@@ -267,7 +282,55 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
 }
 
 #[component]
-pub fn ShoppingCart() -> impl IntoView {}
+pub fn ShoppingCart() -> impl IntoView {
+    let shopping_cart = expect_context::<ReadSignal<ShoppingCart>>();
+    provide_context(shopping_cart);
+    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+    provide_context(set_shopping_cart);
+
+    // TODO show shopping cart info + add checkout button for creating new checkout session
+
+    view! {{move || {
+        if shopping_cart.get().0.len() != 0 {
+            view! {
+                <ul class="shopping-list-ul">
+                    {
+                        shopping_cart.get().0.into_iter()
+                            .map(|(product_id, quantity)| {
+                                let product_name = product_id.clone();
+                                view! {
+                                    <li>
+                                        <p>
+                                            {product_name}", quantity: "{quantity}
+                                        </p>
+                                        <div>
+                                            <button on:click=move |_| {
+                                                // TODO make sessionned adding to cart
+                                                set_shopping_cart.update(|s| {
+                                                    s.remove_single_product(product_id.clone());
+                                                });
+                                                // leptos::logging::log!("Removed From Cart! {:#?}", product_id);
+                                                // leptos::logging::log!("Shopping Cart: {:#?}", shopping_cart.get());
+                                            }>
+                                            "Remove"
+                                            </button>
+                                        </div>
+                                    </li>
+                                }
+                            })
+                            .collect::<Vec<_>>()
+                    }
+                </ul>
+            }
+        } else {
+            view! {
+                <ul>
+                    "Your Shopping Cart is Empty"
+                </ul>
+            }
+        }
+    }}}
+}
 
 #[component]
 pub fn FooterBar() -> impl IntoView {
@@ -305,14 +368,7 @@ pub fn NavBar() -> impl IntoView {
                     <img src="/main_logo.svg" alt="Farmtasker Logo" loading="lazy"/>
                 </a>
             </div>
-            <h4 class="title-text">"Marketplace for farmers & pet food manufacturers"</h4>
             <ul class="nav_buttons">
-                <li>
-                    <a class:current=move || {
-                        matches!(selected.get(), CurrentPage::HomePage)
-                    }
-                        href="/" id="button_left">"Home"</a>
-                </li>
                 <li>
                     <a
                     class:current=move || {
@@ -339,14 +395,7 @@ pub fn NavBar() -> impl IntoView {
                     class:current=move || {
                         matches!(selected.get(), CurrentPage::ShoppingCart)
                     }
-                        href="/shop/cart" id="button_middle">"🛒"</a>
-                </li>
-                <li>
-                    <a
-                    class:current=move || {
-                        matches!(selected.get(), CurrentPage::TermsOfService)
-                    }
-                        href="/terms" id="button_right">"?"</a>
+                        href="/shop/cart" id="button_middle">"🛒 ""Cart"</a>
                 </li>
             </ul>
         </nav>
