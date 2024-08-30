@@ -48,11 +48,39 @@ a {
 .navbar {
   background-color: $main-color;
 
-  /* padding: 0.1rem; */
+  padding: 0.1rem;
   display: grid;
   color: white;
-  /* flex-direction: row; */
+  flex-direction: row;
   /* position: relative; */
+
+  .banner-bg {
+    min-height: 18.5rem;
+    /* min-width: 90vw; */
+    /* margin: 0; */
+    /* padding: 0; */
+
+    background-image: url('/banner-bg.jpg');
+    /* width: 50%; */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: top center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    @include respond-to(tablet) {
+      background-position: left;
+      background-size: contain;
+    }
+
+    @include respond-to(mobile) {
+      background-position: left;
+      background-size: cover;
+    }
+  }
 
   .logo-container {
     justify-content: center;
@@ -60,10 +88,9 @@ a {
     background-color: darken($main-color, 10%);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
-    z-index: 1;
 
     img {
-      max-height: 17vh;
+      max-height: 25vh;
       height: auto;
       width: auto;
     }

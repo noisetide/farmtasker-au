@@ -58,7 +58,7 @@ pub async fn stater() -> Result<StripeData, leptos::ServerFnError> {
     }
 }
 
-use leptos::{create_effect, ServerFnError};
+use leptos::{create_effect, Serializable, ServerFnError};
 use leptos_router::FromFormData;
 use serde::{Deserialize, Serialize};
 
@@ -112,13 +112,14 @@ pub struct StripeData {
     pub customers: Vec<stripe_retypes::DbCustomer>,
 }
 
-#[leptos::server(
-    name = NewCheckoutSession,
-    // endpoint = "",
-)]
-#[cfg(feature = "ssr")]
-pub async fn new_checkout_session(shopping_cart: ShoppingCart) -> Result<String, ServerFnError> {
-    use app::ProductItemsPropsBuilder_Error_Missing_required_field_items_category;
+#[leptos::server(name = NewCheckoutSession)]
+pub async fn new_checkout_session(
+    shopping_cart: HashMap<String, u8>,
+) -> Result<serde_json::Value, ServerFnError> {
+    let mut cart = ShoppingCart::default();
+    cart.0 = shopping_cart;
+    let shopping_cart = cart;
+
     use stripe::*;
     let client = Client::new(match std::env::var("REMOVED") {
         Ok(ok) => ok,
@@ -132,16 +133,11 @@ pub async fn new_checkout_session(shopping_cart: ShoppingCart) -> Result<String,
 
     let checkout_session = {
         let mut params = stripe::CreateCheckoutSession::new();
-        // params.cancel_url = Some("http://farmtasker.au/cancel"); // TODO!
-        // params.success_url = Some("http://farmtasker.au/success"); // TODO!
-        // params.customer = Some(customer.id);
+        params.cancel_url = Some("http://localhost:4444/cancel"); // TODO!
+        params.success_url = Some("http://localhost:4444/success"); // TODO!
         params.customer = None;
+        // params.customer = Some(customer.id);
         params.mode = Some(stripe::CheckoutSessionMode::Payment);
-        // params.line_items = Some(vec![stripe::CreateCheckoutSessionLineItems {
-        //     quantity: Some(3),
-        //     price: Some(price.id.to_string()),
-        //     ..Default::default()
-        // }]);
         let mut vec_of_create_checkout_session_line_items =
             Vec::<CreateCheckoutSessionLineItems>::new();
 
@@ -156,15 +152,24 @@ pub async fn new_checkout_session(shopping_cart: ShoppingCart) -> Result<String,
             }
         }
 
+        // params.line_items = Some(vec![stripe::CreateCheckoutSessionLineItems {
+        //     quantity: Some(3),
+        //     price: Some(price.id.to_string()),
+        //     ..Default::default()
+        // }]);
         params.line_items = Some(vec_of_create_checkout_session_line_items);
         params.expand = &["line_items", "line_items.data.price.product"];
 
-        stripe::CheckoutSession::create(&client, params).await?;
+        stripe::CheckoutSession::create(&client, params).await?
     };
-    info!("Created checkout session: {:#?}", &checkout_session);
+    // info!("Created checkout session: {:#?}, for {:#?} $AUD", &checkout_session.id, &checkout_session.amount_total as f64 / 100, );
+
+    // let checkout_session = "test";
+
+    leptos_axum::redirect(&checkout_session.url.clone().unwrap());
 
     // unimplemented!();
-    Ok(format!("Created checkout session: {:#?}", checkout_session))
+    Ok(serde_json::Value::from(checkout_session.ser().unwrap()))
 }
 
 use log::*;

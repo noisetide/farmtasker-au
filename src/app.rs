@@ -120,6 +120,24 @@ pub fn Routerer() -> impl IntoView {
                     }
                 }
             }/>
+            <Route path="/success" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::HomePage);
+                    view! {
+                        <Pager page=SuccessCheckout/>
+                    }
+                }
+            }/>
+            <Route path="/cancel" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::HomePage);
+                    view! {
+                        <Pager page=CancelCheckout/>
+                    }
+                }
+            }/>
         </Routes>
     }
 }
@@ -159,13 +177,13 @@ pub fn HomePage() -> impl IntoView {
     view! {
         <div id="shop_selector2" class="shop_selector_container">
             <a href="/shop/food">
-                <p class="shop_selector_title">"Online Shop"</p>
+                <p class="shop_selector_title">"Farm Food Online Shop"</p>
                 <img src="/button_farm_to_table.png" alt="Food Shop"/>
             </a>
         </div>
         <div id="shop_selector1" class="shop_selector_container">
             <a href="/shop/pet">
-                <p class="shop_selector_title">"Online Shop"</p>
+                <p class="shop_selector_title">"Pet Food Online Shop"</p>
                 <img src="/button_pet_food_shop.png" alt="Pet Shop"/>
             </a>
         </div>
@@ -282,6 +300,24 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
 }
 
 #[component]
+pub fn SuccessCheckout() -> impl IntoView {
+    view! {
+        <div>
+            "Checkout Succeeded..."
+        </div>
+    }
+}
+
+#[component]
+pub fn CancelCheckout() -> impl IntoView {
+    view! {
+        <div>
+            "Checkout Cancelled..."
+        </div>
+    }
+}
+
+#[component]
 pub fn ShoppingCart() -> impl IntoView {
     let shopping_cart = expect_context::<ReadSignal<ShoppingCart>>();
     provide_context(shopping_cart);
@@ -321,12 +357,26 @@ pub fn ShoppingCart() -> impl IntoView {
                             .collect::<Vec<_>>()
                     }
                 </ul>
+                <div class="shopping-cart-ceckout-section">
+                    <button on:click=move |_| {
+                            spawn_local(async move {
+                                let mut cart: ShoppingCart = shopping_cart.get();
+
+                                new_checkout_session(cart.0).await;
+
+                            });
+                        }>
+                        "Checkout"
+                    </button>
+                </div>
             }
         } else {
             view! {
                 <ul>
-                    "Your Shopping Cart is Empty"
                 </ul>
+                <div>
+                    "Your Shopping Cart is Empty"
+                </div>
             }
         }
     }}}
@@ -363,10 +413,12 @@ pub fn NavBar() -> impl IntoView {
 
     view! {
         <nav class="navbar">
-            <div class="logo-container">
-                <a href="/">
-                    <img src="/main_logo.svg" alt="Farmtasker Logo" loading="lazy"/>
-                </a>
+            <div class="banner-bg">
+                <div class="logo-container">
+                    <a href="/">
+                        <img src="/main_logo.svg" alt="Farmtasker Logo" loading="lazy"/>
+                    </a>
+                </div>
             </div>
             <ul class="nav_buttons">
                 <li>

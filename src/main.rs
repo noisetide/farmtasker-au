@@ -67,7 +67,6 @@ async fn main() {
 
     // build our application with a route
     let app = Router::new()
-        // .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
         .leptos_routes_with_context(
             &leptos_options,
             routes,
@@ -79,7 +78,8 @@ async fn main() {
         )
         .fallback(file_and_error_handler)
         .with_state(leptos_options)
-        .layer(Extension(appstate.clone()));
+        .layer(Extension(appstate.clone()))
+        .route("/api/*fn_name", post(leptos_axum::handle_server_fns));
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     tracing::info!("listening on http://{}\n", &addr);
