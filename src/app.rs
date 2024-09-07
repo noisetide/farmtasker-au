@@ -62,7 +62,7 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CurrentPage::HomePage);
                     view! {
-                        <Pager page=HomePage/>
+                        <Pager page=HomePage currentpage=CurrentPage::HomePage/>
                     }
                 }
             }/>
@@ -71,7 +71,7 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CurrentPage::PetShop);
                     view! {
-                        <Pager page=PetShop/>
+                        <Pager page=PetShop currentpage=CurrentPage::PetShop/>
                     }
                 }
             }/>
@@ -80,7 +80,7 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CurrentPage::FoodShop);
                     view! {
-                        <Pager page=FoodShop/>
+                        <Pager page=FoodShop currentpage=CurrentPage::FoodShop/>
                     }
                 }
             }/>
@@ -89,7 +89,7 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CurrentPage::About);
                     view! {
-                        <Pager page=About/>
+                        <Pager page=About currentpage=CurrentPage::About/>
                     }
                 }
             }/>
@@ -98,7 +98,7 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CurrentPage::PrivacyPolicy);
                     view! {
-                        <Pager page=PrivacyPolicy/>
+                        <Pager page=PrivacyPolicy currentpage=CurrentPage::PrivacyPolicy/>
                     }
                 }
             }/>
@@ -107,7 +107,7 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CurrentPage::TermsOfService);
                     view! {
-                        <Pager page=TermsOfService/>
+                        <Pager page=TermsOfService currentpage=CurrentPage::TermsOfService/>
                     }
                 }
             }/>
@@ -116,25 +116,25 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CurrentPage::ShoppingCart);
                     view! {
-                        <Pager page=|| view!{<ShoppingCart/>}/>
+                        <Pager page=ShoppingCart currentpage=CurrentPage::ShoppingCart/>
                     }
                 }
             }/>
             <Route path="/success" view={
                 move || {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::HomePage);
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::None);
                     view! {
-                        <Pager page=SuccessCheckout/>
+                        <Pager page=SuccessCheckout currentpage=CurrentPage::None/>
                     }
                 }
             }/>
             <Route path="/cancel" view={
                 move || {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::HomePage);
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::None);
                     view! {
-                        <Pager page=CancelCheckout/>
+                        <Pager page=CancelCheckout currentpage=CurrentPage::None/>
                     }
                 }
             }/>
@@ -155,7 +155,7 @@ pub enum CurrentPage {
 }
 
 #[component]
-pub fn Pager<F, IV>(page: F) -> impl IntoView
+pub fn Pager<F, IV>(page: F, currentpage: CurrentPage) -> impl IntoView
 where
     F: Fn() -> IV,
     IV: IntoView,
@@ -164,7 +164,16 @@ where
         <div class="page">
             <div class="pager-bg">
                 <div class="pager">
-                    <div class="pager-content">{page()}</div>
+                    <div class="pager-content" class=match currentpage {
+                        CurrentPage::None => {"pager-content-none"},
+                        CurrentPage::HomePage => {"pager-content-home-page"},
+                        CurrentPage::PetShop => {"pager-content-pet-shop"},
+                        CurrentPage::FoodShop => {"pager-content-foot-shop"},
+                        CurrentPage::About => {"pager-content-about"},
+                        CurrentPage::PrivacyPolicy => {"pager-content-privacy-policy"},
+                        CurrentPage::TermsOfService => {"pager-content-terms-of-service"},
+                        CurrentPage::ShoppingCart => {"pager-content-shopping-cart"},
+                    }>{page()}</div>
                 </div>
             </div>
         </div>
@@ -208,7 +217,7 @@ pub fn FoodShop() -> impl IntoView {
 #[component]
 pub fn About() -> impl IntoView {
     view! {
-        <div>"About!!!"</div>
+        <img class="about-us-image" src="/photos/DSCF6711.jpg" alt="About Us"/>
     }
 }
 

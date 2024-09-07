@@ -53,7 +53,7 @@ pub fn ErrorTemplate(
     }
 
     view! {
-        <crate::app::Pager page=|| { let errors = errors.clone();
+        <crate::app::Pager currentpage=crate::app::CurrentPage::None page=|| { let errors = errors.clone();
             view! {
             <div class="error_pager">
                 <h1>{if errors.clone().len() > 1 {"Errors"} else {"Error"}}</h1>

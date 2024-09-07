@@ -31,7 +31,7 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 
-    let key = std::env::var("REMOVED").expect("couldn't get env var REMOVED");
+    let key = std::env::var("STRIPE_KEY").expect("couldn't get env var STRIPE_KEY");
     let stripe_client = stripe::Client::new(key.clone());
 
     let appstate = farmtasker_au::AppState {

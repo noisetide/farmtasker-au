@@ -261,9 +261,9 @@ a {
       background-color: transparentize(darken($background-color-light, 10%), 0.15);
 
       .pager-content {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(100px, 5fr));
-        grid-auto-columns: auto;
+        /* display: grid; */
+        /* grid-template-columns: repeat(auto-fit, minmax(100px, 5fr)); */
+        /* grid-auto-columns: auto; */
 
         * {
           /* min-height: 4rem; */
@@ -275,6 +275,10 @@ a {
       }
     }
   }
+}
+
+.about-us-image {
+  max-height: 40vh;
 }
 
 .shop_selector_container {
@@ -320,12 +324,13 @@ a {
       /* margin: 0; */
       /* transform: translateY(1rem); */
       text-decoration: none;
-      /* font-size: auto + 2rem; */
+      font-size: auto + 2rem;
       /* font-weight: bold; */
       color: white;
     }
   }
 }
+
 
 /* Responsive Design */
 @include respond-to(mobile) {

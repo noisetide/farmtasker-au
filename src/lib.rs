@@ -121,7 +121,7 @@ pub async fn new_checkout_session(
     let shopping_cart = cart;
 
     use stripe::*;
-    let client = Client::new(match std::env::var("REMOVED") {
+    let client = Client::new(match std::env::var("STRIPE_KEY") {
         Ok(ok) => ok,
         Err(err) => {
             log::error!("{:#?}", err);
@@ -180,7 +180,7 @@ use stripe_retypes::DbProduct;
 )]
 pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
     use stripe::*;
-    let client = Client::new(match std::env::var("REMOVED") {
+    let client = Client::new(match std::env::var("STRIPE_KEY") {
         Ok(ok) => ok,
         Err(err) => {
             log::error!("{:#?}", err);
@@ -456,7 +456,7 @@ pub mod sync {
 //     let key = appstate.id.clone();
 //     trace!("Here {:#?}", key);
 
-//     let client = Client::new(std::env::var("REMOVED").unwrap().as_str());
+//     let client = Client::new(std::env::var("STRIPE_KEY").unwrap().as_str());
 
 //     let customer_list_params = ListCustomers::new();
 //     let list_of_customers_from_stripe_api =
