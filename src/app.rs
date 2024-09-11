@@ -184,18 +184,18 @@ where
 #[component]
 pub fn HomePage() -> impl IntoView {
     view! {
-        <div id="shop_selector2" class="shop_selector_container">
-            <a href="/shop/food">
-                <p class="shop_selector_title">"Farm Food Online Shop"</p>
-                <img src="/button_farm_to_table.png" alt="Food Shop"/>
-            </a>
-        </div>
-        <div id="shop_selector1" class="shop_selector_container">
-            <a href="/shop/pet">
-                <p class="shop_selector_title">"Pet Food Online Shop"</p>
-                <img src="/button_pet_food_shop.png" alt="Pet Shop"/>
-            </a>
-        </div>
+        <a href="/shop/food" class="shop-selector-container" id="button_farm_to_table_near_me">
+            <p class="shop_selector_title">"Online Shop"</p>
+        </a>
+        <a href="/shop/pet" class="shop-selector-container" id="button_farmtasker_pet_food_shop">
+            <p class="shop_selector_title">"Online Shop"</p>
+        </a>
+        <a href="/shop/pet" class="shop-selector-container" id="button_farm_task_video_instruction_service">
+            <p class="shop_selector_title">"Video Instructions"</p>
+        </a>
+        <a href="/shop/pet" class="shop-selector-container" id="button_culinary_adventure">
+            <p class="shop_selector_title">"Video Blog"</p>
+        </a>
     }
 }
 
@@ -217,7 +217,15 @@ pub fn FoodShop() -> impl IntoView {
 #[component]
 pub fn About() -> impl IntoView {
     view! {
-        <img class="about-us-image" src="/photos/DSCF6711.jpg" alt="About Us"/>
+        <div class="about-us-image-container">
+            <img class="about-us-image" src="/photos/DSCF6711.jpg" alt="About Us"/>
+            <div class="about-us-image-block-1">
+                "About"
+            </div>
+            <div class="about-us-image-block-2">
+                "Us"
+            </div>
+        </div>
     }
 }
 
@@ -384,7 +392,15 @@ pub fn ShoppingCart() -> impl IntoView {
                 <ul>
                 </ul>
                 <div>
-                    "Your Shopping Cart is Empty"
+                    <h3>
+                        "Your Shopping Cart is Empty."
+                    </h3>
+                    <p>
+                        "You can browse items in:"
+                    </p>
+                    <a href="/shop/food">"Food Shop "</a>
+                    "or "
+                    <a href="/shop/pet">"Pet Food Shop"</a>
                 </div>
             }
         }
@@ -420,8 +436,36 @@ pub fn FooterBar() -> impl IntoView {
 pub fn NavBar() -> impl IntoView {
     let selected = expect_context::<ReadSignal<CurrentPage>>();
 
+    let (is_navbar_hidden, set_is_navbar_hidden) = create_signal(true);
+
+    let shopping_cart = expect_context::<ReadSignal<ShoppingCart>>();
+    provide_context(shopping_cart);
+
     view! {
         <nav class="navbar">
+            <div class="navbar-hide-block">
+                <button class="navbar-hide-button"
+                    on:click=move |_| {
+                        set_is_navbar_hidden.update(|n| *n = !*n);
+                    }
+                >
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </button>
+            </div>
+            <div class="shopping-cart-hide-block">
+                <a href="/shop/cart" class="navbar-hide-button"
+                    class:current=move || {
+                        matches!(selected.get(), CurrentPage::ShoppingCart)
+                    }
+                >
+                    "🛒 "{move || match shopping_cart.get().0.values().map(|&v| v as usize).sum() {
+                        0 => "".to_string(),
+                        x => x.to_string(),
+                    }}
+                </a>
+            </div>
             <div class="banner-bg">
                 <div class="logo-container">
                     <a href="/">
@@ -429,7 +473,7 @@ pub fn NavBar() -> impl IntoView {
                     </a>
                 </div>
             </div>
-            <ul class="nav_buttons">
+            <ul class="nav_buttons" class:is-navbar-hidden=move || is_navbar_hidden()>
                 <li>
                     <a
                     class:current=move || {
@@ -451,13 +495,13 @@ pub fn NavBar() -> impl IntoView {
                     }
                         href="/about" id="button_middle">"About Us"</a>
                 </li>
-                <li>
-                    <a
-                    class:current=move || {
-                        matches!(selected.get(), CurrentPage::ShoppingCart)
-                    }
-                        href="/shop/cart" id="button_middle">"🛒 ""Cart"</a>
-                </li>
+                // <li>
+                //     <a
+                //     class:current=move || {
+                //         matches!(selected.get(), CurrentPage::ShoppingCart)
+                //     }
+                //         href="/shop/cart" id="button_middle">"🛒 ""Cart"</a>
+                // </li>
             </ul>
         </nav>
     }

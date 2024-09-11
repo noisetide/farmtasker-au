@@ -1,5 +1,6 @@
 /* Variables for colors */
 $main-color: darkolivegreen;
+$accent-color: lighten(darkred, 8.5%);
 $background-color-light: #F6F6E5;
 $background-color-dark: bisque;
 
@@ -12,7 +13,7 @@ $background-color-dark: bisque;
   }
 
   @else if $media ==tablet {
-    @media (min-width: 651px) and (max-width: 1024px) {
+    @media (min-width: 750px) and (max-width: 1024px) {
       @content;
     }
   }
@@ -28,7 +29,7 @@ $background-color-dark: bisque;
   justify-content: center;
   display: flex;
   flex-direction: column;
-  min-height: 50vh;
+  min-height: 40vh;
 }
 
 /* Global styles */
@@ -44,6 +45,7 @@ a {
   text-decoration: underline;
 }
 
+
 /* Navbar styles */
 .navbar {
   background-color: $main-color;
@@ -55,7 +57,7 @@ a {
   /* position: relative; */
 
   .banner-bg {
-    min-height: 18.5rem;
+    min-height: 18vh;
     /* min-width: 90vw; */
     /* margin: 0; */
     /* padding: 0; */
@@ -77,37 +79,57 @@ a {
     }
 
     @include respond-to(mobile) {
+      min-height: 10vh;
       background-position: left;
       background-size: cover;
     }
   }
 
   .logo-container {
-    justify-content: center;
+    /* justify-content: center; */
     display: flex;
+    position: top;
     background-color: darken($main-color, 10%);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
 
     img {
-      max-height: 25vh;
+      max-height: 15vh;
+      min-height: 10vh;
       height: auto;
       width: auto;
+
+      @include respond-to(mobile) {
+        max-height: 14vh;
+      }
     }
 
     @include respond-to(tablet) {
       position: top;
       margin: 0;
       padding: 0;
-      padding-right: 0;
     }
 
     @include respond-to(mobile) {
-      position: top;
       margin: 0;
       padding: 0;
-      padding-right: 0;
     }
+  }
+
+  ul.is-navbar-hidden {
+    li {
+      display: none;
+
+      @include respond-to(desktop) {
+        display: block;
+      }
+
+      @include respond-to(tablet) {
+        display: block;
+      }
+    }
+
+
   }
 
   ul.nav_buttons {
@@ -136,8 +158,6 @@ a {
         transition: 200ms;
         padding: 1rem;
         height: 6vh;
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         align-items: center;
         justify-content: center;
         text-align: center;
@@ -150,12 +170,13 @@ a {
           transition: 200ms;
           font-weight: bold;
           text-decoration: underline !important;
-          background-color: lighten($main-color, 65%);
-          color: black;
+          box-shadow: inset 0 -2px 25px rgba(255, 255, 255, 0.15);
+          /* background-color: lighten($main-color, 65%); */
+          /* color: black; */
 
           &:hover {
             transition: 200ms;
-            background-color: lighten($main-color, 50%);
+            /* background-color: lighten($main-color, 50%); */
           }
         }
 
@@ -185,9 +206,101 @@ a {
     }
   }
 
+  .navbar-hide-block {
+    display: none;
+
+    button {
+      display: none;
+    }
+  }
+
+  .shopping-cart-hide-block {
+    display: block;
+    position: absolute;
+    top: 2.5rem;
+    right: 2.5rem;
+    max-height: 4rem;
+    background-color: darken($main-color, 12.5%);
+    box-shadow: 0 4px 8px rgba(100, 100, 100, 0.1);
+    border-radius: 7px;
+
+
+    .current {
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+
+
+    &:hover {
+      background-color: darken($main-color, 7%);
+    }
+
+
+    a {
+      border-radius: 7px;
+      padding: 1.35rem 1.5rem;
+      display: block;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      text-decoration: none;
+      flex-direction: column;
+      justify-content: space-between;
+      color: white;
+      /* Adjust the height for spacing between bars */
+    }
+  }
+
+
   @include respond-to(mobile) {
     /* flex-direction: row; */
-    margin: 0
+    margin: 0;
+
+    .navbar-hide-block {
+      display: block;
+      position: absolute;
+      top: 2.5rem;
+      left: 2.5rem;
+      max-height: 2rem;
+      background-color: darken($main-color, 12.5%);
+      box-shadow: 0 4px 8px rgba(100, 100, 100, 0.1);
+
+      &:hover {
+        background-color: darken($main-color, 7%);
+      }
+
+      border-radius: 7px;
+      padding: 1.0rem;
+
+      button {
+        display: block;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 34px;
+        /* Adjust the height for spacing between bars */
+      }
+
+      .bar {
+        width: 6vw;
+        height: 0.4vh;
+        background-color: white;
+        border-radius: 2px;
+      }
+    }
+
+
+
+    .logo-container {
+      width: 100%;
+
+      a {
+        width: 100%;
+      }
+    }
   }
 }
 
@@ -225,9 +338,6 @@ a {
   padding: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
 
   .pager-bg {
     /* min-height: 20rem; */
@@ -238,118 +348,110 @@ a {
     width: 100%;
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: top center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+    background-position: top left;
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* justify-content: center; */
+    /* align-items: center; */
+    /* text-align: center; */
 
 
     .pager {
-      padding-top: 1rem;
+      padding: 0;
       padding-bottom: 1rem;
+      padding-top: 1rem;
+      margin: 1rem;
       margin-top: 1rem;
       margin-bottom: 1rem;
       border-radius: 5px;
-      display: grid;
-      align-content: center;
-      justify-content: center;
-      text-align: center;
-      /* min-height: 960px; */
-      width: 90%;
+      min-height: 40vh;
       background-color: transparentize(darken($background-color-light, 10%), 0.15);
 
-      .pager-content {
-        /* display: grid; */
-        /* grid-template-columns: repeat(auto-fit, minmax(100px, 5fr)); */
-        /* grid-auto-columns: auto; */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
 
-        * {
-          /* min-height: 4rem; */
-          /* display: flex; */
-          /* justify-content: center; */
-          /* align-items: center; */
-          /* text-align: center; */
+      .pager-content-about {
+        .about-us-image {
+          max-height: 40vh;
+        }
+      }
+
+      .pager-content-home-page {
+        @include respond-to(mobile) {
+          display: flex;
+          flex-direction: column;
+        }
+
+        display:grid;
+        grid-template-columns: repeat(2, 1fr);
+        background-color: lighten($main-color, 10%);
+        justify-content: center;
+        border-radius: 20px;
+
+
+
+        a.shop-selector-container {
+          display: flex;
+          justify-content: center;
+
+          min-height: 40vh;
+          min-width: 40vw;
+
+          &:hover {
+            background-color: lighten($main-color, 20%);
+            border-radius: 20px;
+          }
+
+          .shop_selector_title {
+            margin: 0;
+            padding: 0;
+            width: 90%;
+            color: white;
+            border-radius: 100px;
+
+            padding: 0;
+            margin: 0;
+            transform: translateY(2rem);
+            font-size: 150%;
+            text-decoration: underline;
+
+            font-weight: bold;
+
+            @include respond-to(mobile) {
+              font-size: 1rem;
+            }
+          }
+
+          background-position: center;
+          background-size: contain;
+          background-repeat: no-repeat;
+          text-align: center;
+
+          &#button_farm_to_table_near_me {
+            background-image: url("/button_farm_to_table_near_me.png");
+          }
+
+          &#button_farmtasker_pet_food_shop {
+            background-image: url("/button_farmtasker_pet_food_shop.png");
+          }
+
+          &#button_farm_task_video_instruction_service {
+            background-image: url("/button_farm_task_video_instruction_service.png");
+          }
+
+          &#button_culinary_adventure {
+            background-image: url("/button_culinary_adventure.png");
+          }
         }
       }
     }
   }
 }
 
-.about-us-image {
-  max-height: 40vh;
-}
-
-.shop_selector_container {
-  display: flex;
-  justify-content: center;
-
-  a {
-    margin: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: lighten($main-color, 10%);
-    border-radius: 5vw;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    overflow: visible;
-
-    img {
-      max-width: 100%;
-      margin: 0;
-      padding: 0;
-      height: auto;
-      /* transform: translateY(4rem); */
-    }
-
-    &:hover {
-      background-color: lighten($main-color, 20%);
-    }
-
-    @include respond-to(mobile) {
-      /* max-height: 25vh; */
-      /* min-height: 8vh; */
-      margin: 0;
-      margin-left: 0.5rem;
-      margin-right: 0.5rem;
-    }
-
-    .shop_selector_title {
-      background: none;
-      background-color: transparent;
-
-      /* padding: 0; */
-      /* margin: 0; */
-      /* transform: translateY(1rem); */
-      text-decoration: none;
-      font-size: auto + 2rem;
-      /* font-weight: bold; */
-      color: white;
-    }
-  }
-}
 
 
-/* Responsive Design */
-@include respond-to(mobile) {
-  .pager-content {
-    grid-template-columns: 1fr;
-  }
-}
-
-#shop_selector1 {
-  &:hover {
-    color: white;
-  }
-}
-
-#shop_selector2 {
-  &:hover {
-    color: white;
-  }
-}
 
 button#test {
   background-color: $main-color;

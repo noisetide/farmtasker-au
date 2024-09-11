@@ -50,7 +50,7 @@ pub async fn stater() -> Result<StripeData, leptos::ServerFnError> {
             Ok(ok)
         }
         None => {
-            error!("No StripeData!");
+            // error!("No StripeData!");
             return Err(leptos::ServerFnError::ServerError(
                 "StripeData not found".into(),
             ));
