@@ -380,8 +380,11 @@ a {
 
       .pager-content-home-page {
         @include respond-to(mobile) {
-          display: flex;
-          flex-direction: column;
+          grid-template-columns: repeat(1, 1fr);
+
+          a.shop-selector-container {
+            width: 80vw;
+          }
         }
 
         display:grid;
@@ -395,8 +398,9 @@ a {
         a.shop-selector-container {
           display: flex;
           justify-content: center;
+          padding-top: 1rem;
 
-          min-height: 40vh;
+          min-height: 30vh;
           min-width: 40vw;
 
           &:hover {
@@ -411,9 +415,10 @@ a {
             color: white;
             border-radius: 100px;
 
+            /* transform: translateY(-1rem); */
+
             padding: 0;
             margin: 0;
-            transform: translateY(2rem);
             font-size: 150%;
             text-decoration: underline;
 
@@ -437,12 +442,12 @@ a {
             background-image: url("/button_farmtasker_pet_food_shop.png");
           }
 
-          &#button_farm_task_video_instruction_service {
-            background-image: url("/button_farm_task_video_instruction_service.png");
-          }
-
           &#button_culinary_adventure {
             background-image: url("/button_culinary_adventure.png");
+          }
+
+          &#button_farm_task_video_instructions_service {
+            background-image: url("/button_farm_task_video_instructions_service.png");
           }
         }
       }

@@ -120,6 +120,24 @@ pub fn Routerer() -> impl IntoView {
                     }
                 }
             }/>
+            <Route path="/video/instructions" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::VideoInstructionsService);
+                    view! {
+                        <Pager page=VideoInstructionsService currentpage=CurrentPage::VideoInstructionsService/>
+                    }
+                }
+            }/>
+            <Route path="/video/blog/culinary-adventure" view={
+                move || {
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::VideoBlogCulinaryAdventure);
+                    view! {
+                        <Pager page=VideoBlogCulinaryAdventure currentpage=CurrentPage::VideoBlogCulinaryAdventure/>
+                    }
+                }
+            }/>
             <Route path="/success" view={
                 move || {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
@@ -152,6 +170,8 @@ pub enum CurrentPage {
     PrivacyPolicy,
     TermsOfService,
     ShoppingCart,
+    VideoInstructionsService,
+    VideoBlogCulinaryAdventure,
 }
 
 #[component]
@@ -173,6 +193,8 @@ where
                         CurrentPage::PrivacyPolicy => {"pager-content-privacy-policy"},
                         CurrentPage::TermsOfService => {"pager-content-terms-of-service"},
                         CurrentPage::ShoppingCart => {"pager-content-shopping-cart"},
+                        CurrentPage::VideoInstructionsService => {"pager-content-video-instructions-service"},
+                        CurrentPage::VideoBlogCulinaryAdventure => {"pager-content-video-blog-culinary-adventure"}
                     }>{page()}</div>
                 </div>
             </div>
@@ -190,10 +212,10 @@ pub fn HomePage() -> impl IntoView {
         <a href="/shop/pet" class="shop-selector-container" id="button_farmtasker_pet_food_shop">
             <p class="shop_selector_title">"Online Shop"</p>
         </a>
-        <a href="/shop/pet" class="shop-selector-container" id="button_farm_task_video_instruction_service">
+        <a href="/video/instructions" class="shop-selector-container" id="button_farm_task_video_instructions_service">
             <p class="shop_selector_title">"Video Instructions"</p>
         </a>
-        <a href="/shop/pet" class="shop-selector-container" id="button_culinary_adventure">
+        <a href="/video/blog/culinary-adventure" class="shop-selector-container" id="button_culinary_adventure">
             <p class="shop_selector_title">"Video Blog"</p>
         </a>
     }
@@ -214,6 +236,21 @@ pub fn FoodShop() -> impl IntoView {
         <ProductItems items_category="food".to_string()/>
     }
 }
+
+#[component]
+pub fn VideoInstructionsService() -> impl IntoView {
+    view! {
+        <div>"Video Instructions Service!!!"</div>
+    }
+}
+
+#[component]
+pub fn VideoBlogCulinaryAdventure() -> impl IntoView {
+    view! {
+        <div>"Video Blog Culinary Adventure!!!"</div>
+    }
+}
+
 #[component]
 pub fn About() -> impl IntoView {
     view! {
@@ -487,6 +524,20 @@ pub fn NavBar() -> impl IntoView {
                         matches!(selected.get(), CurrentPage::PetShop)
                     }
                         href="/shop/pet" id="button_middle">"Pet Shop"</a>
+                </li>
+                <li>
+                    <a
+                    class:current=move || {
+                        matches!(selected.get(), CurrentPage::VideoInstructionsService)
+                    }
+                        href="/video/instructions" id="button_middle">"Video Instructions"</a>
+                </li>
+                <li>
+                    <a
+                    class:current=move || {
+                        matches!(selected.get(), CurrentPage::VideoBlogCulinaryAdventure)
+                    }
+                        href="/video/blog/culinary-adventure" id="button_middle">"Video Blogs"</a> // TODO GLOBAL BLOGS PAGE
                 </li>
                 <li>
                     <a
