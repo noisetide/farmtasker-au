@@ -19,35 +19,42 @@
   } @ inputs: let
     forEachSystem = nixpkgs.lib.genAttrs (import systems);
   in {
+    packages = # TODO not yet implemented. Use Dockerfile instead
+      forEachSystem
+      (system: let
+        pkgs = nixpkgs.legacyPackages.${system};
+      in {
+        default = pkgs.callPackage ./. {};
+      });
     devShells =
       forEachSystem
       (system: let
         pkgs = nixpkgs.legacyPackages.${system};
         buildInputs = with pkgs; [
-            # Cli
-            bacon
-            cargo-watch
-            cargo-shuttle
-            cargo-leptos
-            cargo-generate
-            dart-sass
-            leptosfmt
-            nodePackages.svelte-language-server
-            leptosfmt
-            trunk
-            binaryen
+          # Cli
+          bacon
+          cargo-watch
+          cargo-shuttle
+          cargo-leptos
+          cargo-generate
+          dart-sass
+          leptosfmt
+          nodePackages.svelte-language-server
+          leptosfmt
+          trunk
+          binaryen
 
-            sqlx-cli
-          
-            # Lib
-            openssl
-            libclang
-            hidapi
-            pkg-config
-            alsa-lib
-            udev
-            clang
-            lld
+          sqlx-cli
+
+          # Lib
+          openssl
+          libclang
+          hidapi
+          pkg-config
+          alsa-lib
+          udev
+          clang
+          lld
         ];
       in {
         default = devenv.lib.mkShell {
@@ -69,7 +76,7 @@
               };
 
               services.nginx.enable = true;
-              
+
               languages.typescript.enable = true;
 
               languages.rust = {
@@ -78,7 +85,7 @@
                 toolchain = {
                   rustc = pkgs.rustc-wasm32;
                 };
-                targets = [ "wasm32-unknown-unknown" ];
+                targets = ["wasm32-unknown-unknown"];
               };
 
               env = {
