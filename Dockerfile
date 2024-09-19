@@ -1,4 +1,3 @@
-# Dockerfile for building leptos app: https://book.leptos.dev/deployment/ssr.html#creating-a-containerfile
 # Get started with a build env with Rust nightly
 FROM rustlang/rust:nightly-bullseye as builder
 
@@ -17,39 +16,33 @@ RUN cargo binstall cargo-leptos -y
 # Add the WASM target
 RUN rustup target add wasm32-unknown-unknown
 
-
-# Make an /work dir, which everything will be compiled in
-RUN mkdir -p /work
-
 # Make an /app dir, which everything will eventually live in
 RUN mkdir -p /app
-
-WORKDIR /work
+WORKDIR /app
 COPY . .
-RUN ls -la /work
 
 # Build the app
 RUN cargo leptos build --release -vv
-RUN ls -la /work
+RUN sed -i 's|site-root = "target/site"|site-root = "site"|' Cargo.toml
 
 FROM debian:bookworm-slim as runtime
-WORKDIR /work
+WORKDIR /app
 RUN apt-get update -y \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
-  && apt-get install -y --no-install-recommends wget curl  \
+  && apt-get install -y --no-install-recommends wget curl sed \
   && apt-get autoremove -y \
   && apt-get clean -y \
   && rm -rf /var/lib/apt/lists/*
 
 # -- NB: update binary name from "leptos_start" to match your app name in Cargo.toml --
 # Copy the server binary to the /app directory
-COPY --from=builder /work/target/release/farmtasker-au /app/
+COPY --from=builder /app/target/release/farmtasker-au /app/
 
 # /target/site contains our JS/WASM/CSS, etc.
-COPY --from=builder /work/target/site /app/site
+COPY --from=builder /app/target/site /app/site
 
 # Copy Cargo.toml if it’s needed at runtime
-COPY --from=builder /work/Cargo.toml /app/
+COPY --from=builder /app/Cargo.toml /app/
 
 # Set any required env variables and
 ENV RUST_LOG="info"
