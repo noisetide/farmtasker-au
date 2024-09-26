@@ -356,9 +356,12 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
 #[component]
 pub fn SuccessCheckout() -> impl IntoView {
     view! {
-        <div>
-            "Checkout Succeeded..."
-        </div>
+        <p>
+            "Checkout Completed!"
+        </p>
+        <p>
+            "You will find details of your order in your email soon."
+        </p>
     }
 }
 

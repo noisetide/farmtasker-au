@@ -31,7 +31,8 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 
-    let key = std::env::var("STRIPE_KEY").expect("couldn't get env var STRIPE_KEY");
+    let key = std::env::var("STRIPE_KEY")
+        .expect("Missing STRIPE_KEY variable in env. Please do 'export STRIPE_KEY=sk_*******'.\nYou can verify if env variable 'STRIPE_KEY' is present with 'env | grep STRIPE_KEY'");
     let stripe_client = stripe::Client::new(key.clone());
 
     let appstate = farmtasker_au::AppState {
@@ -63,7 +64,16 @@ async fn main() {
             i.default_price.clone().unwrap().unit_amount.unwrap() as f64 / 100.0
         );
     }
+    let customers = &appstate
+        .stripe_data
+        .clone()
+        .expect(
+            "No StripeData in AppState. Check if the StripeData could be fetched from internet.",
+        )
+        .customers;
     tracing::info!("Total Products: {:}", products.len());
+
+    tracing::info!("Total Customers: {:}", customers.len());
 
     // build our application with a route
     let app = Router::new()
@@ -77,12 +87,12 @@ async fn main() {
             App,
         )
         .fallback(file_and_error_handler)
-        .with_state(leptos_options)
+        .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
         .layer(Extension(appstate.clone()))
-        .route("/api/*fn_name", post(leptos_axum::handle_server_fns));
+        .with_state(leptos_options);
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
-    tracing::info!("listening on http://{}\n", &addr);
+    tracing::info!("Server started. listening on http://{}\n", &addr);
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();

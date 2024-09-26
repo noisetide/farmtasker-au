@@ -58,6 +58,7 @@ pub async fn stater() -> Result<StripeData, leptos::ServerFnError> {
     }
 }
 
+use app::PagerPropsBuilder_Error_Missing_required_field_page;
 use leptos::{create_effect, Serializable, ServerFnError};
 use leptos_router::FromFormData;
 use serde::{Deserialize, Serialize};
@@ -133,8 +134,8 @@ pub async fn new_checkout_session(
 
     let checkout_session = {
         let mut params = stripe::CreateCheckoutSession::new();
-        params.cancel_url = Some("http://localhost:4444/cancel"); // TODO!
-        params.success_url = Some("http://localhost:4444/success"); // TODO!
+        params.cancel_url = Some("http://farmtasker.au/cancel"); // TODO!
+        params.success_url = Some("http://farmtasker.au/success"); // TODO!
         params.customer = None;
         // params.customer = Some(customer.id);
         params.mode = Some(stripe::CheckoutSessionMode::Payment);
@@ -162,13 +163,18 @@ pub async fn new_checkout_session(
 
         stripe::CheckoutSession::create(&client, params).await?
     };
-    // info!("Created checkout session: {:#?}, for {:#?} $AUD", &checkout_session.id, &checkout_session.amount_total as f64 / 100, );
+    info!(
+        "Created checkout session: {:#?}, for {:#?} $AUD. (Created: {:#?} / Expires at: {:#?} )",
+        &checkout_session.id,
+        checkout_session.amount_total.unwrap().clone() as f64 / 100.0,
+        &checkout_session.created,
+        &checkout_session.expires_at
+    );
 
     // let checkout_session = "test";
 
     leptos_axum::redirect(&checkout_session.url.clone().unwrap());
 
-    // unimplemented!();
     Ok(serde_json::Value::from(checkout_session.ser().unwrap()))
 }
 
@@ -439,82 +445,73 @@ pub mod sync {
     }
 }
 
-// use leptos::*;
-// #[server (
-//     name = StripeSync,
-//     endpoint = "sync", // KINDA WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
-// )]
-// pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
-//     use log::*;
-//     use stripe::*;
+use leptos::*;
+#[server (
+    name = StripeSync,
+    endpoint = "sync", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
+)]
+pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
+    use log::*;
+    use stripe::*;
 
-//     let state = leptos::expect_context::<crate::AppState>();
-//     let axum::extract::State(mut appstate): axum::extract::State<crate::AppState> =
-//         leptos_axum::extract_with_state(&state).await?;
+    let state = match leptos::use_context::<Option<crate::AppState>>() {
+        Some(ok) => {
+            // leptos::logging::log!("GOT context AppState");
+            ok
+        }
+        None => {
+            // leptos::logging::log!("No context AppState");
+            None
+        }
+    };
+    let axum::extract::State(mut appstate): axum::extract::State<crate::AppState> =
+        leptos_axum::extract_with_state(match &state {
+            Some(x) => x,
+            None => &AppState {
+                stripe_api_key: None,
+                stripe_data: None,
+            },
+        })
+        .await?;
 
-//     info!("Starting sync of local StripeData with Stripe API...");
-//     let key = appstate.id.clone();
-//     trace!("Here {:#?}", key);
+    info!("Starting sync of local StripeData with Stripe API...");
 
-//     let client = Client::new(std::env::var("STRIPE_KEY").unwrap().as_str());
+    let new_stripedata: Option<StripeData> = match StripeData::new_fetch().await {
+        Ok(ok) => Some(ok),
+        Err(err) => {
+            log::error!("Couldn't fetch new StripeData!!!: {:#?}", err);
+            None
+        }
+    };
 
-//     let customer_list_params = ListCustomers::new();
-//     let list_of_customers_from_stripe_api =
-//         match Customer::list(&client, &customer_list_params).await {
-//             Ok(list) => list,
-//             Err(err) => {
-//                 log::error!("{:#?}", err);
-//                 return Err(ServerFnError::from(err));
-//             }
-//         };
+    appstate.stripe_data = match new_stripedata.clone() {
+        Some(data) => {
+            info!("Synchronized AppState with Stripe API");
+            info!("Total Products: {:#?}", data.products.len());
+            info!("Total Customers: {:#?}", data.customers.len());
+            Some(data)
+        }
+        None => {
+            log::error!("Couldn't update StripeData");
+            return Err(leptos::ServerFnError::ServerError(
+                "Couldn't update StripeData".into(),
+            ));
+        }
+    };
 
-//     match list_of_customers_from_stripe_api.data.len() {
-//         0 => {
-//             log::info!("No Customers");
-//         }
-//         x if x > 0 => {
-//             log::info!("Amount of Customers: {:?}", x);
-//         }
-//         _ => {}
-//     };
-
-//     let mut product_list_params = ListProducts::new();
-//     product_list_params.active = Some(true);
-//     product_list_params.expand = &["data.default_price"];
-
-//     let list_of_products_from_stripe_api = match Product::list(&client, &product_list_params).await
-//     {
-//         Ok(list) => list,
-//         Err(err) => {
-//             log::error!("{:#?}", err);
-//             return Err(ServerFnError::from(err));
-//         }
-//     };
-
-//     match list_of_products_from_stripe_api.data.len() {
-//         0 => {
-//             log::info!("No Products");
-//         }
-//         x if x > 0 => {
-//             log::info!("Amount of Products#: {:?}", x);
-//         }
-//         _ => {}
-//     };
-
-//     let data = StripeData::new(
-//         list_of_products_from_stripe_api.clone(),
-//         list_of_customers_from_stripe_api.clone(),
-//     );
-
-//     info!("Updating local AppState with synced data from Stripe API");
-//     appstate.stripe_data = data.clone();
-
-//     let value = serde_json::json!({
-//         "code": http::StatusCode::NO_CONTENT.to_string(),
-//         "count": {
-//             "products": data.clone().products.len(),
-//             "customers": data.clone().customers.len()
-//         },
-//     });
-//     Ok(value)
-// }
+    Ok(serde_json::json!({
+        "code": match appstate.stripe_data.clone() {
+            Some(_) => http::StatusCode::NO_CONTENT.to_string(),
+            None => http::StatusCode::INTERNAL_SERVER_ERROR.to_string(),        },
+        "count": {
+            "products": match appstate.stripe_data.clone() {
+                Some(data) => data.products.len(),
+                None => 0,
+            },
+            "customers": match appstate.stripe_data.clone() {
+                Some(data) => data.customers.len(),
+                None => 0
+            },
+        },
+    }))
+}
