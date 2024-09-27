@@ -74,30 +74,27 @@ use std::collections::HashMap;
 pub struct ShoppingCart(HashMap<String, u8>);
 
 impl ShoppingCart {
-    pub fn add_single_product(&mut self, product_id: String) -> &mut Self {
+    pub fn add_single_product(&mut self, product_id: &String) {
         // If the product is already in the cart, increase its quantity by 1
-        if let Some(quantity) = self.0.get_mut(&product_id) {
+        if let Some(quantity) = self.0.get_mut(product_id) {
             *quantity += 1;
         } else {
             // If the product is not in the cart, add it with a quantity of 1
-            self.0.insert(product_id, 1);
+            self.0.insert(product_id.clone(), 1);
         }
-        self
     }
-    pub fn remove_single_product(&mut self, product_id: String) -> &mut Self {
+    pub fn remove_single_product(&mut self, product_id: &String) {
         // If the product is in the cart, adjust its quantity
-        if let Some(quantity) = self.0.get_mut(&product_id) {
+        if let Some(quantity) = self.0.get_mut(product_id) {
             if *quantity > 1 {
                 *quantity -= 1; // Decrease quantity by 1
             } else {
-                self.0.remove(&product_id); // If quantity is 1, remove the product
+                self.0.remove(&product_id.clone()); // If quantity is 1, remove the product
             }
         }
-        self
     }
-    pub fn delete_product(&mut self, product_id: String) -> &mut Self {
+    pub fn delete_product(&mut self, product_id: String) {
         self.0.remove(&product_id);
-        self
     }
 }
 

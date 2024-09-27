@@ -336,11 +336,14 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
                                     view! {
                                         <li>
                                             <div>
+                                                // {product.images.unwrap().into_iter()
+                                                // .map(|link| view! { <img class="product-image" src={link}/>})
+                                                // .collect::<Vec<_>>()}
+                                                <img class="product-image" src={product.images.unwrap().first()}/>
                                                 {product.name}, {product.default_price.unwrap().unit_amount.unwrap() / 100}"$ AUD"
                                                 <button on:click=move |_| {
-                                                    // TODO make sessionned adding to cart
                                                     set_shopping_cart.update(|s| {
-                                                        s.add_single_product(product.id.clone());
+                                                        s.add_single_product(&product.id.clone());
                                                     });
                                                     // leptos::logging::log!("Added to Cart! {:#?}", product.id);
                                                     // leptos::logging::log!("Shopping Cart: {:#?}", shopping_cart.get());
@@ -384,6 +387,9 @@ pub fn CancelCheckout() -> impl IntoView {
 
 #[component]
 pub fn ShoppingCart() -> impl IntoView {
+    let stripe_data = expect_context::<StripeDataRes>();
+    provide_context(stripe_data);
+
     let shopping_cart = expect_context::<Signal<ShoppingCart>>();
     provide_context(shopping_cart);
     let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
@@ -398,7 +404,8 @@ pub fn ShoppingCart() -> impl IntoView {
                     {
                         shopping_cart.get().0.into_iter()
                             .map(|(product_id, quantity)| {
-                                let product_name = product_id.clone();
+                                let (product_id, _) = create_signal(product_id.clone());
+                                let product_name = stripe_data.get().unwrap().unwrap().products.into_iter().find(|x| x.id == product_id.get()).unwrap().name;
                                 view! {
                                     <li>
                                         <p>
@@ -406,14 +413,18 @@ pub fn ShoppingCart() -> impl IntoView {
                                         </p>
                                         <div>
                                             <button on:click=move |_| {
-                                                // TODO make sessionned adding to cart
                                                 set_shopping_cart.update(|s| {
-                                                    s.remove_single_product(product_id.clone());
+                                                    s.add_single_product(&product_id.get());
                                                 });
-                                                // leptos::logging::log!("Removed From Cart! {:#?}", product_id);
-                                                // leptos::logging::log!("Shopping Cart: {:#?}", shopping_cart.get());
                                             }>
-                                            "Remove"
+                                            "+"
+                                            </button>
+                                            <button on:click=move |_| {
+                                                set_shopping_cart.update(|s| {
+                                                    s.remove_single_product(&product_id.get());
+                                                });
+                                            }>
+                                            "-"
                                             </button>
                                         </div>
                                     </li>

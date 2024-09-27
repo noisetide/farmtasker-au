@@ -378,6 +378,30 @@ a {
         }
       }
 
+      ul.product-list-ul {
+
+        transition: 200ms;
+        list-style: none;
+        /* border-radius: 5px; */
+        margin: 0;
+        padding: 0;
+        /* gap: 0.5rem; */
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+
+        img.product-image {
+          max-width: 20vw;
+          border-radius: 20px;
+        }
+
+        button {
+          padding: 1rem;
+        }
+      }
+
+
       .pager-content-home-page {
         @include respond-to(mobile) {
           grid-template-columns: repeat(1, 1fr);
