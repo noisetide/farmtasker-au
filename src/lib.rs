@@ -70,7 +70,7 @@ pub struct AppState {
 }
 
 use std::collections::HashMap;
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct ShoppingCart(HashMap<String, u8>);
 
 impl ShoppingCart {
@@ -137,10 +137,17 @@ pub async fn new_checkout_session(
         params.cancel_url = Some("http://farmtasker.au/cancel"); // TODO!
         params.success_url = Some("http://farmtasker.au/success"); // TODO!
         params.customer = None;
-        // params.customer = Some(customer.id);
+        params.customer_creation = Some(stripe::CheckoutSessionCustomerCreation::IfRequired);
+
         params.mode = Some(stripe::CheckoutSessionMode::Payment);
         let mut vec_of_create_checkout_session_line_items =
             Vec::<CreateCheckoutSessionLineItems>::new();
+
+        // params.shipping_options = Some(stripe::CreateCheckoutSessionShippingOptions)
+
+        params.billing_address_collection =
+            Some(stripe::CheckoutSessionBillingAddressCollection::Required);
+        params.currency = Some(stripe::Currency::AUD);
 
         for (product_id, quantity) in &shopping_cart.0 {
             if let Some(product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
@@ -445,73 +452,73 @@ pub mod sync {
     }
 }
 
-use leptos::*;
-#[server (
-    name = StripeSync,
-    endpoint = "sync", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
-)]
-pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
-    use log::*;
-    use stripe::*;
+// use leptos::*;
+// #[server (
+//     name = StripeSync,
+//     // endpoint = "sync", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
+// )]
+// pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
+//     use log::*;
+//     use stripe::*;
 
-    let state = match leptos::use_context::<Option<crate::AppState>>() {
-        Some(ok) => {
-            // leptos::logging::log!("GOT context AppState");
-            ok
-        }
-        None => {
-            // leptos::logging::log!("No context AppState");
-            None
-        }
-    };
-    let axum::extract::State(mut appstate): axum::extract::State<crate::AppState> =
-        leptos_axum::extract_with_state(match &state {
-            Some(x) => x,
-            None => &AppState {
-                stripe_api_key: None,
-                stripe_data: None,
-            },
-        })
-        .await?;
+//     let state = match leptos::use_context::<Option<crate::AppState>>() {
+//         Some(ok) => {
+//             // leptos::logging::log!("GOT context AppState");
+//             ok
+//         }
+//         None => {
+//             // leptos::logging::log!("No context AppState");
+//             None
+//         }
+//     };
+//     let axum::extract::State(mut appstate): axum::extract::State<crate::AppState> =
+//         leptos_axum::extract_with_state(match &state {
+//             Some(x) => x,
+//             None => &AppState {
+//                 stripe_api_key: None,
+//                 stripe_data: None,
+//             },
+//         })
+//         .await?;
 
-    info!("Starting sync of local StripeData with Stripe API...");
+//     info!("Starting sync of local StripeData with Stripe API...");
 
-    let new_stripedata: Option<StripeData> = match StripeData::new_fetch().await {
-        Ok(ok) => Some(ok),
-        Err(err) => {
-            log::error!("Couldn't fetch new StripeData!!!: {:#?}", err);
-            None
-        }
-    };
+//     let new_stripedata: Option<StripeData> = match StripeData::new_fetch().await {
+//         Ok(ok) => Some(ok),
+//         Err(err) => {
+//             log::error!("Couldn't fetch new StripeData!!!: {:#?}", err);
+//             None
+//         }
+//     };
 
-    appstate.stripe_data = match new_stripedata.clone() {
-        Some(data) => {
-            info!("Synchronized AppState with Stripe API");
-            info!("Total Products: {:#?}", data.products.len());
-            info!("Total Customers: {:#?}", data.customers.len());
-            Some(data)
-        }
-        None => {
-            log::error!("Couldn't update StripeData");
-            return Err(leptos::ServerFnError::ServerError(
-                "Couldn't update StripeData".into(),
-            ));
-        }
-    };
+//     appstate.stripe_data = match new_stripedata.clone() {
+//         Some(data) => {
+//             info!("Synchronized AppState with Stripe API");
+//             info!("Total Products: {:#?}", data.products.len());
+//             info!("Total Customers: {:#?}", data.customers.len());
+//             Some(data)
+//         }
+//         None => {
+//             log::error!("Couldn't update StripeData");
+//             return Err(leptos::ServerFnError::ServerError(
+//                 "Couldn't update StripeData".into(),
+//             ));
+//         }
+//     };
 
-    Ok(serde_json::json!({
-        "code": match appstate.stripe_data.clone() {
-            Some(_) => http::StatusCode::NO_CONTENT.to_string(),
-            None => http::StatusCode::INTERNAL_SERVER_ERROR.to_string(),        },
-        "count": {
-            "products": match appstate.stripe_data.clone() {
-                Some(data) => data.products.len(),
-                None => 0,
-            },
-            "customers": match appstate.stripe_data.clone() {
-                Some(data) => data.customers.len(),
-                None => 0
-            },
-        },
-    }))
-}
+//     Ok(serde_json::json!({
+//         "code": match appstate.stripe_data.clone() {
+//             Some(_) => http::StatusCode::NO_CONTENT.to_string(),
+//             None => http::StatusCode::INTERNAL_SERVER_ERROR.to_string(),        },
+//         "count": {
+//             "products": match appstate.stripe_data.clone() {
+//                 Some(data) => data.products.len(),
+//                 None => 0,
+//             },
+//             "customers": match appstate.stripe_data.clone() {
+//                 Some(data) => data.customers.len(),
+//                 None => 0
+//             },
+//         },
+//     }))
+// }

@@ -5,6 +5,8 @@ use crate::*;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
+use leptos_use::storage::*;
+use leptos_use::*;
 use log::*;
 
 pub type StripeDataRes = Resource<(), Result<StripeData, ServerFnError>>;
@@ -17,9 +19,15 @@ pub fn App() -> impl IntoView {
     let (current_page, set_current_page) = create_signal(CurrentPage::None);
     provide_context(current_page);
     provide_context(set_current_page);
-    let (shopping_cart, set_shopping_cart) = create_signal(ShoppingCart::default());
+
+    // let (shopping_cart, set_shopping_cart) = create_signal(ShoppingCart::default());
+
+    let (shopping_cart, set_shopping_cart, clear_shopping_cart) =
+        use_local_storage::<ShoppingCart, codee::string::JsonSerdeCodec>("shopping_cart");
+
     provide_context(shopping_cart);
     provide_context(set_shopping_cart);
+    provide_context(clear_shopping_cart);
 
     let stripe_data: StripeDataRes = create_resource(|| (), move |_| async { stater().await });
     provide_context(stripe_data);
@@ -224,7 +232,7 @@ pub fn HomePage() -> impl IntoView {
 #[component]
 pub fn PetShop() -> impl IntoView {
     view! {
-        <div>"PetShop!!!"</div>
+        <h1>"PetShop!!!"</h1>
         <ProductItems items_category="pet_food".to_string()/>
     }
 }
@@ -232,7 +240,7 @@ pub fn PetShop() -> impl IntoView {
 #[component]
 pub fn FoodShop() -> impl IntoView {
     view! {
-        <div>"FoodShop!!!"</div>
+        <h1>"FoodShop!!!"</h1>
         <ProductItems items_category="food".to_string()/>
     }
 }
@@ -300,7 +308,7 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
     let (items_category, set_items_category) = create_signal(items_category);
     provide_context(items_category);
 
-    let shopping_cart = expect_context::<ReadSignal<ShoppingCart>>();
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
     provide_context(shopping_cart);
     let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
     provide_context(set_shopping_cart);
@@ -376,7 +384,7 @@ pub fn CancelCheckout() -> impl IntoView {
 
 #[component]
 pub fn ShoppingCart() -> impl IntoView {
-    let shopping_cart = expect_context::<ReadSignal<ShoppingCart>>();
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
     provide_context(shopping_cart);
     let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
     provide_context(set_shopping_cart);
@@ -478,7 +486,7 @@ pub fn NavBar() -> impl IntoView {
 
     let (is_navbar_hidden, set_is_navbar_hidden) = create_signal(true);
 
-    let shopping_cart = expect_context::<ReadSignal<ShoppingCart>>();
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
     provide_context(shopping_cart);
 
     view! {
