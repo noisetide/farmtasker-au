@@ -11,6 +11,8 @@ use log::*;
 
 pub type StripeDataRes = Resource<(), Result<StripeData, ServerFnError>>;
 
+pub type CheckoutSessionIdRes = String;
+
 #[component]
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
@@ -23,7 +25,18 @@ pub fn App() -> impl IntoView {
     // let (shopping_cart, set_shopping_cart) = create_signal(ShoppingCart::default());
 
     let (shopping_cart, set_shopping_cart, clear_shopping_cart) =
-        use_local_storage::<ShoppingCart, codee::string::JsonSerdeCodec>("shopping_cart");
+        use_local_storage_with_options::<ShoppingCart, codee::string::JsonSerdeCodec>(
+            "shopping_cart",
+            UseStorageOptions::default().delay_during_hydration(true),
+        );
+
+    let (checkout_sessionid, set_checkout_sessionid, clear_checkout_sessionid) =
+        use_local_storage::<CheckoutSessionIdRes, codee::string::JsonSerdeCodec>(
+            "checkout_sessionid",
+        );
+    provide_context(checkout_sessionid);
+    provide_context(set_checkout_sessionid);
+    provide_context(clear_checkout_sessionid);
 
     provide_context(shopping_cart);
     provide_context(set_shopping_cart);
@@ -192,18 +205,21 @@ where
         <div class="page">
             <div class="pager-bg">
                 <div class="pager">
-                    <div class="pager-content" class=match currentpage {
-                        CurrentPage::None => {"pager-content-none"},
-                        CurrentPage::HomePage => {"pager-content-home-page"},
-                        CurrentPage::PetShop => {"pager-content-pet-shop"},
-                        CurrentPage::FoodShop => {"pager-content-foot-shop"},
-                        CurrentPage::About => {"pager-content-about"},
-                        CurrentPage::PrivacyPolicy => {"pager-content-privacy-policy"},
-                        CurrentPage::TermsOfService => {"pager-content-terms-of-service"},
-                        CurrentPage::ShoppingCart => {"pager-content-shopping-cart"},
-                        CurrentPage::VideoInstructionsService => {"pager-content-video-instructions-service"},
-                        CurrentPage::VideoBlogCulinaryAdventure => {"pager-content-video-blog-culinary-adventure"}
-                    }>{page()}</div>
+                    <div
+                        class="pager-content"
+                        class=match currentpage {
+                            CurrentPage::None => {"pager-content-none"},
+                            CurrentPage::HomePage => {"pager-content-home-page"},
+                            CurrentPage::PetShop => {"pager-content-pet-shop pager-content-shop-general"},
+                            CurrentPage::FoodShop => {"pager-content-foot-shop pager-content-shop-general"},
+                            CurrentPage::About => {"pager-content-about"},
+                            CurrentPage::PrivacyPolicy => {"pager-content-privacy-policy"},
+                            CurrentPage::TermsOfService => {"pager-content-terms-of-service"},
+                            CurrentPage::ShoppingCart => {"pager-content-shopping-cart"},
+                            CurrentPage::VideoInstructionsService => {"pager-content-video-instructions-service"},
+                            CurrentPage::VideoBlogCulinaryAdventure => {"pager-content-video-blog-culinary-adventure"}
+                        }
+                    >{page()}</div>
                 </div>
             </div>
         </div>
@@ -232,15 +248,17 @@ pub fn HomePage() -> impl IntoView {
 #[component]
 pub fn PetShop() -> impl IntoView {
     view! {
-        <h1>"PetShop!!!"</h1>
+        <h1>"Pet Food Shop!!!"</h1>
         <ProductItems items_category="pet_food".to_string()/>
     }
+
+    /* Navbar styles */
 }
 
 #[component]
 pub fn FoodShop() -> impl IntoView {
     view! {
-        <h1>"FoodShop!!!"</h1>
+        <h1>"Farm Food Shop"</h1>
         <ProductItems items_category="food".to_string()/>
     }
 }
@@ -320,6 +338,8 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
                 Some(stripe_data) => {
                     let stripe_data: StripeData = stripe_data.expect("Resource StripeData is not here on 'get()'");
                     let items_category = expect_context::<ReadSignal<String>>();
+                    provide_context(items_category);
+
 
                     view! {
                         <ul class="product-list-ul">
@@ -333,24 +353,38 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
                                         .unwrap_or(false)
                                 })
                                 .map(|product| {
+                                    let (product, _) = create_signal(product);
                                     view! {
-                                        <li>
-                                            <div>
-                                                // {product.images.unwrap().into_iter()
-                                                // .map(|link| view! { <img class="product-image" src={link}/>})
-                                                // .collect::<Vec<_>>()}
-                                                <img class="product-image" src={product.images.unwrap().first()}/>
-                                                {product.name}, {product.default_price.unwrap().unit_amount.unwrap() / 100}"$ AUD"
-                                                <button on:click=move |_| {
-                                                    set_shopping_cart.update(|s| {
-                                                        s.add_single_product(&product.id.clone());
-                                                    });
-                                                    // leptos::logging::log!("Added to Cart! {:#?}", product.id);
-                                                    // leptos::logging::log!("Shopping Cart: {:#?}", shopping_cart.get());
-                                                }>
-                                                "Add To Cart"
-                                                </button>
-                                            </div>
+                                        <li class="product-list-item">
+                                            <a href=move || { format!("/shop/{:#}/{:#}", items_category.get(), product.get().name.to_lowercase().replace(" ", "-")) }>
+                                                <Show
+                                                    when=move || {product.get().images.is_some()}
+                                                    fallback=move || view! {
+                                                        <div class="product-item-image">
+                                                        </div>
+                                                    }
+                                                >
+                                                    <img class="product-item-image" src={product.get().images.unwrap().first()}/>
+                                                </Show>
+                                                <div class="product-info">
+                                                    <p class="product-item-name">
+                                                        {product.get().name}
+                                                    </p>
+                                                    <p class="product-item-price">
+                                                        {product.get().default_price.unwrap().unit_amount.unwrap() / 100}"$A"
+                                                    </p>
+                                                    <p class="product-item-description">
+                                                        {product.get().description.unwrap_or_default()}
+                                                    </p>
+                                                </div>
+                                            </a>
+                                            <button class="product-item-addtocart-button" on:click=move |_| {
+                                                set_shopping_cart.update(|s| {
+                                                    s.add_single_product(&product.get().id);
+                                                });
+                                            }>
+                                            "Add To Cart"
+                                            </button>
                                         </li>
                                     }
                                 })
@@ -366,6 +400,9 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
 
 #[component]
 pub fn SuccessCheckout() -> impl IntoView {
+    let checkout_sessionid = expect_context::<Signal<CheckoutSessionIdRes>>();
+    provide_context(checkout_sessionid);
+
     view! {
         <p>
             "Checkout Completed!"
@@ -392,24 +429,45 @@ pub fn ShoppingCart() -> impl IntoView {
 
     let shopping_cart = expect_context::<Signal<ShoppingCart>>();
     provide_context(shopping_cart);
+
     let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
     provide_context(set_shopping_cart);
 
-    // TODO show shopping cart info + add checkout button for creating new checkout session
+    let checkout_sessionid = expect_context::<Signal<CheckoutSessionIdRes>>();
+    provide_context(checkout_sessionid);
+    let set_checkout_sessionid = expect_context::<WriteSignal<CheckoutSessionIdRes>>();
+    provide_context(set_checkout_sessionid);
 
-    view! {{move || {
-        if shopping_cart.get().0.len() != 0 {
-            view! {
+    view! {
+        <Show
+            when=move || { shopping_cart.get().0.len() != 0 }
+            fallback=|| view!{
+                <div>
+                    <h3>
+                        "Your Shopping Cart is Empty."
+                    </h3>
+                    <p>
+                        "You can browse items in:"
+                    </p>
+                    <a href="/shop/food">"Food Shop "</a>
+                    "or "
+                    <a href="/shop/pet">"Pet Food Shop"</a>
+                </div>
+            }
+        >
                 <ul class="shopping-list-ul">
                     {
                         shopping_cart.get().0.into_iter()
                             .map(|(product_id, quantity)| {
                                 let (product_id, _) = create_signal(product_id.clone());
-                                let product_name = stripe_data.get().unwrap().unwrap().products.into_iter().find(|x| x.id == product_id.get()).unwrap().name;
+                                provide_context(product_id);
+
+                                let (product_name, _) = create_signal(stripe_data.get().unwrap().unwrap().products.into_iter().find(|x| x.id == product_id.get()).unwrap().name);
+                                provide_context(product_name);
                                 view! {
                                     <li>
                                         <p>
-                                            {product_name}", quantity: "{quantity}
+                                            {product_name.get()}", quantity: "{quantity}
                                         </p>
                                         <div>
                                             <button on:click=move |_| {
@@ -435,35 +493,25 @@ pub fn ShoppingCart() -> impl IntoView {
                 </ul>
                 <div class="shopping-cart-ceckout-section">
                     <button on:click=move |_| {
-                            spawn_local(async move {
-                                let mut cart: ShoppingCart = shopping_cart.get();
-
+                            let mut cart: ShoppingCart = shopping_cart.get();
+                            spawn_local(async {
                                 new_checkout_session(cart.0).await;
-
                             });
+                            // set_checkout_sessionid.update(|s| {
+                            // })
                         }>
                         "Checkout"
                     </button>
+                    <button on:click=move |_| {
+                            set_shopping_cart.update(|s| {
+                                *s = ShoppingCart::default();
+                            });
+                        }>
+                        "Clear"
+                    </button>
                 </div>
-            }
-        } else {
-            view! {
-                <ul>
-                </ul>
-                <div>
-                    <h3>
-                        "Your Shopping Cart is Empty."
-                    </h3>
-                    <p>
-                        "You can browse items in:"
-                    </p>
-                    <a href="/shop/food">"Food Shop "</a>
-                    "or "
-                    <a href="/shop/pet">"Pet Food Shop"</a>
-                </div>
-            }
-        }
-    }}}
+        </Show>
+    }
 }
 
 #[component]

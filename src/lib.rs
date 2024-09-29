@@ -108,6 +108,7 @@ impl Default for ShoppingCart {
 pub struct StripeData {
     pub products: Vec<stripe_retypes::DbProduct>,
     pub customers: Vec<stripe_retypes::DbCustomer>,
+    pub checkout_sessions: Vec<stripe_retypes::DbCheckoutSession>,
 }
 
 #[leptos::server(name = NewCheckoutSession)]
@@ -135,10 +136,27 @@ pub async fn new_checkout_session(
         params.success_url = Some("http://farmtasker.au/success"); // TODO!
         params.customer = None;
         params.customer_creation = Some(stripe::CheckoutSessionCustomerCreation::IfRequired);
-
+        params.shipping_address_collection =
+            Some(stripe::CreateCheckoutSessionShippingAddressCollection {
+                allowed_countries: vec![
+                    stripe::CreateCheckoutSessionShippingAddressCollectionAllowedCountries::Au,
+                ],
+            });
+        params.custom_text = Some(stripe::CreateCheckoutSessionCustomText {
+            after_submit: None,
+            shipping_address: Some(stripe::CreateCheckoutSessionCustomTextShippingAddress {
+                message: "We make deliveries only within Derwent Valley in Tasmania".to_string(),
+            }),
+            submit: None,
+            terms_of_service_acceptance: None,
+        });
+        params.phone_number_collection =
+            Some(stripe::CreateCheckoutSessionPhoneNumberCollection { enabled: true });
+        params.ui_mode = Some(stripe::CheckoutSessionUiMode::Hosted);
         params.mode = Some(stripe::CheckoutSessionMode::Payment);
+
         let mut vec_of_create_checkout_session_line_items =
-            Vec::<CreateCheckoutSessionLineItems>::new();
+            Vec::<stripe::CreateCheckoutSessionLineItems>::new();
 
         // params.shipping_options = Some(stripe::CreateCheckoutSessionShippingOptions)
 
@@ -201,7 +219,6 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
     let mut product_list_params = ListProducts::new();
     product_list_params.active = Some(true);
     product_list_params.expand = &["data.default_price"];
-
     let list_of_products_from_stripe_api = match Product::list(&client, &product_list_params).await
     {
         Ok(list) => list,
@@ -220,11 +237,21 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
                 return Err(ServerFnError::ServerError(err.to_string()));
             }
         };
+    let checkout_session_list_params = ListCheckoutSessions::new();
+    let list_of_checkout_sessions_from_stripe_api =
+        match CheckoutSession::list(&client, &checkout_session_list_params).await {
+            Ok(list) => list,
+            Err(err) => {
+                log::error!("{:#?}", err);
+                return Err(ServerFnError::ServerError(err.to_string()));
+            }
+        };
 
     info!("New fetch api call to Stripe...");
     Ok(StripeData::new(
         list_of_products_from_stripe_api,
         list_of_customers_from_stripe_api,
+        list_of_checkout_sessions_from_stripe_api,
     ))
 }
 
@@ -245,14 +272,86 @@ pub mod sync {
     use stripe_retypes::*;
 
     impl StripeData {
-        pub fn new(products: List<Product>, customers: List<Customer>) -> Self {
+        pub fn new(
+            products: List<Product>,
+            customers: List<Customer>,
+            checkout_sessions: List<CheckoutSession>,
+        ) -> Self {
             StripeData {
                 products: products.data.into_iter().map(|x| x.into()).collect(),
                 customers: customers.data.into_iter().map(|x| x.into()).collect(),
+                checkout_sessions: checkout_sessions
+                    .data
+                    .into_iter()
+                    .map(|x| x.into())
+                    .collect(),
             }
         }
         pub async fn new_fetch() -> Result<Self, ServerFnError> {
             fetch_stripe_data().await
+        }
+    }
+
+    impl From<CheckoutSession> for DbCheckoutSession {
+        fn from(value: CheckoutSession) -> Self {
+            DbCheckoutSession {
+                id: value.id.to_string(),
+                amount_subtotal: value.amount_subtotal,
+                amount_total: value.amount_total,
+                cancel_url: value.cancel_url,
+                created: Some(value.created),
+                customer: match value.customer {
+                    Some(x) => Some(x.into_object().unwrap().into()),
+                    _ => None,
+                },
+                customer_email: value.customer_email,
+                expires_at: Some(value.expires_at),
+                line_items: match value.line_items {
+                    Some(x) => Some(x.data.into_iter().map(|x| x.into()).collect()),
+                    None => None,
+                },
+                livemode: value.livemode,
+                metadata: value.metadata,
+                mode: match value.mode {
+                    CheckoutSessionMode::Payment => DbCheckoutSessionMode::Payment,
+                    CheckoutSessionMode::Setup => DbCheckoutSessionMode::Setup,
+                    CheckoutSessionMode::Subscription => DbCheckoutSessionMode::Subscription,
+                },
+                payment_status: match value.payment_status {
+                    CheckoutSessionPaymentStatus::Paid => DbCheckoutSessionPaymentStatus::Paid,
+                    CheckoutSessionPaymentStatus::Unpaid => DbCheckoutSessionPaymentStatus::Unpaid,
+                    CheckoutSessionPaymentStatus::NoPaymentRequired => {
+                        DbCheckoutSessionPaymentStatus::NoPaymentRequired
+                    }
+                },
+                status: match value.status {
+                    Some(x) => Some(match x {
+                        CheckoutSessionStatus::Open => DbCheckoutSessionStatus::Open,
+                        CheckoutSessionStatus::Expired => DbCheckoutSessionStatus::Expired,
+                        CheckoutSessionStatus::Complete => DbCheckoutSessionStatus::Complete,
+                    }),
+                    None => None,
+                },
+                success_url: value.success_url,
+                url: value.url,
+            }
+        }
+    }
+
+    impl From<CheckoutSessionItem> for DbCheckoutSessionItem {
+        fn from(value: CheckoutSessionItem) -> Self {
+            DbCheckoutSessionItem {
+                id: value.id.to_string(),
+                amount_discount: value.amount_discount,
+                amount_subtotal: value.amount_subtotal,
+                amount_total: value.amount_total,
+                description: value.description,
+                price: match value.price {
+                    Some(x) => Some(x.into()),
+                    None => None,
+                },
+                quantity: value.quantity,
+            }
         }
     }
 

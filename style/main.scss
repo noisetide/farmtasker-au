@@ -62,7 +62,7 @@ a {
     /* margin: 0; */
     /* padding: 0; */
 
-    background-image: url('/banner-bg.jpg');
+    /* background-image: url('/banner-bg.jpg'); */
     /* width: 50%; */
     background-size: contain;
     background-repeat: no-repeat;
@@ -378,29 +378,111 @@ a {
         }
       }
 
+
+      .pager-content-shop-general {}
+
+      /* Product List Styles */
       ul.product-list-ul {
-
-        transition: 200ms;
         list-style: none;
-        /* border-radius: 5px; */
-        margin: 0;
-        padding: 0;
-        /* gap: 0.5rem; */
         display: flex;
-        justify-content: center;
+        flex-wrap: wrap;
+        justify-content: space-between;
         align-content: center;
-        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem;
+        margin: 0;
+        background-color: $background-color-light;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        /* width: 90vw; */
 
-        img.product-image {
-          max-width: 20vw;
-          border-radius: 20px;
+        li.product-list-item {
+          background-color: $background-color-dark;
+          border-radius: 15px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+
+          .product-item-image {
+            max-width: 40vw;
+            min-width: 10vw;
+            background-color: $main-color;
+            height: auto;
+            border-radius: 15px 15px 0 0;
+          }
+
+          .product-item-info {
+            padding: 1rem;
+            text-align: center;
+
+            .product-item-name {
+              font-size: 1.2rem;
+              color: $main-color;
+              margin-bottom: 0.5rem;
+              font-weight: bold;
+            }
+
+            .product-item-description {
+              font-size: 1rem;
+              color: darken($main-color, 25%);
+              margin-bottom: 1rem;
+            }
+
+            .product-item-price {
+              font-size: 1.1rem;
+              color: $accent-color;
+              font-weight: bold;
+              margin-bottom: 0.75rem;
+            }
+
+          }
+
+          .product-item-addtocart-button {
+            padding: 1rem;
+
+          }
+
+          button.product-item-addtocart-button {
+            background-color: $main-color;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition-duration: 200ms;
+            transition: 0.2s ease-in-out;
+
+            &:hover {
+              transform: scale(1.05);
+              background-color: lighten($main-color, 10%);
+              box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            &:active {
+              background-color: darken($main-color, 10%);
+            }
+          }
         }
 
-        button {
-          padding: 1rem;
+        /* Responsive layout for tablets */
+        @include respond-to(tablet) {
+          li.product-list-item {}
+        }
+
+        /* Responsive layout for mobile */
+        @include respond-to(mobile) {
+          flex-direction: column;
+          gap: 1rem;
+
+          li.product-list-item {
+            width: 100%;
+          }
+
+          img.product-list-item-image {
+            height: auto;
+          }
         }
       }
-
 
       .pager-content-home-page {
         @include respond-to(mobile) {
@@ -479,22 +561,6 @@ a {
   }
 }
 
-
-
-
-button#test {
-  background-color: $main-color;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: lighten($main-color, 10%);
-  }
-}
-
 .privacy-policy,
 .terms-of-service {
   padding: 2rem;
@@ -507,3 +573,16 @@ button#test {
     color: $main-color;
   }
 }
+
+/* button#test { */
+/* background-color: $main-color; */
+/* color: white; */
+/* border: none; */
+/* padding: 0.5rem 1rem; */
+/* border-radius: 5px; */
+/* cursor: pointer; */
+
+/* &:hover { */
+/* background-color: lighten($main-color, 10%); */
+/* } */
+/* } */

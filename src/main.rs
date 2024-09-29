@@ -33,6 +33,7 @@ async fn main() {
 
     let key = std::env::var("STRIPE_KEY")
         .expect("Missing STRIPE_KEY variable in env. Please do 'export STRIPE_KEY=sk_*******'.\nYou can verify if env variable 'STRIPE_KEY' is present with 'env | grep STRIPE_KEY'");
+
     let stripe_client = stripe::Client::new(key.clone());
 
     let appstate = farmtasker_au::AppState {
@@ -46,16 +47,15 @@ async fn main() {
         },
     };
 
-    // let stripedata = StripeData::new_fetch()
-    //     .await
-    //     .expect("Couldn't fetch StripeData");
+    assert!(
+        &appstate.stripe_data.clone().is_some(), 
+        "No StripeData in AppState during server init. Check if the StripeData could be fetched from internet.\nPlease verify that you have internet connection.",
+    );
 
     let products = &appstate
         .stripe_data
         .clone()
-        .expect(
-            "No StripeData in AppState. Check if the StripeData could be fetched from internet.",
-        )
+        .unwrap()
         .products;
     for i in products {
         tracing::info!(
@@ -67,13 +67,34 @@ async fn main() {
     let customers = &appstate
         .stripe_data
         .clone()
-        .expect(
-            "No StripeData in AppState. Check if the StripeData could be fetched from internet.",
-        )
+        .unwrap()
         .customers;
-    tracing::info!("Total Products: {:}", products.len());
 
-    tracing::info!("Total Customers: {:}", customers.len());
+    let checkout_sessions = &appstate
+        .stripe_data
+        .clone()
+        .unwrap()
+        .checkout_sessions
+        .clone();
+    tracing::info!("Total \"Products\": {:}", products.len());
+
+    tracing::info!("Total \"Customers\": {:}", customers.len());
+
+    tracing::info!(
+        "Total of currently Open \"Checkout Sessions\": {:}",
+        checkout_sessions
+            .into_iter()
+            .filter(|c| match &c.status {
+                Some(s) => match s {
+                    crate::stripe_retypes::DbCheckoutSessionStatus::Complete => false,
+                    crate::stripe_retypes::DbCheckoutSessionStatus::Expired => false,
+                    crate::stripe_retypes::DbCheckoutSessionStatus::Open => true,
+                },
+                None => false,
+            })
+            .collect::<Vec<&crate::stripe_retypes::DbCheckoutSession>>()
+            .len()
+    );
 
     // build our application with a route
     let app = Router::new()

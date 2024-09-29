@@ -3,6 +3,62 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DbCheckoutSession {
+    pub id: crate::app::CheckoutSessionIdRes,
+    pub amount_subtotal: Option<i64>,
+    pub amount_total: Option<i64>,
+    pub cancel_url: Option<String>,
+    pub created: Option<i64>,
+    pub customer: Option<DbCustomer>,
+    pub customer_email: Option<String>,
+    pub expires_at: Option<i64>,
+    pub line_items: Option<Vec<DbCheckoutSessionItem>>,
+    pub livemode: bool,
+    pub metadata: Option<HashMap<String, String>>,
+    pub mode: DbCheckoutSessionMode,
+    pub payment_status: DbCheckoutSessionPaymentStatus,
+    pub status: Option<DbCheckoutSessionStatus>,
+    pub success_url: Option<String>,
+    pub url: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum DbCheckoutSessionMode {
+    Payment,
+    Setup,
+    Subscription,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum DbCheckoutSessionPaymentStatus {
+    NoPaymentRequired,
+    Paid,
+    Unpaid,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum DbCheckoutSessionStatus {
+    Complete,
+    Expired,
+    Open,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DbCheckoutSessionItem {
+    pub id: String,
+    pub amount_discount: i64,
+    pub amount_subtotal: i64,
+    // pub amount_tax: i64,
+    pub amount_total: i64,
+    // pub currency: Currency,
+    pub description: String,
+    // pub discounts: Option<Vec<LineItemsDiscountAmount>>,
+    pub price: Option<DbPrice>,
+    pub quantity: Option<u64>,
+    // pub taxes: Option<Vec<LineItemsTaxAmount>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DbProduct {
     pub id: String,
     pub active: bool,
