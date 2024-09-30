@@ -3,6 +3,7 @@ use crate::error_template::{AppError, ErrorTemplate};
 
 use crate::*;
 use leptos::*;
+use leptos_dom::logging;
 use leptos_meta::*;
 use leptos_router::*;
 use leptos_use::storage::*;
@@ -10,40 +11,54 @@ use leptos_use::*;
 use log::*;
 
 pub type StripeDataRes = Resource<(), Result<StripeData, ServerFnError>>;
+pub type CheckoutSessionRes = Resource<serde_json::Value, Result<String, ServerFnError>>;
 
 pub type CheckoutSessionIdRes = String;
+
+pub type CheckoutSessionUpdateRes = serde_json::Value;
 
 #[component]
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
+    let stripe_data: StripeDataRes = create_resource(|| (), move |_| async { stater().await });
+    provide_context(stripe_data);
+
     let (current_page, set_current_page) = create_signal(CurrentPage::None);
     provide_context(current_page);
     provide_context(set_current_page);
-
-    // let (shopping_cart, set_shopping_cart) = create_signal(ShoppingCart::default());
 
     let (shopping_cart, set_shopping_cart, clear_shopping_cart) =
         use_local_storage_with_options::<ShoppingCart, codee::string::JsonSerdeCodec>(
             "shopping_cart",
             UseStorageOptions::default().delay_during_hydration(true),
         );
+    provide_context(shopping_cart);
+    provide_context(set_shopping_cart);
+    provide_context(clear_shopping_cart);
 
     let (checkout_sessionid, set_checkout_sessionid, clear_checkout_sessionid) =
-        use_local_storage::<CheckoutSessionIdRes, codee::string::JsonSerdeCodec>(
+        use_local_storage_with_options::<CheckoutSessionIdRes, codee::string::JsonSerdeCodec>(
             "checkout_sessionid",
+            UseStorageOptions::default().delay_during_hydration(true),
         );
     provide_context(checkout_sessionid);
     provide_context(set_checkout_sessionid);
     provide_context(clear_checkout_sessionid);
 
-    provide_context(shopping_cart);
-    provide_context(set_shopping_cart);
-    provide_context(clear_shopping_cart);
+    let (submit_checkout, set_submit_checkout): (
+        ReadSignal<CheckoutSessionUpdateRes>,
+        WriteSignal<CheckoutSessionUpdateRes>,
+    ) = create_signal::<CheckoutSessionUpdateRes>(serde_json::json!("none"));
+    provide_context(submit_checkout);
+    provide_context(set_submit_checkout);
 
-    let stripe_data: StripeDataRes = create_resource(|| (), move |_| async { stater().await });
-    provide_context(stripe_data);
+    let checkout_session: CheckoutSessionRes =
+        create_resource(submit_checkout, move |x| async move {
+            new_checkout_session(shopping_cart.get().clone().0, checkout_sessionid.get()).await
+        });
+    provide_context(checkout_session);
 
     view! {
         // injects a stylesheet into the document <head>
@@ -433,10 +448,41 @@ pub fn ShoppingCart() -> impl IntoView {
     let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
     provide_context(set_shopping_cart);
 
-    let checkout_sessionid = expect_context::<Signal<CheckoutSessionIdRes>>();
-    provide_context(checkout_sessionid);
     let set_checkout_sessionid = expect_context::<WriteSignal<CheckoutSessionIdRes>>();
     provide_context(set_checkout_sessionid);
+
+    let submit_checkout = expect_context::<ReadSignal<CheckoutSessionUpdateRes>>();
+    provide_context(submit_checkout);
+    let set_submit_checkout = expect_context::<WriteSignal<CheckoutSessionUpdateRes>>();
+    provide_context(set_submit_checkout);
+
+    let checkout_sessionid = expect_context::<Signal<CheckoutSessionIdRes>>();
+    provide_context(checkout_sessionid);
+
+    let checkout_session = expect_context::<CheckoutSessionRes>();
+    provide_context(checkout_session);
+
+    let loading = checkout_session.loading();
+    let is_loading = move || {
+        if loading() {
+            "Loading..."
+        } else {
+            let session = checkout_session
+                .get()
+                .map(|value| {
+                    value
+                        .map(|value2| {
+                            set_checkout_sessionid.update(|s| *s = value2.clone());
+                            value2
+                        })
+                        .unwrap_or_else(|x| "Loading 2".into())
+                })
+                .unwrap_or_else(|| "Loading".into());
+            leptos::logging::log!("{:#?}", session);
+            // stripe_data.get().expect("no stripdata lol")
+            "Idle..."
+        }
+    };
 
     view! {
         <Show
@@ -492,13 +538,42 @@ pub fn ShoppingCart() -> impl IntoView {
                     }
                 </ul>
                 <div class="shopping-cart-ceckout-section">
+                    {is_loading}
                     <button on:click=move |_| {
-                            let mut cart: ShoppingCart = shopping_cart.get();
-                            spawn_local(async {
-                                new_checkout_session(cart.0).await;
+                            let checkout_sessionid_before = checkout_sessionid.get();
+
+                            set_submit_checkout.update(|s| {
+                                *s = serde_json::json!(1);
                             });
-                            // set_checkout_sessionid.update(|s| {
-                            // })
+
+                            let checkout_sessionid_after = checkout_sessionid.get();
+
+
+                            if {checkout_sessionid_before != checkout_sessionid_after || checkout_sessionid.get() == ""} {
+                                spawn_local(async {
+                                    stripe_sync().await;
+                                });
+                            }
+
+                            // Step 1: Get the StripeData
+                            let stripe_data = stripe_data.get().expect("No StripeData!");
+
+                            // Step 2: Access checkout_sessions
+                            let checkout_sessions = stripe_data.expect("No StripeData! 2").checkout_sessions.clone();
+
+                            // Step 3: Find the session with the matching ID
+                            let session = checkout_sessions
+                                .iter()
+                                .find(|session| session.id == checkout_sessionid_after)
+                                .expect("Checkout session not found");
+
+                            // Step 4: Clone and unwrap the URL
+                            let url = session.url.clone().expect("URL is None");
+
+
+                            spawn_local(async move {
+                                redirect(url).await;
+                            });
                         }>
                         "Checkout"
                     </button>

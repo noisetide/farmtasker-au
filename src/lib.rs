@@ -114,7 +114,8 @@ pub struct StripeData {
 #[leptos::server(name = NewCheckoutSession)]
 pub async fn new_checkout_session(
     shopping_cart: HashMap<String, u8>,
-) -> Result<serde_json::Value, ServerFnError> {
+    checkout_sessionid: String,
+) -> Result<String, ServerFnError> {
     let mut cart = ShoppingCart::default();
     cart.0 = shopping_cart;
     let shopping_cart = cart;
@@ -130,74 +131,91 @@ pub async fn new_checkout_session(
 
     let stripe_data: StripeData = stater().await?;
 
-    let checkout_session = {
-        let mut params = stripe::CreateCheckoutSession::new();
-        params.cancel_url = Some("http://farmtasker.au/cancel"); // TODO!
-        params.success_url = Some("http://farmtasker.au/success"); // TODO!
-        params.customer = None;
-        params.customer_creation = Some(stripe::CheckoutSessionCustomerCreation::IfRequired);
-        params.shipping_address_collection =
-            Some(stripe::CreateCheckoutSessionShippingAddressCollection {
-                allowed_countries: vec![
-                    stripe::CreateCheckoutSessionShippingAddressCollectionAllowedCountries::Au,
-                ],
-            });
-        params.custom_text = Some(stripe::CreateCheckoutSessionCustomText {
-            after_submit: None,
-            shipping_address: Some(stripe::CreateCheckoutSessionCustomTextShippingAddress {
-                message: "We make deliveries only within Derwent Valley in Tasmania".to_string(),
-            }),
-            submit: None,
-            terms_of_service_acceptance: None,
-        });
-        params.phone_number_collection =
-            Some(stripe::CreateCheckoutSessionPhoneNumberCollection { enabled: true });
-        params.ui_mode = Some(stripe::CheckoutSessionUiMode::Hosted);
-        params.mode = Some(stripe::CheckoutSessionMode::Payment);
-
-        let mut vec_of_create_checkout_session_line_items =
-            Vec::<stripe::CreateCheckoutSessionLineItems>::new();
-
-        // params.shipping_options = Some(stripe::CreateCheckoutSessionShippingOptions)
-
-        params.billing_address_collection =
-            Some(stripe::CheckoutSessionBillingAddressCollection::Required);
-        params.currency = Some(stripe::Currency::AUD);
-
-        for (product_id, quantity) in &shopping_cart.0 {
-            if let Some(product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
-                let line_item = CreateCheckoutSessionLineItems {
-                    quantity: Some((*quantity).into()),
-                    price: Some(product.default_price.clone().expect("NO PRICE!").id),
-                    ..Default::default()
-                };
-                vec_of_create_checkout_session_line_items.push(line_item);
-            }
-        }
-
-        // params.line_items = Some(vec![stripe::CreateCheckoutSessionLineItems {
-        //     quantity: Some(3),
-        //     price: Some(price.id.to_string()),
-        //     ..Default::default()
-        // }]);
-        params.line_items = Some(vec_of_create_checkout_session_line_items);
-        params.expand = &["line_items", "line_items.data.price.product"];
-
-        stripe::CheckoutSession::create(&client, params).await?
+    let base_url = match std::env::var("DEVPORT") {
+        Ok(port) => "http://localhost:4444",
+        Err(err) => "https://farmtasker.au",
     };
-    info!(
-        "Created checkout session: {:#?}, for {:#?} $AUD. (Created: {:#?} / Expires at: {:#?} )",
-        &checkout_session.id,
-        checkout_session.amount_total.unwrap().clone() as f64 / 100.0,
-        &checkout_session.created,
-        &checkout_session.expires_at
-    );
 
-    // let checkout_session = "test";
+    if stripe_data
+        .checkout_sessions
+        .iter()
+        .any(|session| session.id == checkout_sessionid.clone())
+    {
+        info!(
+            "Checkout Session with id '{:#?}' already exists!",
+            checkout_sessionid.to_string().clone()
+        );
+        return Ok(checkout_sessionid.to_string());
+    } else {
+        let checkout_session = {
+            let cancel_url = format!("{:#}/cancel", base_url);
+            let success_url = format!("{:#}/success", base_url);
 
-    leptos_axum::redirect(&checkout_session.url.clone().unwrap());
+            let mut params = stripe::CreateCheckoutSession::new();
+            params.cancel_url = Some(&cancel_url); // TODO!
+            params.success_url = Some(&success_url); // TODO!
+            params.customer = None;
+            params.customer_creation = Some(stripe::CheckoutSessionCustomerCreation::IfRequired);
+            params.shipping_address_collection =
+                Some(stripe::CreateCheckoutSessionShippingAddressCollection {
+                    allowed_countries: vec![
+                        stripe::CreateCheckoutSessionShippingAddressCollectionAllowedCountries::Au,
+                    ],
+                });
+            params.custom_text = Some(stripe::CreateCheckoutSessionCustomText {
+                after_submit: None,
+                shipping_address: Some(stripe::CreateCheckoutSessionCustomTextShippingAddress {
+                    message: "We make deliveries only within Derwent Valley in Tasmania"
+                        .to_string(),
+                }),
+                submit: None,
+                terms_of_service_acceptance: None,
+            });
+            params.phone_number_collection =
+                Some(stripe::CreateCheckoutSessionPhoneNumberCollection { enabled: true });
+            params.ui_mode = Some(stripe::CheckoutSessionUiMode::Hosted);
+            params.mode = Some(stripe::CheckoutSessionMode::Payment);
 
-    Ok(serde_json::Value::from(checkout_session.ser().unwrap()))
+            let mut vec_of_create_checkout_session_line_items =
+                Vec::<stripe::CreateCheckoutSessionLineItems>::new();
+
+            // params.shipping_options = Some(stripe::CreateCheckoutSessionShippingOptions)
+
+            params.billing_address_collection =
+                Some(stripe::CheckoutSessionBillingAddressCollection::Required);
+            params.currency = Some(stripe::Currency::AUD);
+
+            for (product_id, quantity) in &shopping_cart.0 {
+                if let Some(product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
+                    let line_item = CreateCheckoutSessionLineItems {
+                        quantity: Some((*quantity).into()),
+                        price: Some(product.default_price.clone().expect("NO PRICE!").id),
+                        ..Default::default()
+                    };
+                    vec_of_create_checkout_session_line_items.push(line_item);
+                }
+            }
+
+            // params.line_items = Some(vec![stripe::CreateCheckoutSessionLineItems {
+            //     quantity: Some(3),
+            //     price: Some(price.id.to_string()),
+            //     ..Default::default()
+            // }]);
+            params.line_items = Some(vec_of_create_checkout_session_line_items);
+            params.expand = &["line_items", "line_items.data.price.product"];
+
+            stripe::CheckoutSession::create(&client, params).await?
+        };
+        info!(
+            "Created checkout session: {:#?}, for {:#?} $AUD. (Created: {:#?} / Expires at: {:#?} )",
+            &checkout_session.id,
+            checkout_session.amount_total.unwrap().clone() as f64 / 100.0,
+            &checkout_session.created,
+            &checkout_session.expires_at
+        );
+
+        Ok(checkout_session.id.to_string())
+    }
 }
 
 use log::*;
@@ -547,74 +565,98 @@ pub mod sync {
         }
     }
 }
+#[server (
+    name = Redirect,
+)]
+pub async fn redirect(url: String) -> Result<(), leptos::ServerFnError> {
+    leptos_axum::redirect(&url);
+    Ok(())
+}
 
-// use leptos::*;
-// #[server (
-//     name = StripeSync,
-//     // endpoint = "sync", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
-// )]
-// pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
-//     use log::*;
-//     use stripe::*;
+use leptos::*;
+#[server (
+    name = StripeSync,
+    // endpoint = "sync", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
+)]
+pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
+    use log::*;
+    use stripe::*;
 
-//     let state = match leptos::use_context::<Option<crate::AppState>>() {
-//         Some(ok) => {
-//             // leptos::logging::log!("GOT context AppState");
-//             ok
-//         }
-//         None => {
-//             // leptos::logging::log!("No context AppState");
-//             None
-//         }
-//     };
-//     let axum::extract::State(mut appstate): axum::extract::State<crate::AppState> =
-//         leptos_axum::extract_with_state(match &state {
-//             Some(x) => x,
-//             None => &AppState {
-//                 stripe_api_key: None,
-//                 stripe_data: None,
-//             },
-//         })
-//         .await?;
+    let state = match leptos::use_context::<Option<crate::AppState>>() {
+        Some(ok) => {
+            // leptos::logging::log!("GOT context AppState");
+            ok
+        }
+        None => {
+            // leptos::logging::log!("No context AppState");
+            None
+        }
+    };
+    let axum::extract::State(mut appstate): axum::extract::State<crate::AppState> =
+        leptos_axum::extract_with_state(match &state {
+            Some(x) => x,
+            None => &AppState {
+                stripe_api_key: None,
+                stripe_data: None,
+            },
+        })
+        .await?;
 
-//     info!("Starting sync of local StripeData with Stripe API...");
+    info!("Starting sync of local StripeData with Stripe API...");
 
-//     let new_stripedata: Option<StripeData> = match StripeData::new_fetch().await {
-//         Ok(ok) => Some(ok),
-//         Err(err) => {
-//             log::error!("Couldn't fetch new StripeData!!!: {:#?}", err);
-//             None
-//         }
-//     };
+    let new_stripedata: Option<StripeData> = match StripeData::new_fetch().await {
+        Ok(ok) => Some(ok),
+        Err(err) => {
+            log::error!("Couldn't fetch new StripeData!!!: {:#?}", err);
+            None
+        }
+    };
 
-//     appstate.stripe_data = match new_stripedata.clone() {
-//         Some(data) => {
-//             info!("Synchronized AppState with Stripe API");
-//             info!("Total Products: {:#?}", data.products.len());
-//             info!("Total Customers: {:#?}", data.customers.len());
-//             Some(data)
-//         }
-//         None => {
-//             log::error!("Couldn't update StripeData");
-//             return Err(leptos::ServerFnError::ServerError(
-//                 "Couldn't update StripeData".into(),
-//             ));
-//         }
-//     };
+    appstate.stripe_data = match new_stripedata.clone() {
+        Some(data) => {
+            info!("v----Synced-StripeData---v");
+            info!("Synchronized AppState with Stripe API");
+            info!("Total Products: {:#?}", data.products.len());
+            info!("Total Customers: {:#?}", data.customers.len());
+            tracing::info!(
+                "Total of currently Open \"Checkout Sessions\": {:}",
+                data.checkout_sessions
+                    .clone()
+                    .into_iter()
+                    .filter(|c| match &c.status {
+                        Some(s) => match s {
+                            crate::stripe_retypes::DbCheckoutSessionStatus::Complete => false,
+                            crate::stripe_retypes::DbCheckoutSessionStatus::Expired => false,
+                            crate::stripe_retypes::DbCheckoutSessionStatus::Open => true,
+                        },
+                        None => false,
+                    })
+                    .collect::<Vec<crate::stripe_retypes::DbCheckoutSession>>()
+                    .len()
+            );
+            Some(data)
+        }
+        None => {
+            log::error!("Couldn't update StripeData");
+            return Err(leptos::ServerFnError::ServerError(
+                "Couldn't update StripeData".into(),
+            ));
+        }
+    };
 
-//     Ok(serde_json::json!({
-//         "code": match appstate.stripe_data.clone() {
-//             Some(_) => http::StatusCode::NO_CONTENT.to_string(),
-//             None => http::StatusCode::INTERNAL_SERVER_ERROR.to_string(),        },
-//         "count": {
-//             "products": match appstate.stripe_data.clone() {
-//                 Some(data) => data.products.len(),
-//                 None => 0,
-//             },
-//             "customers": match appstate.stripe_data.clone() {
-//                 Some(data) => data.customers.len(),
-//                 None => 0
-//             },
-//         },
-//     }))
-// }
+    Ok(serde_json::json!({
+        "code": match appstate.stripe_data.clone() {
+            Some(_) => http::StatusCode::NO_CONTENT.to_string(),
+            None => http::StatusCode::INTERNAL_SERVER_ERROR.to_string(),        },
+        "count": {
+            "products": match appstate.stripe_data.clone() {
+                Some(data) => data.products.len(),
+                None => 0,
+            },
+            "customers": match appstate.stripe_data.clone() {
+                Some(data) => data.customers.len(),
+                None => 0
+            },
+        },
+    }))
+}
