@@ -83,7 +83,7 @@ async fn main() {
     tracing::info!(
         "Total of currently Open \"Checkout Sessions\": {:}",
         checkout_sessions
-            .into_iter()
+            .iter()
             .filter(|c| match &c.status {
                 Some(s) => match s {
                     crate::stripe_retypes::DbCheckoutSessionStatus::Complete => false,

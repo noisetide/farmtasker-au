@@ -36,7 +36,7 @@ pub enum DbCheckoutSessionPaymentStatus {
     Unpaid,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum DbCheckoutSessionStatus {
     Complete,
     Expired,

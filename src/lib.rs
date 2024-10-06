@@ -70,7 +70,7 @@ pub struct AppState {
 }
 
 use std::collections::HashMap;
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ShoppingCart(HashMap<String, u8>);
 
 impl ShoppingCart {
@@ -98,6 +98,19 @@ impl ShoppingCart {
     }
 }
 
+impl From<Vec<stripe_retypes::DbCheckoutSessionItem>> for ShoppingCart {
+    fn from(value: Vec<stripe_retypes::DbCheckoutSessionItem>) -> Self {
+        let mut cart = ShoppingCart::default();
+        for item in value {
+            cart.0.insert(
+                item.id.to_string(),
+                item.quantity.unwrap_or_default().try_into().unwrap(),
+            );
+        }
+        cart
+    }
+}
+
 impl Default for ShoppingCart {
     fn default() -> Self {
         ShoppingCart(HashMap::<String, u8>::new())
@@ -111,11 +124,36 @@ pub struct StripeData {
     pub checkout_sessions: Vec<stripe_retypes::DbCheckoutSession>,
 }
 
+/// Find if there is existing session by id
+#[leptos::server(name = CheckoutSessionMatches)]
+pub async fn find_checkout_session_matches(
+    checkout_sessionid: String,
+) -> Result<bool, ServerFnError> {
+    use stripe::*;
+    let client = Client::new(match std::env::var("STRIPE_KEY") {
+        Ok(ok) => ok,
+        Err(err) => {
+            log::error!("{:#?}", err);
+            return Err(ServerFnError::ServerError(err.to_string()));
+        }
+    });
+
+    let stripe_data: StripeData = stater().await?;
+
+    Ok(stripe_data.checkout_sessions.iter().any(|session| {
+        session.id == checkout_sessionid
+            && session
+                .status
+                .clone()
+                .map_or(false, |status| status == DbCheckoutSessionStatus::Open)
+    }))
+}
+
 #[leptos::server(name = NewCheckoutSession)]
 pub async fn new_checkout_session(
-    shopping_cart: HashMap<String, u8>,
-    checkout_sessionid: String,
-) -> Result<String, ServerFnError> {
+    shopping_cart: HashMap<String, u8>, // shopping_cart input from storage
+    checkout_sessionid: String,         // browser checkout_sessionid input from storage
+) -> Result<DbCheckoutSession, ServerFnError> {
     let mut cart = ShoppingCart::default();
     cart.0 = shopping_cart;
     let shopping_cart = cart;
@@ -129,97 +167,169 @@ pub async fn new_checkout_session(
         }
     });
 
-    let stripe_data: StripeData = stater().await?;
-
     let base_url = match std::env::var("DEVPORT") {
         Ok(port) => "http://localhost:4444",
-        Err(err) => "https://farmtasker.au",
+        Err(_) => "https://farmtasker.au",
     };
 
-    if stripe_data
-        .checkout_sessions
-        .iter()
-        .any(|session| session.id == checkout_sessionid.clone())
+    let cancel_url = format!("{:#}/cancel", base_url);
+    let success_url = format!("{:#}/success", base_url);
+
+    let mut params = stripe::CreateCheckoutSession::new();
+    params.cancel_url = Some(&cancel_url);
+    params.success_url = Some(&success_url);
+    params.customer = None;
+    params.customer_creation = Some(stripe::CheckoutSessionCustomerCreation::IfRequired);
+    params.shipping_address_collection =
+        Some(stripe::CreateCheckoutSessionShippingAddressCollection {
+            allowed_countries: vec![
+                stripe::CreateCheckoutSessionShippingAddressCollectionAllowedCountries::Au,
+            ],
+        });
+    params.custom_text = Some(CreateCheckoutSessionCustomText {
+        shipping_address: Some(CreateCheckoutSessionCustomTextShippingAddress {
+            message: "We make deliveries only within southern Tasmania".to_string(),
+        }),
+        ..Default::default()
+    });
+    params.phone_number_collection =
+        Some(stripe::CreateCheckoutSessionPhoneNumberCollection { enabled: true });
+    params.ui_mode = Some(stripe::CheckoutSessionUiMode::Hosted);
+    params.mode = Some(stripe::CheckoutSessionMode::Payment);
+    params.billing_address_collection =
+        Some(stripe::CheckoutSessionBillingAddressCollection::Required);
+    params.currency = Some(stripe::Currency::AUD);
+
+    let mut line_items_vec = Vec::new();
+
+    let stripe_data: StripeData = stater().await?;
+
+    for (product_id, quantity) in &shopping_cart.0 {
+        if let Some(product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
+            let line_item = CreateCheckoutSessionLineItems {
+                quantity: Some((*quantity).into()),
+                price: Some(product.default_price.clone().expect("NO PRICE!").id),
+                ..Default::default()
+            };
+            line_items_vec.push(line_item);
+        }
+    }
+
+    params.line_items = Some(line_items_vec);
+    params.expand = &["line_items", "line_items.data.price.product"];
+
+    let checkout_session: Option<DbCheckoutSession> = if find_checkout_session_matches(
+        checkout_sessionid.clone(),
+    )
+    .await?
     {
-        info!(
-            "Checkout Session with id '{:#?}' already exists!",
-            checkout_sessionid.to_string().clone()
-        );
-        return Ok(checkout_sessionid.to_string());
-    } else {
-        let checkout_session = {
-            let cancel_url = format!("{:#}/cancel", base_url);
-            let success_url = format!("{:#}/success", base_url);
+        leptos::logging::log!("Found matched session with id: {:#?}", checkout_sessionid);
 
-            let mut params = stripe::CreateCheckoutSession::new();
-            params.cancel_url = Some(&cancel_url); // TODO!
-            params.success_url = Some(&success_url); // TODO!
-            params.customer = None;
-            params.customer_creation = Some(stripe::CheckoutSessionCustomerCreation::IfRequired);
-            params.shipping_address_collection =
-                Some(stripe::CreateCheckoutSessionShippingAddressCollection {
-                    allowed_countries: vec![
-                        stripe::CreateCheckoutSessionShippingAddressCollectionAllowedCountries::Au,
-                    ],
-                });
-            params.custom_text = Some(stripe::CreateCheckoutSessionCustomText {
-                after_submit: None,
-                shipping_address: Some(stripe::CreateCheckoutSessionCustomTextShippingAddress {
-                    message: "We make deliveries only within Derwent Valley in Tasmania"
-                        .to_string(),
-                }),
-                submit: None,
-                terms_of_service_acceptance: None,
-            });
-            params.phone_number_collection =
-                Some(stripe::CreateCheckoutSessionPhoneNumberCollection { enabled: true });
-            params.ui_mode = Some(stripe::CheckoutSessionUiMode::Hosted);
-            params.mode = Some(stripe::CheckoutSessionMode::Payment);
+        stripe_sync();
 
-            let mut vec_of_create_checkout_session_line_items =
-                Vec::<stripe::CreateCheckoutSessionLineItems>::new();
+        let stripe_data: StripeData = stater().await?;
 
-            // params.shipping_options = Some(stripe::CreateCheckoutSessionShippingOptions)
+        let existing_session = stripe_data
+            .checkout_sessions
+            .iter()
+            .find(|session| session.id == checkout_sessionid.clone())
+            .expect("No session with id");
 
-            params.billing_address_collection =
-                Some(stripe::CheckoutSessionBillingAddressCollection::Required);
-            params.currency = Some(stripe::Currency::AUD);
+        // leptos::logging::log!(
+        //     "Checkout Session line_items: {:#?}",
+        //     existing_session.line_items.clone()
+        // );
 
-            for (product_id, quantity) in &shopping_cart.0 {
-                if let Some(product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
-                    let line_item = CreateCheckoutSessionLineItems {
-                        quantity: Some((*quantity).into()),
-                        price: Some(product.default_price.clone().expect("NO PRICE!").id),
-                        ..Default::default()
-                    };
-                    vec_of_create_checkout_session_line_items.push(line_item);
+        leptos::logging::log!("Checking if the items are the same");
+
+        // Step 2: Check if the shopping cart items match the existing session
+        match existing_session.line_items.clone() {
+            Some(line_items) => {
+                let mut does_cart_match = false;
+
+                let mut cart_prices_map: HashMap<String, u8> = HashMap::new();
+                for (cart_product_id, cart_product_quantity) in shopping_cart.0 {
+                    if let Some(product) = stripe_data
+                        .products
+                        .iter()
+                        .find(|p| p.id == *cart_product_id)
+                    {
+                        if let Some(db_price) = &product.default_price {
+                            // Map price ID to cart quantity
+                            cart_prices_map.insert(db_price.id.clone(), cart_product_quantity);
+                        }
+                    }
+                }
+
+                let mut line_items_prices_map: HashMap<String, u8> = HashMap::new();
+                for checkout_session_item in line_items {
+                    line_items_prices_map.insert(
+                        checkout_session_item.price.unwrap().id.to_string(),
+                        checkout_session_item
+                            .quantity
+                            .unwrap_or(0)
+                            .try_into()
+                            .unwrap(),
+                    );
+                }
+
+                leptos::logging::log!("ShoppingCart: {:#?}", cart_prices_map.clone());
+                leptos::logging::log!("ExistingSession: {:#?}", line_items_prices_map.clone());
+
+                does_cart_match = cart_prices_map == line_items_prices_map;
+
+                // Step 3: If the does_cart_match the existing session, return the session ID
+                if does_cart_match {
+                    leptos::logging::log!(
+                        "Existing Checkout Session with matching cart and id '{:#?}' found!",
+                        checkout_sessionid
+                    );
+                    Some(existing_session.clone())
+                } else {
+                    leptos::logging::log!(
+                        "Shopping cart is not the same as session with id: {:#?}",
+                        checkout_sessionid
+                    );
+                    let new_session = stripe::CheckoutSession::create(&client, params).await?;
+
+                    info!(
+                            "Created NEW checkout session: {:#?}, for {:#?} $AUD. (Created: {:#?} / Expires at: {:#?} )",
+                            &new_session.id,
+                            new_session.amount_total.unwrap().clone() as f64 / 100.0,
+                            &new_session.created,
+                            &new_session.expires_at
+                        );
+
+                    Some(new_session.into())
                 }
             }
+            None => {
+                return Err(ServerFnError::new("NO line items in existing session???"));
+            }
+        }
+    } else {
+        let new_session = stripe::CheckoutSession::create(&client, params).await?;
 
-            // params.line_items = Some(vec![stripe::CreateCheckoutSessionLineItems {
-            //     quantity: Some(3),
-            //     price: Some(price.id.to_string()),
-            //     ..Default::default()
-            // }]);
-            params.line_items = Some(vec_of_create_checkout_session_line_items);
-            params.expand = &["line_items", "line_items.data.price.product"];
-
-            stripe::CheckoutSession::create(&client, params).await?
-        };
         info!(
-            "Created checkout session: {:#?}, for {:#?} $AUD. (Created: {:#?} / Expires at: {:#?} )",
-            &checkout_session.id,
-            checkout_session.amount_total.unwrap().clone() as f64 / 100.0,
-            &checkout_session.created,
-            &checkout_session.expires_at
-        );
+                "Created NEW checkout session: {:#?}, for {:#?} $AUD. (Created: {:#?} / Expires at: {:#?} )",
+                &new_session.id,
+                new_session.amount_total.unwrap().clone() as f64 / 100.0,
+                &new_session.created,
+                &new_session.expires_at
+            );
 
-        Ok(checkout_session.id.to_string())
-    }
+        Some(new_session.into())
+    };
+
+    stripe_sync();
+
+    leptos_axum::redirect(&checkout_session.clone().unwrap().url.unwrap());
+
+    Ok(checkout_session.unwrap())
 }
 
 use log::*;
-use stripe_retypes::DbProduct;
+use stripe_retypes::{DbCheckoutSession, DbCheckoutSessionStatus, DbProduct};
 #[leptos::server(
     // name = FetchStripeData,
     // endpoint = "fetch_stripe_data",
@@ -255,7 +365,8 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
                 return Err(ServerFnError::ServerError(err.to_string()));
             }
         };
-    let checkout_session_list_params = ListCheckoutSessions::new();
+    let mut checkout_session_list_params = ListCheckoutSessions::new();
+    checkout_session_list_params.expand = &["data.line_items"];
     let list_of_checkout_sessions_from_stripe_api =
         match CheckoutSession::list(&client, &checkout_session_list_params).await {
             Ok(list) => list,
@@ -307,6 +418,17 @@ pub mod sync {
         }
         pub async fn new_fetch() -> Result<Self, ServerFnError> {
             fetch_stripe_data().await
+        }
+    }
+
+    impl From<Vec<stripe::CheckoutSessionItem>> for ShoppingCart {
+        fn from(value: Vec<stripe::CheckoutSessionItem>) -> Self {
+            let mut cart = ShoppingCart::default();
+            value.into_iter().map(|item| {
+                cart.0
+                    .insert(item.id.to_string(), item.quantity.unwrap_or_default() as u8)
+            });
+            cart
         }
     }
 
@@ -566,9 +688,9 @@ pub mod sync {
     }
 }
 #[server (
-    name = Redirect,
+    name = RedirectToUrl,
 )]
-pub async fn redirect(url: String) -> Result<(), leptos::ServerFnError> {
+pub async fn redirect_to_url(url: String) -> Result<(), leptos::ServerFnError> {
     leptos_axum::redirect(&url);
     Ok(())
 }
@@ -602,7 +724,7 @@ pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
         })
         .await?;
 
-    info!("Starting sync of local StripeData with Stripe API...");
+    info!("v----Starting sync of local StripeData with Stripe API----v");
 
     let new_stripedata: Option<StripeData> = match StripeData::new_fetch().await {
         Ok(ok) => Some(ok),
@@ -614,7 +736,7 @@ pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
 
     appstate.stripe_data = match new_stripedata.clone() {
         Some(data) => {
-            info!("v----Synced-StripeData---v");
+            info!("v----Synced-StripeData----v");
             info!("Synchronized AppState with Stripe API");
             info!("Total Products: {:#?}", data.products.len());
             info!("Total Customers: {:#?}", data.customers.len());
