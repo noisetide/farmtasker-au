@@ -24,12 +24,13 @@ wasm-bindgen = "0.2.92"
 axum = { version = "0.7", features = ["macros"], optional = true }
 leptos-use = "0.13.5"
 codee = { version = "0.2.0", features = ["base64", "json_serde", "json_serde_wasm"] }
+tower = "0.5.1"
+tower-http = "0.5"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 axum_session = "0.14.2"
 inquire = "0.7.5"
 async-stripe = { version = "*", features = ["runtime-tokio-hyper-rustls"]}
-tower = { version = "0.4"}
 tower-http = { version = "0.5", features = ["fs"]}
 # surrealdb = "1.5.4"
 axum-extra = "0.9.3"

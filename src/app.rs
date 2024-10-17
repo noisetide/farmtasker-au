@@ -395,7 +395,7 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
                                             </a>
                                             <button class="product-item-addtocart-button" on:click=move |_| {
                                                 set_shopping_cart.update(|s| {
-                                                    s.add_single_product(&product.get().id);
+                                                    s.add_single_product(&product.get().id, 20);
                                                 });
                                             }>
                                             "Add To Cart"
@@ -518,19 +518,32 @@ pub fn ShoppingCart() -> impl IntoView {
                                             {product_name.get()}", quantity: "{quantity}
                                         </p>
                                         <div>
-                                            <button on:click=move |_| {
-                                                set_shopping_cart.update(|s| {
-                                                    s.add_single_product(&product_id.get());
-                                                });
-                                            }>
-                                            "+"
-                                            </button>
-                                            <button on:click=move |_| {
+                                            <Show
+                                                when=move || {quantity < 20}
+                                                fallback=move || view! {
+                                                    <button class="plus_one_product_amount">
+                                                    "MAX"
+                                                    </button>
+                                                }
+                                            >
+                                                <button class="plus_one_product_amount" on:click=move |_| {
+                                                    set_shopping_cart.update(|s| {
+                                                        s.add_single_product(&product_id.get(), 20);
+                                                    });
+                                                }>
+                                                "+"
+                                                </button>
+                                            </Show>
+                                            <button class="minus_one_product_amount" on:click=move |_| {
                                                 set_shopping_cart.update(|s| {
                                                     s.remove_single_product(&product_id.get());
                                                 });
                                             }>
-                                            "-"
+                                                {move || if quantity > 1 {
+                                                    "-"
+                                                } else {
+                                                    "Delete"
+                                                }}
                                             </button>
                                         </div>
                                     </li>
