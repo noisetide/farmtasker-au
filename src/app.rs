@@ -128,7 +128,7 @@ pub fn Routerer() -> impl IntoView {
             }/>
             <Route path="/shop/products/:product_name"  view={
                 move || {
-                    let CURRENTPAGE: CurrentPage = CurrentPage::FoodShop;
+                    let CURRENTPAGE: CurrentPage = CurrentPage::ProductItemDetails;
 
                     let params = use_params_map();
                     let product_name = params.with(|params| params.get("product_name").cloned()).unwrap_or("no parameter".into());
@@ -137,7 +137,7 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=move || {view!{<ShopItem product_name=product_name.clone()/>}} currentpage=CURRENTPAGE/>
+                        <Pager page=move || {view!{<ProductItemDetailsPage product_name=product_name.clone()/>}} currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
@@ -240,6 +240,7 @@ pub enum CurrentPage {
     PetShop,
     FoodShop,
     About,
+    ProductItemDetails,
     PrivacyPolicy,
     TermsOfService,
     ShoppingCart,
@@ -269,7 +270,8 @@ where
                             CurrentPage::TermsOfService => {"pager-content-terms-of-service"},
                             CurrentPage::ShoppingCart => {"pager-content-shopping-cart"},
                             CurrentPage::VideoInstructionsService => {"pager-content-video-instructions-service"},
-                            CurrentPage::VideoBlogCulinaryAdventure => {"pager-content-video-blog-culinary-adventure"}
+                            CurrentPage::VideoBlogCulinaryAdventure => {"pager-content-video-blog-culinary-adventure"},
+                            CurrentPage::ProductItemDetails => {"pager-content-product-item-details"},
                         }
                     >{page()}</div>
                 </div>
@@ -298,7 +300,47 @@ pub fn HomePage() -> impl IntoView {
 }
 
 #[component]
-pub fn ShopItem(product_name: String) -> impl IntoView {
+pub fn ProductItemDetails(product: DbProduct) -> impl IntoView {
+    let (product, _) = create_signal(product);
+    provide_context(product);
+
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+    provide_context(shopping_cart);
+    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+    provide_context(set_shopping_cart);
+
+    view! {
+        <div class="product-item-container">
+            <Show
+                when=move || {product.get().images.is_some_and(|x| !x.is_empty())}
+                fallback=move || {view!{
+                    <div class="product-item-empty">
+                    </div>
+                }}
+            >
+                <img class="product-item-image" src={product.get().images.unwrap().first()}/>
+            </Show>
+            <div class="product-info">
+                <strong class="product-item-name">
+                    {product.get().name}
+                </strong>
+                <p class="product-item-description">
+                    {product.get().description.unwrap_or("No Description.".to_string())}
+                </p>
+            </div>
+            <button class="product-item-addtocart-button" on:click=move |_| {
+                set_shopping_cart.update(|s| {
+                    s.add_single_product(&product.get().id, 20);
+                });
+            }>
+            "Add To Cart $"{product.get().default_price.unwrap().unit_amount.unwrap() / 100}
+            </button>
+        </div>
+    }
+}
+
+#[component]
+pub fn ProductItemDetailsPage(product_name: String) -> impl IntoView {
     let stripe_data = expect_context::<StripeDataRes>();
     let (product_name, _) = create_signal(product_name);
     provide_context(product_name);
@@ -326,39 +368,8 @@ pub fn ShopItem(product_name: String) -> impl IntoView {
                         cmp1 == cmp2
                     }) {
                         Some(product) => {
-                            let (product, _) = create_signal(product);
                             view!{
-                                <a href=move || {
-                                    let product_name = product.get().name.to_lowercase().replace(" ", "-");
-                                    format!("/shop/products/:{:#}", product_name)
-                                }>
-                                    <Show
-                                        when=move || {product.get().images.is_some()}
-                                        fallback=move || view! {
-                                            <img class="product-item-image" src="default_product_image.jpg"/>
-                                        }
-                                    >
-                                        <img class="product-item-image" src={product.get().images.unwrap().first()}/>
-                                    </Show>
-                                    <div class="product-info">
-                                        <p class="product-item-name">
-                                            {product.get().name}
-                                        </p>
-                                        <p class="product-item-price">
-                                            {product.get().default_price.unwrap().unit_amount.unwrap() / 100}"$A"
-                                        </p>
-                                        <p class="product-item-description">
-                                            {product.get().description.unwrap_or_default()}
-                                        </p>
-                                    </div>
-                                </a>
-                                <button class="product-item-addtocart-button" on:click=move |_| {
-                                    set_shopping_cart.update(|s| {
-                                        s.add_single_product(&product.get().id, 20);
-                                    });
-                                }>
-                                "Add To Cart"
-                                </button>
+                                <ProductItemDetails product=product/>
                             }.into_view()
                         },
                         None => view!{
@@ -374,18 +385,16 @@ pub fn ShopItem(product_name: String) -> impl IntoView {
 #[component]
 pub fn PetShop() -> impl IntoView {
     view! {
-        <h1>"Pet Food Shop!!!"</h1>
-        <ProductItems items_category="pet_food".to_string()/>
+        <h1 class="shop-title">"Pet Food Shop"</h1>
+        <ProductItemsList items_category="pet_food".to_string()/>
     }
-
-    /* Navbar styles */
 }
 
 #[component]
 pub fn FoodShop() -> impl IntoView {
     view! {
-        <h1>"Farm Food Shop"</h1>
-        <ProductItems items_category="food".to_string()/>
+        <h1 class="shop-title">"Farm Food Shop"</h1>
+        <ProductItemsList items_category="food".to_string()/>
     }
 }
 
@@ -408,12 +417,12 @@ pub fn About() -> impl IntoView {
     view! {
         <div class="about-us-image-container">
             <img class="about-us-image" src="/photos/DSCF6711.jpg" alt="About Us"/>
-            <div class="about-us-image-block-1">
+            <strong class="about-us-image-block-1">
                 "About"
-            </div>
-            <div class="about-us-image-block-2">
+            </strong>
+            <strong class="about-us-image-block-2">
                 "Us"
-            </div>
+            </strong>
         </div>
     }
 }
@@ -445,17 +454,53 @@ pub fn TermsOfService() -> impl IntoView {
         </div>
     }
 }
-
 #[component]
-pub fn ProductItems(items_category: String) -> impl IntoView {
-    let stripe_data = expect_context::<StripeDataRes>();
-    let (items_category, set_items_category) = create_signal(items_category);
-    provide_context(items_category);
+pub fn ProductItem(product: DbProduct) -> impl IntoView {
+    let (product, _) = create_signal(product);
+    provide_context(product);
 
     let shopping_cart = expect_context::<Signal<ShoppingCart>>();
     provide_context(shopping_cart);
     let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
     provide_context(set_shopping_cart);
+
+    view! {
+        <div class="product-item-container">
+            <a href=move || {
+                let product_name = product.get().name.to_lowercase().replace(" ", "-");
+                format!("/shop/products/:{:#}", product_name)
+            }>
+                <Show
+                    when=move || {product.get().images.is_some_and(|x| !x.is_empty())}
+                    fallback=move || {view!{
+                        <div class="product-item-empty">
+                        </div>
+                    }}
+                >
+                    <img class="product-item-image" src={product.get().images.unwrap().first()}/>
+                </Show>
+                <div class="product-info">
+                    <strong class="product-item-name">
+                        {product.get().name}
+                    </strong>
+                </div>
+            </a>
+            <button class="product-item-addtocart-button" on:click=move |_| {
+                set_shopping_cart.update(|s| {
+                    s.add_single_product(&product.get().id, 20);
+                });
+            }>
+            "Add To Cart $"{product.get().default_price.unwrap().unit_amount.unwrap() / 100}
+            </button>
+        </div>
+    }
+}
+
+#[component]
+pub fn ProductItemsList(items_category: String) -> impl IntoView {
+    let stripe_data = expect_context::<StripeDataRes>();
+    let (items_category, set_items_category) = create_signal(items_category);
+    provide_context(items_category);
 
     view! {
         <Suspense fallback=move || view! {"loading data"}>
@@ -479,41 +524,9 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
                                         .unwrap_or(false)
                                 })
                                 .map(|product| {
-                                    let (product, _) = create_signal(product);
                                     view! {
                                         <li class="product-list-item">
-                                            <a href=move || {
-                                                let product_name = product.get().name.to_lowercase().replace(" ", "-");
-                                                format!("/shop/products/:{:#}", product_name)
-                                            }>
-                                                <Show
-                                                    when=move || {product.get().images.is_some()}
-                                                    fallback=move || view! {
-                                                        <div class="product-item-image">
-                                                        </div>
-                                                    }
-                                                >
-                                                    <img class="product-item-image" src={product.get().images.unwrap().first()}/>
-                                                </Show>
-                                                <div class="product-info">
-                                                    <p class="product-item-name">
-                                                        {product.get().name}
-                                                    </p>
-                                                    <p class="product-item-price">
-                                                        {product.get().default_price.unwrap().unit_amount.unwrap() / 100}"$A"
-                                                    </p>
-                                                    <p class="product-item-description">
-                                                        {product.get().description.unwrap_or_default()}
-                                                    </p>
-                                                </div>
-                                            </a>
-                                            <button class="product-item-addtocart-button" on:click=move |_| {
-                                                set_shopping_cart.update(|s| {
-                                                    s.add_single_product(&product.get().id, 20);
-                                                });
-                                            }>
-                                            "Add To Cart"
-                                            </button>
+                                            <ProductItem product=product/>
                                         </li>
                                     }
                                 })
@@ -788,20 +801,6 @@ pub fn NavBar() -> impl IntoView {
                 <li>
                     <a
                     class:current=move || {
-                        matches!(selected.get(), CurrentPage::FoodShop)
-                    }
-                        href="/shop/food" id="button_middle">"Food Shop"</a>
-                </li>
-                <li>
-                    <a
-                    class:current=move || {
-                        matches!(selected.get(), CurrentPage::PetShop)
-                    }
-                        href="/shop/pet" id="button_middle">"Pet Shop"</a>
-                </li>
-                <li>
-                    <a
-                    class:current=move || {
                         matches!(selected.get(), CurrentPage::VideoInstructionsService)
                     }
                         href="/video/instructions" id="button_middle">"Video Instructions"</a>
@@ -812,6 +811,20 @@ pub fn NavBar() -> impl IntoView {
                         matches!(selected.get(), CurrentPage::VideoBlogCulinaryAdventure)
                     }
                         href="/video/blog/culinary-adventure" id="button_middle">"Video Blogs"</a> // TODO GLOBAL BLOGS PAGE
+                </li>
+                <li>
+                    <a
+                    class:current=move || {
+                        matches!(selected.get(), CurrentPage::FoodShop)
+                    }
+                        href="/shop/food" id="button_middle">"Food Shop"</a>
+                </li>
+                <li>
+                    <a
+                    class:current=move || {
+                        matches!(selected.get(), CurrentPage::PetShop)
+                    }
+                        href="/shop/pet" id="button_middle">"Pet Shop"</a>
                 </li>
                 <li>
                     <a
