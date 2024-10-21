@@ -95,51 +95,78 @@ pub fn Routerer() -> impl IntoView {
         <Routes>
             <Route path="/" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::HomePage;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::HomePage);
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=HomePage currentpage=CurrentPage::HomePage/>
+                        <Pager page=HomePage currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/shop/pet" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::PetShop;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::PetShop);
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=PetShop currentpage=CurrentPage::PetShop/>
+                        <Pager page=PetShop currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/shop/food" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::FoodShop;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::FoodShop);
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=FoodShop currentpage=CurrentPage::FoodShop/>
+                        <Pager page=FoodShop currentpage=CURRENTPAGE/>
+                    }
+                }
+            }/>
+            <Route path="/shop/products/:product_name"  view={
+                move || {
+                    let CURRENTPAGE: CurrentPage = CurrentPage::FoodShop;
+
+                    let params = use_params_map();
+                    let product_name = params.with(|params| params.get("product_name").cloned()).unwrap_or("no parameter".into());
+
+
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
+                    view! {
+                        <Pager page=move || {view!{<ShopItem product_name=product_name.clone()/>}} currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/about" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::About;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::About);
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=About currentpage=CurrentPage::About/>
+                        <Pager page=About currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/privacy" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::PrivacyPolicy;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::PrivacyPolicy);
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=PrivacyPolicy currentpage=CurrentPage::PrivacyPolicy/>
+                        <Pager page=PrivacyPolicy currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/terms" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::None;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CurrentPage::TermsOfService);
                     view! {
@@ -149,46 +176,56 @@ pub fn Routerer() -> impl IntoView {
             }/>
             <Route path="/shop/cart" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::ShoppingCart;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::ShoppingCart);
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=ShoppingCart currentpage=CurrentPage::ShoppingCart/>
+                        <Pager page=ShoppingCart currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/video/instructions" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::VideoInstructionsService;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::VideoInstructionsService);
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=VideoInstructionsService currentpage=CurrentPage::VideoInstructionsService/>
+                        <Pager page=VideoInstructionsService currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/video/blog/culinary-adventure" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::VideoBlogCulinaryAdventure;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::VideoBlogCulinaryAdventure);
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=VideoBlogCulinaryAdventure currentpage=CurrentPage::VideoBlogCulinaryAdventure/>
+                        <Pager page=VideoBlogCulinaryAdventure currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/success" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::None;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::None);
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=SuccessCheckout currentpage=CurrentPage::None/>
+                        <Pager page=SuccessCheckout currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/cancel" view={
                 move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::None;
+
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
-                    setter.update(|page: &mut CurrentPage| *page = CurrentPage::None);
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=CancelCheckout currentpage=CurrentPage::None/>
+                        <Pager page=CancelCheckout currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
@@ -257,6 +294,80 @@ pub fn HomePage() -> impl IntoView {
         <a href="/video/blog/culinary-adventure" class="shop-selector-container" id="button_culinary_adventure">
             <p class="shop_selector_title">"Video Blog"</p>
         </a>
+    }
+}
+
+#[component]
+pub fn ShopItem(product_name: String) -> impl IntoView {
+    let stripe_data = expect_context::<StripeDataRes>();
+    let (product_name, _) = create_signal(product_name);
+    provide_context(product_name);
+
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+    provide_context(shopping_cart);
+    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+    provide_context(set_shopping_cart);
+
+    view! {
+        <Suspense fallback=move || view! {"loading data"}>
+            {move || match stripe_data.get() {
+                None => view! { <p>"Loading..."</p> }.into_view(),
+                Some(stripe_data) => {
+                    let stripe_data: StripeData = stripe_data.expect("Resource StripeData is not here on 'get()'");
+                    let product_name = expect_context::<ReadSignal<String>>();
+                    provide_context(product_name);
+
+
+                    match stripe_data.products.into_iter()
+                    .find(|product| {
+                        let cmp1 = product.name.to_lowercase().replace(" ", "-");
+                        let cmp2 = &product_name.get()[1..];
+
+                        cmp1 == cmp2
+                    }) {
+                        Some(product) => {
+                            let (product, _) = create_signal(product);
+                            view!{
+                                <a href=move || {
+                                    let product_name = product.get().name.to_lowercase().replace(" ", "-");
+                                    format!("/shop/products/:{:#}", product_name)
+                                }>
+                                    <Show
+                                        when=move || {product.get().images.is_some()}
+                                        fallback=move || view! {
+                                            <img class="product-item-image" src="default_product_image.jpg"/>
+                                        }
+                                    >
+                                        <img class="product-item-image" src={product.get().images.unwrap().first()}/>
+                                    </Show>
+                                    <div class="product-info">
+                                        <p class="product-item-name">
+                                            {product.get().name}
+                                        </p>
+                                        <p class="product-item-price">
+                                            {product.get().default_price.unwrap().unit_amount.unwrap() / 100}"$A"
+                                        </p>
+                                        <p class="product-item-description">
+                                            {product.get().description.unwrap_or_default()}
+                                        </p>
+                                    </div>
+                                </a>
+                                <button class="product-item-addtocart-button" on:click=move |_| {
+                                    set_shopping_cart.update(|s| {
+                                        s.add_single_product(&product.get().id, 20);
+                                    });
+                                }>
+                                "Add To Cart"
+                                </button>
+                            }.into_view()
+                        },
+                        None => view!{
+                            <div>"NO PRODUCT WITH SUCH NAME"</div>
+                        }.into_view(),
+                    }
+                }
+            }}
+        </Suspense>
     }
 }
 
@@ -371,7 +482,10 @@ pub fn ProductItems(items_category: String) -> impl IntoView {
                                     let (product, _) = create_signal(product);
                                     view! {
                                         <li class="product-list-item">
-                                            <a href=move || { format!("/shop/{:#}/{:#}", items_category.get(), product.get().name.to_lowercase().replace(" ", "-")) }>
+                                            <a href=move || {
+                                                let product_name = product.get().name.to_lowercase().replace(" ", "-");
+                                                format!("/shop/products/:{:#}", product_name)
+                                            }>
                                                 <Show
                                                     when=move || {product.get().images.is_some()}
                                                     fallback=move || view! {
