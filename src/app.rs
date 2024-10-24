@@ -416,13 +416,13 @@ pub fn VideoBlogCulinaryAdventure() -> impl IntoView {
 pub fn About() -> impl IntoView {
     view! {
         <div class="about-us-image-container">
-            <img class="about-us-image" src="/photos/DSCF6711.jpg" alt="About Us"/>
-            <strong class="about-us-image-block-1">
-                "About"
-            </strong>
-            <strong class="about-us-image-block-2">
-                "Us"
-            </strong>
+            <img class="about-us-image" src="/about_us_page/1-1.png" alt="About Us"/>
+            // <strong class="about-us-image-block-1">
+            //     "About"
+            // </strong>
+            // <strong class="about-us-image-block-2">
+            //     "Us"
+            // </strong>
         </div>
     }
 }
@@ -882,10 +882,6 @@ pub fn NavBar() -> impl IntoView {
                     >
                         <img
                              src="/buttons/online_shop.png" class="button_middle_image" alt="Home"
-                                style:height="auto"
-                                style:width="100%"
-                                style:max-height="8vh"
-                                style:object-fit="contain"
                         />
                     </a>
                 </li>
@@ -896,10 +892,6 @@ pub fn NavBar() -> impl IntoView {
                     >
                         <img
                              src="/buttons/food_shop.png" class="button_middle_image" alt="Food Shop"
-                                style:height="auto"
-                                style:width="100%"
-                                style:max-height="8vh"
-                                style:object-fit="contain"
                         />
                     </a>
                 </li>
@@ -910,10 +902,6 @@ pub fn NavBar() -> impl IntoView {
                     >
                         <img
                              src="/buttons/pet_shop.png" class="button_middle_image" alt="Pet Shop"
-                                style:height="auto"
-                                style:width="100%"
-                                style:max-height="8vh"
-                                style:object-fit="contain"
                         />
                     </a>
                 </li>
@@ -924,10 +912,6 @@ pub fn NavBar() -> impl IntoView {
                     >
                         <img
                              src="/buttons/video_instructions.png" class="button_middle_image" alt="Video Instructions"
-                                style:height="auto"
-                                style:width="100%"
-                                style:max-height="8vh"
-                                style:object-fit="contain"
                         />
                     </a>
                 </li>
@@ -938,10 +922,6 @@ pub fn NavBar() -> impl IntoView {
                     >
                         <img
                              src="/buttons/video_blog.png" class="button_middle_image" alt="Video Blogs"
-                                style:height="auto"
-                                style:width="100%"
-                                style:max-height="8vh"
-                                style:object-fit="contain"
                         />
                     </a>
                 </li>
@@ -952,10 +932,6 @@ pub fn NavBar() -> impl IntoView {
                     >
                         <img
                              src="/buttons/about_us.png" class="button_middle_image" alt="About Us"
-                                style:height="auto"
-                                style:width="100%"
-                                style:max-height="8vh"
-                                style:object-fit="contain"
                         />
                     </a>
                 </li>

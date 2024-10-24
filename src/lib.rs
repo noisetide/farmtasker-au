@@ -96,9 +96,33 @@ impl ShoppingCart {
             }
         }
     }
-    pub fn total(self) -> u64 {
+    pub fn total_quantity(self) -> u64 {
         self.0.values().map(|&v| v as u64).sum()
     }
+
+    pub fn calculate_total_price(&self, stripe_data: &[DbProduct]) -> i64 {
+        let mut total_price: i64 = 0;
+
+        // Iterate over the shopping cart (product_id, quantity)
+        for (product_id, &quantity) in &self.0 {
+            // Find the corresponding product in stripe_data
+            if let Some(product) = stripe_data.iter().find(|p| p.id == *product_id) {
+                // Check if the product has a default price and if it's active
+                if let Some(price) = &product.default_price {
+                    if price.active {
+                        // Get the unit_amount from the price, default to 0 if it's not present
+                        if let Some(unit_amount) = price.unit_amount {
+                            // Multiply the unit price by the quantity and add it to the total
+                            total_price += unit_amount * quantity as i64;
+                        }
+                    }
+                }
+            }
+        }
+
+        total_price
+    }
+
     pub fn delete_product(&mut self, product_id: String) {
         self.0.remove(&product_id);
     }
@@ -128,6 +152,8 @@ pub struct StripeData {
     pub products: Vec<stripe_retypes::DbProduct>,
     pub customers: Vec<stripe_retypes::DbCustomer>,
     pub checkout_sessions: Vec<stripe_retypes::DbCheckoutSession>,
+    pub default_shipping_rate_id: String,
+    pub free_shipping_rate_id: String,
 }
 
 /// Find if there is existing session by id
@@ -172,6 +198,7 @@ pub async fn new_checkout_session(
             return Err(ServerFnError::ServerError(err.to_string()));
         }
     });
+    let stripe_data: StripeData = stater().await?;
 
     let base_url = match std::env::var("DEVPORT") {
         Ok(port) => "http://localhost:4444",
@@ -192,12 +219,35 @@ pub async fn new_checkout_session(
                 stripe::CreateCheckoutSessionShippingAddressCollectionAllowedCountries::Au,
             ],
         });
+
+    let total_price: i64 = shopping_cart.calculate_total_price(&stripe_data.products);
+
+    let is_cart_under: bool = total_price < 30000;
+
+    params.shipping_options = if is_cart_under {
+        Some(vec![CreateCheckoutSessionShippingOptions {
+            /// The ID of the Shipping Rate to use for this shipping option.
+            shipping_rate: Some(stripe_data.default_shipping_rate_id),
+
+            /// Parameters to be passed to Shipping Rate creation for this shipping option.
+            shipping_rate_data: None,
+        }])
+    } else {
+        Some(vec![CreateCheckoutSessionShippingOptions {
+            /// The ID of the Shipping Rate to use for this shipping option.
+            shipping_rate: Some(stripe_data.free_shipping_rate_id),
+
+            /// Parameters to be passed to Shipping Rate creation for this shipping option.
+            shipping_rate_data: None,
+        }])
+    };
     params.consent_collection = Some(CreateCheckoutSessionConsentCollection {
         payment_method_reuse_agreement: Some(CreateCheckoutSessionConsentCollectionPaymentMethodReuseAgreement {
             position: CreateCheckoutSessionConsentCollectionPaymentMethodReuseAgreementPosition::Hidden,
         }),
         ..Default::default()
     });
+
     // Collect additional information from your customer using custom fields.
     //
     // Up to 3 fields are supported.
@@ -270,7 +320,6 @@ pub async fn new_checkout_session(
 
     let mut line_items_vec = Vec::new();
 
-    let stripe_data: StripeData = stater().await?;
     for (product_id, quantity) in &shopping_cart.0 {
         if let Some(product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
             let line_item = CreateCheckoutSessionLineItems {
@@ -406,6 +455,8 @@ use stripe_retypes::{DbCheckoutSession, DbCheckoutSessionStatus, DbProduct};
     // endpoint = "fetch_stripe_data",
 )]
 pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
+    info!("New fetch api call to Stripe...");
+
     use stripe::*;
     let client = Client::new(match std::env::var("STRIPE_KEY") {
         Ok(ok) => ok,
@@ -415,6 +466,7 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
         }
     });
 
+    // Products
     let mut product_list_params = ListProducts::new();
     product_list_params.active = Some(true);
     product_list_params.expand = &["data.default_price"];
@@ -427,6 +479,7 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
         }
     };
 
+    // Customers
     let customer_list_params = ListCustomers::new();
     let list_of_customers_from_stripe_api =
         match Customer::list(&client, &customer_list_params).await {
@@ -436,6 +489,8 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
                 return Err(ServerFnError::ServerError(err.to_string()));
             }
         };
+
+    // Checkout Sessions
     let mut checkout_session_list_params = ListCheckoutSessions::new();
     checkout_session_list_params.expand = &["data.line_items"];
     let list_of_checkout_sessions_from_stripe_api =
@@ -447,11 +502,150 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
             }
         };
 
-    info!("New fetch api call to Stripe...");
+    // Shipping Rates
+    let mut shipping_rates_list_params = ListShippingRates::new();
+    shipping_rates_list_params.active = Some(true);
+    let list_of_shipping_rates_from_stripe_api: List<ShippingRate> =
+        match ShippingRate::list(&client, &shipping_rates_list_params).await {
+            Ok(list) => list,
+            Err(err) => {
+                log::error!("{:#?}", err);
+                return Err(ServerFnError::ServerError(err.to_string()));
+            }
+        };
+
+    let default_shipping_rate_id: String = match {
+        list_of_shipping_rates_from_stripe_api
+            .data
+            .iter()
+            .find(|rate| {
+                if let Some(fixed_amount) = &rate.fixed_amount {
+                    if fixed_amount.amount > 0 && fixed_amount.currency == Currency::AUD {
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            })
+    } {
+        Some(first_shipping_rate) => {
+            info!(
+                "Found Default Shipping Rate ID: {:#?} for {:#?}$",
+                first_shipping_rate.id.to_string().clone(),
+                first_shipping_rate.fixed_amount.clone().unwrap().amount as f64 / 100.0,
+            );
+            first_shipping_rate.id.to_string()
+        }
+        None => {
+            let mut create_default_shipping_rate_params = CreateShippingRate {
+                delivery_estimate: Some(CreateShippingRateDeliveryEstimate {
+                    maximum: Some(CreateShippingRateDeliveryEstimateMaximum {
+                        unit: CreateShippingRateDeliveryEstimateMaximumUnit::Day,
+                        value: 4,
+                    }),
+                    minimum: Some(CreateShippingRateDeliveryEstimateMinimum {
+                        unit: CreateShippingRateDeliveryEstimateMinimumUnit::Day,
+                        value: 7,
+                    }),
+                }),
+                display_name: "Default Created Shipping Rate",
+                expand: &[],
+                fixed_amount: Some(CreateShippingRateFixedAmount {
+                    amount: 1000, // 10$AUD
+                    currency: Currency::AUD,
+                    currency_options: None,
+                }),
+                metadata: None,
+                tax_behavior: None,
+                tax_code: None,
+                type_: Some(ShippingRateType::FixedAmount),
+            };
+            info!("Creating New Default Shipping Rate.");
+            let shipping_rate =
+                match ShippingRate::create(&client, create_default_shipping_rate_params).await {
+                    Ok(rate) => rate,
+                    Err(err) => {
+                        log::error!("{:#?}", err);
+                        return Err(ServerFnError::ServerError(err.to_string()));
+                    }
+                };
+            shipping_rate.id.to_string()
+        }
+    };
+
+    let free_shipping_rate_id: String = match {
+        list_of_shipping_rates_from_stripe_api
+            .data
+            .iter()
+            .find(|rate| {
+                if let Some(fixed_amount) = &rate.fixed_amount {
+                    if fixed_amount.amount == 0 && fixed_amount.currency == Currency::AUD {
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            })
+    } {
+        Some(free_shipping_rate) => {
+            info!(
+                "Found Free Shipping Rate ID: {:#?} for {:#?}$",
+                free_shipping_rate.id.to_string().clone(),
+                free_shipping_rate.fixed_amount.clone().unwrap().amount as f64 / 100.0
+            );
+            free_shipping_rate.id.to_string()
+        }
+        None => {
+            let mut create_free_shipping_rate_params = CreateShippingRate {
+                delivery_estimate: Some(CreateShippingRateDeliveryEstimate {
+                    maximum: Some(CreateShippingRateDeliveryEstimateMaximum {
+                        unit: CreateShippingRateDeliveryEstimateMaximumUnit::Day,
+                        value: 7,
+                    }),
+                    minimum: Some(CreateShippingRateDeliveryEstimateMinimum {
+                        unit: CreateShippingRateDeliveryEstimateMinimumUnit::Day,
+                        value: 4,
+                    }),
+                }),
+                display_name: "Free Created Shipping Rate",
+                expand: &[],
+                fixed_amount: Some(CreateShippingRateFixedAmount {
+                    amount: 0,
+                    currency: Currency::AUD,
+                    currency_options: None,
+                }),
+                metadata: None,
+                tax_behavior: None,
+                tax_code: None,
+                type_: Some(ShippingRateType::FixedAmount),
+            };
+            info!("Creating New Free Shipping Rate.");
+            let shipping_rate =
+                match ShippingRate::create(&client, create_free_shipping_rate_params).await {
+                    Ok(rate) => rate,
+                    Err(err) => {
+                        log::error!("{:#?}", err);
+                        return Err(ServerFnError::ServerError(err.to_string()));
+                    }
+                };
+            shipping_rate.id.to_string()
+        }
+    };
+
+    info!("Default Shipping Rate ID: {:#?}", default_shipping_rate_id);
+    info!("Free Shipping Rate ID: {:#?}", free_shipping_rate_id);
+    leptos::logging::log!("\n");
+
     Ok(StripeData::new(
         list_of_products_from_stripe_api,
         list_of_customers_from_stripe_api,
         list_of_checkout_sessions_from_stripe_api,
+        default_shipping_rate_id,
+        free_shipping_rate_id,
     ))
 }
 
@@ -476,6 +670,8 @@ pub mod sync {
             products: List<Product>,
             customers: List<Customer>,
             checkout_sessions: List<CheckoutSession>,
+            default_shipping_rate_id: String,
+            free_shipping_rate_id: String,
         ) -> Self {
             StripeData {
                 products: products.data.into_iter().map(|x| x.into()).collect(),
@@ -485,6 +681,8 @@ pub mod sync {
                     .into_iter()
                     .map(|x| x.into())
                     .collect(),
+                default_shipping_rate_id,
+                free_shipping_rate_id,
             }
         }
         pub async fn new_fetch() -> Result<Self, ServerFnError> {
@@ -811,6 +1009,7 @@ pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
             info!("Synchronized AppState with Stripe API");
             info!("Total Products: {:#?}", data.products.len());
             info!("Total Customers: {:#?}", data.customers.len());
+            info!("Shiping Rate ID: {:#?}", data.default_shipping_rate_id);
             tracing::info!(
                 "Total of currently Open \"Checkout Sessions\": {:}",
                 data.checkout_sessions
