@@ -557,15 +557,6 @@ pub fn SuccessCheckout() -> impl IntoView {
 
 #[component]
 pub fn CancelCheckout() -> impl IntoView {
-    view! {
-        <div>
-            "Checkout Cancelled..."
-        </div>
-    }
-}
-
-#[component]
-pub fn ShoppingCart() -> impl IntoView {
     let stripe_data = expect_context::<StripeDataRes>();
     provide_context(stripe_data);
 
@@ -609,7 +600,91 @@ pub fn ShoppingCart() -> impl IntoView {
                 .unwrap_or_else(|| "Loading".into());
             // leptos::logging::log!("session: {:#?}", session);
             // stripe_data.get().expect("no stripdata lol")
-            "Idle..."
+            "Checkout"
+        }
+    };
+
+    view! {
+        <div>
+            "Checkout Cancelled..."
+        </div>
+        <Show
+            when=move || {
+                let stripe_data = match stripe_data.get()  {
+                    Some(ok) => ok,
+                    None => return false,
+                }.unwrap();
+                stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
+            }
+            fallback=move || view!{}
+        >
+            <button on:click=move |_| {
+                let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
+
+                let mut url = String::new();
+
+                if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
+                    url = session.url.to_owned().expect("Checkout session has no url!!!");
+                    spawn_local(async move {
+                        redirect_to_url(url).await;
+                    })
+                } else {
+                    leptos::logging::log!("No active checkout session.")
+                }
+            }>
+                "Back to checkout"
+            </button>
+        </Show>
+
+    }
+}
+
+#[component]
+pub fn ShoppingCart() -> impl IntoView {
+    let stripe_data = expect_context::<StripeDataRes>();
+    provide_context(stripe_data);
+
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+    provide_context(shopping_cart);
+
+    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+    provide_context(set_shopping_cart);
+
+    let checkout_sessionid = expect_context::<Signal<CheckoutSessionIdRes>>();
+    provide_context(checkout_sessionid);
+    let set_checkout_sessionid = expect_context::<WriteSignal<CheckoutSessionIdRes>>();
+    provide_context(set_checkout_sessionid);
+
+    let submit_checkout = expect_context::<ReadSignal<CheckoutSessionUpdateRes>>();
+    provide_context(submit_checkout);
+    let set_submit_checkout = expect_context::<WriteSignal<CheckoutSessionUpdateRes>>();
+    provide_context(set_submit_checkout);
+
+    let checkout_sessionid = expect_context::<Signal<CheckoutSessionIdRes>>();
+    provide_context(checkout_sessionid);
+
+    let checkout_session = expect_context::<CheckoutSessionRes>();
+    provide_context(checkout_session);
+
+    let loading = checkout_session.loading();
+    let is_checkout_loading = move || {
+        if loading() {
+            "Loading..."
+        } else {
+            let session = checkout_session
+                .get()
+                .map(|value| {
+                    value
+                        .map(|value2| {
+                            set_checkout_sessionid.update(|s| *s = value2.id.clone());
+                            value2.id
+                        })
+                        .unwrap_or_else(|x| "Loading 2".into())
+                })
+                .unwrap_or_else(|| "Loading".into());
+            // leptos::logging::log!("session: {:#?}", session);
+            // stripe_data.get().expect("no stripdata lol")
+            "Checkout"
         }
     };
 
@@ -680,7 +755,6 @@ pub fn ShoppingCart() -> impl IntoView {
                     }
                 </ul>
                 <div class="shopping-cart-ceckout-section">
-                    {is_loading}
                     <button class="checkout-button" on:click=move |_| {
                             let checkout_sessionid_before = checkout_sessionid.get();
 
@@ -693,7 +767,7 @@ pub fn ShoppingCart() -> impl IntoView {
                             });
 
                         }>
-                        "Checkout"
+                        {is_checkout_loading} // checkout button text
                     </button>
                     <button on:click=move |_| {
                             set_shopping_cart.update(|s| {
@@ -702,30 +776,33 @@ pub fn ShoppingCart() -> impl IntoView {
                         }>
                         "Clear"
                     </button>
-                    // <Show
-                    //     when=move || {
-                    //         let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
-                    //         stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
-                    //     }
-                    //     fallback=move || view!{}
-                    // >
-                    //     <button on:click=move |_| {
-                    //         let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
+                    <Show
+                        when=move || {
+                            let stripe_data = match stripe_data.get()  {
+                                Some(ok) => ok,
+                                None => return false,
+                            }.unwrap();
+                            stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
+                        }
+                        fallback=move || view!{}
+                    >
+                        <button on:click=move |_| {
+                            let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
 
-                    //         let mut url = String::new();
+                            let mut url = String::new();
 
-                    //         if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
-                    //             url = session.url.to_owned().expect("Checkout session has no url!!!");
-                    //             spawn_local(async move {
-                    //                 redirect_to_url(url).await;
-                    //             })
-                    //         } else {
-                    //             leptos::logging::log!("No active checkout session.")
-                    //         }
-                    //     }>
-                    //         "Back to checkout"
-                    //     </button>
-                    // </Show>
+                            if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
+                                url = session.url.to_owned().expect("Checkout session has no url!!!");
+                                spawn_local(async move {
+                                    redirect_to_url(url).await;
+                                })
+                            } else {
+                                leptos::logging::log!("No active checkout session.")
+                            }
+                        }>
+                            "Back to checkout"
+                        </button>
+                    </Show>
                 </div>
         </Show>
     }
@@ -800,38 +877,87 @@ pub fn NavBar() -> impl IntoView {
             <ul class="nav_buttons" class:is-navbar-hidden=move || is_navbar_hidden()>
                 <li>
                     <a
-                    class:current=move || {
-                        matches!(selected.get(), CurrentPage::VideoInstructionsService)
-                    }
-                        href="/video/instructions" id="button_middle">"Video Instructions"</a>
+                        class:current=move || {matches!(selected.get(), CurrentPage::HomePage)}
+                        href="/" id="button_middle"
+                    >
+                        <img
+                             src="/buttons/online_shop.png" class="button_middle_image" alt="Home"
+                                style:height="auto"
+                                style:width="100%"
+                                style:max-height="8vh"
+                                style:object-fit="contain"
+                        />
+                    </a>
                 </li>
                 <li>
                     <a
-                    class:current=move || {
-                        matches!(selected.get(), CurrentPage::VideoBlogCulinaryAdventure)
-                    }
-                        href="/video/blog/culinary-adventure" id="button_middle">"Video Blogs"</a> // TODO GLOBAL BLOGS PAGE
+                        class:current=move || {matches!(selected.get(), CurrentPage::FoodShop)}
+                        href="/shop/food" id="button_middle"
+                    >
+                        <img
+                             src="/buttons/food_shop.png" class="button_middle_image" alt="Food Shop"
+                                style:height="auto"
+                                style:width="100%"
+                                style:max-height="8vh"
+                                style:object-fit="contain"
+                        />
+                    </a>
                 </li>
                 <li>
                     <a
-                    class:current=move || {
-                        matches!(selected.get(), CurrentPage::FoodShop)
-                    }
-                        href="/shop/food" id="button_middle">"Food Shop"</a>
+                        class:current=move || {matches!(selected.get(), CurrentPage::PetShop)}
+                        href="/shop/pet" id="button_middle"
+                    >
+                        <img
+                             src="/buttons/pet_shop.png" class="button_middle_image" alt="Pet Shop"
+                                style:height="auto"
+                                style:width="100%"
+                                style:max-height="8vh"
+                                style:object-fit="contain"
+                        />
+                    </a>
                 </li>
                 <li>
                     <a
-                    class:current=move || {
-                        matches!(selected.get(), CurrentPage::PetShop)
-                    }
-                        href="/shop/pet" id="button_middle">"Pet Shop"</a>
+                        class:current=move || {matches!(selected.get(), CurrentPage::VideoInstructionsService)}
+                        href="/video/instructions" id="button_middle"
+                    >
+                        <img
+                             src="/buttons/video_instructions.png" class="button_middle_image" alt="Video Instructions"
+                                style:height="auto"
+                                style:width="100%"
+                                style:max-height="8vh"
+                                style:object-fit="contain"
+                        />
+                    </a>
                 </li>
                 <li>
                     <a
-                    class:current=move || {
-                        matches!(selected.get(), CurrentPage::About)
-                    }
-                        href="/about" id="button_middle">"About Us"</a>
+                        class:current=move || {matches!(selected.get(), CurrentPage::VideoBlogCulinaryAdventure)}
+                        href="/video/blog/culinary-adventure" id="button_middle"
+                    >
+                        <img
+                             src="/buttons/video_blog.png" class="button_middle_image" alt="Video Blogs"
+                                style:height="auto"
+                                style:width="100%"
+                                style:max-height="8vh"
+                                style:object-fit="contain"
+                        />
+                    </a>
+                </li>
+                <li>
+                    <a
+                        class:current=move || {matches!(selected.get(), CurrentPage::About)}
+                        href="/about" id="button_middle"
+                    >
+                        <img
+                             src="/buttons/about_us.png" class="button_middle_image" alt="About Us"
+                                style:height="auto"
+                                style:width="100%"
+                                style:max-height="8vh"
+                                style:object-fit="contain"
+                        />
+                    </a>
                 </li>
                 // <li>
                 //     <a

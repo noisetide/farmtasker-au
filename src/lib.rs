@@ -192,9 +192,71 @@ pub async fn new_checkout_session(
                 stripe::CreateCheckoutSessionShippingAddressCollectionAllowedCountries::Au,
             ],
         });
+    params.consent_collection = Some(CreateCheckoutSessionConsentCollection {
+        payment_method_reuse_agreement: Some(CreateCheckoutSessionConsentCollectionPaymentMethodReuseAgreement {
+            position: CreateCheckoutSessionConsentCollectionPaymentMethodReuseAgreementPosition::Hidden,
+        }),
+        ..Default::default()
+    });
+    // Collect additional information from your customer using custom fields.
+    //
+    // Up to 3 fields are supported.
+    // params.custom_fields = Some(vec![CreateCheckoutSessionCustomFields {
+    //     // Configuration for `type=dropdown` fields.
+    //     dropdown: Some(CreateCheckoutSessionCustomFieldsDropdown {
+    //         options: vec![CreateCheckoutSessionCustomFieldsDropdownOptions {
+    //             // The label for the option, displayed to the customer.
+    //             //
+    //             // Up to 100 characters.
+    //             label: String::from("I understand that I live within the delivery route "),
+
+    //             // The value for this option, not displayed to the customer, used by your integration to reconcile the option selected by the customer.
+    //             //
+    //             // Must be unique to this option, alphanumeric, and up to 100 characters.
+    //             value: String::from("deliverycollection"),
+    //         }],
+    //     }),
+    //     // dropdown: None,
+
+    //     // The label for the field, displayed to the customer.
+    //     label: CreateCheckoutSessionCustomFieldsLabel {
+    //         custom: String::from("How to collect your order?"),
+    //         type_: CreateCheckoutSessionCustomFieldsLabelType::Custom,
+    //     },
+
+    //     // Configuration for `type=numeric` fields.
+    //     // numeric: Some(CreateCheckoutSessionCustomFieldsNumeric {
+    //     //     ..Default::default()
+    //     // }),
+    //     numeric: None,
+
+    //     // Whether the customer is required to complete the field before completing the Checkout Session.
+    //     //
+    //     // Defaults to `false`.
+    //     optional: Some(false),
+
+    //     // Configuration for `type=text` fields.
+    //     // text: Some(CreateCheckoutSessionCustomFieldsText {}),
+    //     text: None,
+
+    //     // The type of the field.
+    //     type_: CreateCheckoutSessionCustomFieldsType::Dropdown,
+
+    //     // String of your choice that your integration can use to reconcile this field.
+    //     //
+    //     // Must be unique to this field, alphanumeric, and up to 200 characters.
+    //     key: String::from("deliveryconsent"),
+    //     // ..Default::default()
+    // }]);
+
     params.custom_text = Some(CreateCheckoutSessionCustomText {
         shipping_address: Some(CreateCheckoutSessionCustomTextShippingAddress {
-            message: "We make deliveries only within southern Tasmania".to_string(),
+            message: "We make deliveries only within Tasmania Derwent Valley or Hobart area."
+                .to_string(),
+        }),
+        after_submit: Some(CreateCheckoutSessionCustomTextAfterSubmit {
+            message: "We make deliveries only within Tasmania Derwent Valley or Hobart area."
+                .to_string(),
         }),
         ..Default::default()
     });
@@ -209,10 +271,14 @@ pub async fn new_checkout_session(
     let mut line_items_vec = Vec::new();
 
     let stripe_data: StripeData = stater().await?;
-
     for (product_id, quantity) in &shopping_cart.0 {
         if let Some(product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
             let line_item = CreateCheckoutSessionLineItems {
+                adjustable_quantity: Some(CreateCheckoutSessionLineItemsAdjustableQuantity {
+                    enabled: true,
+                    maximum: Some(20),
+                    minimum: Some(1),
+                }),
                 quantity: Some((*quantity).into()),
                 price: Some(product.default_price.clone().expect("NO PRICE!").id),
                 ..Default::default()
@@ -220,7 +286,6 @@ pub async fn new_checkout_session(
             line_items_vec.push(line_item);
         }
     }
-
     params.line_items = Some(line_items_vec);
     params.expand = &["line_items", "line_items.data.price.product"];
 
@@ -279,27 +344,27 @@ pub async fn new_checkout_session(
                     );
                 }
 
-                leptos::logging::log!("ShoppingCart: {:#?}", cart_prices_map.clone());
-                leptos::logging::log!("ExistingSession: {:#?}", line_items_prices_map.clone());
+                // leptos::logging::log!("ShoppingCart: {:#?}", cart_prices_map.clone());
+                // leptos::logging::log!("ExistingSession: {:#?}", line_items_prices_map.clone());
 
                 does_cart_match = cart_prices_map == line_items_prices_map;
 
                 // Step 3: If the does_cart_match the existing session, return the session ID
                 if does_cart_match {
                     leptos::logging::log!(
-                        "Existing Checkout Session with matching cart and id '{:#?}' found!",
+                        "Existing Checkout Session with matching cart and id {:#?} found!",
                         checkout_sessionid
                     );
                     Some(existing_session.clone())
                 } else {
                     leptos::logging::log!(
-                        "Shopping cart is not the same as session with id: {:#?}",
+                        "Shopping cart is NOT the same as session with id: {:#?}",
                         checkout_sessionid
                     );
                     let new_session = stripe::CheckoutSession::create(&client, params).await?;
 
                     info!(
-                            "Created NEW checkout session: {:#?}, for {:#?} $AUD. (Created: {:#?} / Expires at: {:#?} )",
+                            "Created NEW checkout session: {:#}, for {:#} $AUD. (Created: {:#} / Expires at: {:#} )",
                             &new_session.id,
                             new_session.amount_total.unwrap().clone() as f64 / 100.0,
                             &new_session.created,
