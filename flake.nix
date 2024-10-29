@@ -33,6 +33,7 @@
         buildInputs = with pkgs; [
           # Cli
           bacon
+          cargo-binutils
           cargo-watch
           cargo-shuttle
           cargo-leptos

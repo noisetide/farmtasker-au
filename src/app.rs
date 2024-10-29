@@ -185,7 +185,7 @@ pub fn Routerer() -> impl IntoView {
                     }
                 }
             }/>
-            <Route path="/video/instructions" view={
+            <Route path="/instructions" view={
                 move || {
                     const CURRENTPAGE: CurrentPage = CurrentPage::VideoInstructionsService;
 
@@ -196,14 +196,25 @@ pub fn Routerer() -> impl IntoView {
                     }
                 }
             }/>
-            <Route path="/video/blog/culinary-adventure" view={
+            <Route path="/blog/culinary-adventure" view={
                 move || {
-                    const CURRENTPAGE: CurrentPage = CurrentPage::VideoBlogCulinaryAdventure;
+                    const CURRENTPAGE: CurrentPage = CurrentPage::VideoBlog;
 
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=VideoBlogCulinaryAdventure currentpage=CURRENTPAGE/>
+                        <Pager page=VideoBlog currentpage=CURRENTPAGE/>
+                    }
+                }
+            }/>
+            <Route path="/engineering" view={
+                move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::Engineering;
+
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
+                    view! {
+                        <Pager page=Engineering currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
@@ -245,7 +256,8 @@ pub enum CurrentPage {
     TermsOfService,
     ShoppingCart,
     VideoInstructionsService,
-    VideoBlogCulinaryAdventure,
+    VideoBlog,
+    Engineering,
 }
 
 #[component]
@@ -269,9 +281,10 @@ where
                             CurrentPage::PrivacyPolicy => {"pager-content-privacy-policy"},
                             CurrentPage::TermsOfService => {"pager-content-terms-of-service"},
                             CurrentPage::ShoppingCart => {"pager-content-shopping-cart"},
-                            CurrentPage::VideoInstructionsService => {"pager-content-video-instructions-service"},
-                            CurrentPage::VideoBlogCulinaryAdventure => {"pager-content-video-blog-culinary-adventure"},
+                            CurrentPage::VideoInstructionsService => {"pager-content-instructions"},
+                            CurrentPage::VideoBlog => {"pager-content-video-blog"},
                             CurrentPage::ProductItemDetails => {"pager-content-product-item-details"},
+                            CurrentPage::Engineering => {"pager-content-engineering"},
                         }
                     >{page()}</div>
                 </div>
@@ -284,18 +297,25 @@ where
 #[component]
 pub fn HomePage() -> impl IntoView {
     view! {
-        <a href="/shop/food" class="shop-selector-container" id="button_farm_to_table_near_me">
-            <p class="shop_selector_title">"Online Shop"</p>
-        </a>
-        <a href="/shop/pet" class="shop-selector-container" id="button_farmtasker_pet_food_shop">
-            <p class="shop_selector_title">"Online Shop"</p>
-        </a>
-        <a href="/video/instructions" class="shop-selector-container" id="button_farm_task_video_instructions_service">
-            <p class="shop_selector_title">"Video Instructions"</p>
-        </a>
-        <a href="/video/blog/culinary-adventure" class="shop-selector-container" id="button_culinary_adventure">
-            <p class="shop_selector_title">"Video Blog"</p>
-        </a>
+        <div class="main_buttons_online_shops_container">
+            <a href="/shop/food" class="page-selector-container" id="button_farm_to_table_near_me">
+                <img class="page-selector-image" src="/main_buttons/food_shop.png" alt="Online Shop"/>
+            </a>
+            <a href="/shop/pet" class="page-selector-container" id="button_farmtasker_pet_food_shop">
+                <img class="page-selector-image" src="/main_buttons/pet_food_shop.png" alt="Online Shop"/>
+            </a>
+        </div>
+        <div class="main_buttons_services_container">
+            <a href="/engineering" class="page-selector-container" id="button_farm_task_engineering">
+                <img class="page-selector-image" src="/main_buttons/engineering.png" alt="Engineering"/>
+            </a>
+            <a href="/instructions" class="page-selector-container" id="button_farm_task_video_instructions_service">
+                <img class="page-selector-image" src="/main_buttons/instructions.png" alt="Video Instructions"/>
+            </a>
+            <a href="/blog/culinary-adventure" class="page-selector-container" id="button_culinary_adventure">
+                <img class="page-selector-image" src="/main_buttons/video_blog.png" alt="Video Blog"/>
+            </a>
+        </div>
     }
 }
 
@@ -401,28 +421,36 @@ pub fn FoodShop() -> impl IntoView {
 #[component]
 pub fn VideoInstructionsService() -> impl IntoView {
     view! {
-        <div>"Video Instructions Service!!!"</div>
+        <div class="blog-container">
+            <img class="banner-image" src="/banners/instructions.webp" alt="Instructions Service Banner"/>
+        </div>
     }
 }
 
 #[component]
-pub fn VideoBlogCulinaryAdventure() -> impl IntoView {
+pub fn Engineering() -> impl IntoView {
     view! {
-        <div>"Video Blog Culinary Adventure!!!"</div>
+        <div class="blog-container">
+            <img class="banner-image" src="/banners/engineering.webp" alt="Farm Task Engineering Banner"/>
+        </div>
+    }
+}
+
+#[component]
+pub fn VideoBlog() -> impl IntoView {
+    view! {
+        <div class="blog-container">
+            <img class="banner-image" src="/banners/video_blog.webp" alt="Video Blog Banner"/>
+        </div>
     }
 }
 
 #[component]
 pub fn About() -> impl IntoView {
     view! {
-        <div class="about-us-image-container">
-            <img class="about-us-image" src="/about_us_page/1-1.png" alt="About Us"/>
-            // <strong class="about-us-image-block-1">
-            //     "About"
-            // </strong>
-            // <strong class="about-us-image-block-2">
-            //     "Us"
-            // </strong>
+        <div class="blog-container">
+            <img class="banner-image" src="/banners/about_us_cropped.webp" alt="About Us Banner"/>
+            <img class="banner-photo" src="/photos/about_us_group_photo.webp" alt="About Us Photo Banner"/>
         </div>
     }
 }
@@ -608,33 +636,33 @@ pub fn CancelCheckout() -> impl IntoView {
         <div>
             "Checkout Cancelled..."
         </div>
-        <Show
-            when=move || {
-                let stripe_data = match stripe_data.get()  {
-                    Some(ok) => ok,
-                    None => return false,
-                }.unwrap();
-                stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
-            }
-            fallback=move || view!{}
-        >
-            <button on:click=move |_| {
-                let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
+        // <Show
+        //     when=move || {
+        //         let stripe_data = match stripe_data.get()  {
+        //             Some(ok) => ok,
+        //             None => return false,
+        //         }.unwrap();
+        //         stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
+        //     }
+        //     fallback=move || view!{}
+        // >
+        //     <button on:click=move |_| {
+        //         let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
 
-                let mut url = String::new();
+        //         let mut url = String::new();
 
-                if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
-                    url = session.url.to_owned().expect("Checkout session has no url!!!");
-                    spawn_local(async move {
-                        redirect_to_url(url).await;
-                    })
-                } else {
-                    leptos::logging::log!("No active checkout session.")
-                }
-            }>
-                "Back to checkout"
-            </button>
-        </Show>
+        //         if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
+        //             url = session.url.to_owned().expect("Checkout session has no url!!!");
+        //             spawn_local(async move {
+        //                 redirect_to_url(url).await;
+        //             })
+        //         } else {
+        //             leptos::logging::log!("No active checkout session.")
+        //         }
+        //     }>
+        //         "Back to checkout"
+        //     </button>
+        // </Show>
 
     }
 }
@@ -875,23 +903,23 @@ pub fn NavBar() -> impl IntoView {
                 </div>
             </div>
             <ul class="nav_buttons" class:is-navbar-hidden=move || is_navbar_hidden()>
-                <li>
-                    <a
-                        class:current=move || {matches!(selected.get(), CurrentPage::HomePage)}
-                        href="/" id="button_middle"
-                    >
-                        <img
-                             src="/buttons/online_shop.png" class="button_middle_image" alt="Home"
-                        />
-                    </a>
-                </li>
+                // <li>
+                //     <a
+                //         class:current=move || {matches!(selected.get(), CurrentPage::HomePage)}
+                //         href="/" id="button_middle"
+                //     >
+                //         <img
+                //              src="/navbar_buttons/home.webp" class="button_middle_image" alt="Home"
+                //         />
+                //     </a>
+                // </li>
                 <li>
                     <a
                         class:current=move || {matches!(selected.get(), CurrentPage::FoodShop)}
                         href="/shop/food" id="button_middle"
                     >
                         <img
-                             src="/buttons/food_shop.png" class="button_middle_image" alt="Food Shop"
+                             src="/navbar_buttons/food_shop.webp" class="button_middle_image" alt="Food Shop"
                         />
                     </a>
                 </li>
@@ -901,27 +929,37 @@ pub fn NavBar() -> impl IntoView {
                         href="/shop/pet" id="button_middle"
                     >
                         <img
-                             src="/buttons/pet_shop.png" class="button_middle_image" alt="Pet Shop"
+                             src="/navbar_buttons/pet_shop.webp" class="button_middle_image" alt="Pet Shop"
                         />
                     </a>
                 </li>
                 <li>
                     <a
                         class:current=move || {matches!(selected.get(), CurrentPage::VideoInstructionsService)}
-                        href="/video/instructions" id="button_middle"
+                        href="/instructions" id="button_middle"
                     >
                         <img
-                             src="/buttons/video_instructions.png" class="button_middle_image" alt="Video Instructions"
+                             src="/navbar_buttons/video_instructions.webp" class="button_middle_image" alt="Video Instructions"
                         />
                     </a>
                 </li>
                 <li>
                     <a
-                        class:current=move || {matches!(selected.get(), CurrentPage::VideoBlogCulinaryAdventure)}
-                        href="/video/blog/culinary-adventure" id="button_middle"
+                        class:current=move || {matches!(selected.get(), CurrentPage::VideoBlog)}
+                        href="/blog/culinary-adventure" id="button_middle"
                     >
                         <img
-                             src="/buttons/video_blog.png" class="button_middle_image" alt="Video Blogs"
+                             src="/navbar_buttons/video_blog.webp" class="button_middle_image" alt="Video Blogs"
+                        />
+                    </a>
+                </li>
+                <li>
+                    <a
+                        class:current=move || {matches!(selected.get(), CurrentPage::Engineering)}
+                        href="/engineering" id="button_middle"
+                    >
+                        <img
+                             src="/navbar_buttons/engineering.webp" class="button_middle_image" alt="Engineering"
                         />
                     </a>
                 </li>
@@ -931,7 +969,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/about" id="button_middle"
                     >
                         <img
-                             src="/buttons/about_us.png" class="button_middle_image" alt="About Us"
+                             src="/navbar_buttons/about_us.webp" class="button_middle_image" alt="About Us"
                         />
                     </a>
                 </li>
