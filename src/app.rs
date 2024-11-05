@@ -898,28 +898,28 @@ pub fn NavBar() -> impl IntoView {
             <div class="banner-bg">
                 <div class="logo-container">
                     <a href="/">
-                        <img src="/main_logo.svg" alt="Farmtasker Logo" loading="lazy"/>
+                        <img src="/navbar/shapka/main_logo.png" alt="Farmtasker Logo" loading="lazy"/>
                     </a>
                 </div>
             </div>
             <ul class="nav_buttons" class:is-navbar-hidden=move || is_navbar_hidden()>
-                // <li>
-                //     <a
-                //         class:current=move || {matches!(selected.get(), CurrentPage::HomePage)}
-                //         href="/" id="button_middle"
-                //     >
-                //         <img
-                //              src="/navbar_buttons/home.webp" class="button_middle_image" alt="Home"
-                //         />
-                //     </a>
-                // </li>
+                <li>
+                    <a
+                        class:current=move || {matches!(selected.get(), CurrentPage::HomePage)}
+                        href="/" id="button_middle"
+                    >
+                        <img
+                             src="/navbar/button_template.png" class="button_middle_image" alt="Home"
+                        />
+                    </a>
+                </li>
                 <li>
                     <a
                         class:current=move || {matches!(selected.get(), CurrentPage::FoodShop)}
                         href="/shop/food" id="button_middle"
                     >
                         <img
-                             src="/navbar_buttons/food_shop.webp" class="button_middle_image" alt="Food Shop"
+                             src="/navbar/button_template.png" class="button_middle_image" alt="Food Shop"
                         />
                     </a>
                 </li>
@@ -929,7 +929,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/shop/pet" id="button_middle"
                     >
                         <img
-                             src="/navbar_buttons/pet_shop.webp" class="button_middle_image" alt="Pet Shop"
+                             src="/navbar/button_template.png" class="button_middle_image" alt="Pet Shop"
                         />
                     </a>
                 </li>
@@ -939,7 +939,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/instructions" id="button_middle"
                     >
                         <img
-                             src="/navbar_buttons/video_instructions.webp" class="button_middle_image" alt="Video Instructions"
+                             src="/navbar/button_template.png" class="button_middle_image" alt="Video Instructions"
                         />
                     </a>
                 </li>
@@ -949,7 +949,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/blog/culinary-adventure" id="button_middle"
                     >
                         <img
-                             src="/navbar_buttons/video_blog.webp" class="button_middle_image" alt="Video Blogs"
+                             src="/navbar/button_template.png" class="button_middle_image" alt="Video Blogs"
                         />
                     </a>
                 </li>
@@ -959,7 +959,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/engineering" id="button_middle"
                     >
                         <img
-                             src="/navbar_buttons/engineering.webp" class="button_middle_image" alt="Engineering"
+                             src="/navbar/button_template.png" class="button_middle_image" alt="Engineering"
                         />
                     </a>
                 </li>
@@ -969,7 +969,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/about" id="button_middle"
                     >
                         <img
-                             src="/navbar_buttons/about_us.webp" class="button_middle_image" alt="About Us"
+                             src="/navbar/button_template.png" class="button_middle_image" alt="About Us"
                         />
                     </a>
                 </li>
