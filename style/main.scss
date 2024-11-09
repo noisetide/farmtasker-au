@@ -724,72 +724,27 @@ main {
         .pager-content-home-page {
           /* width: 100%; */
           display: flex;
-          gap: 2rem;
+          /* gap: 2rem; */
           flex-direction: column;
           /* justify-items: center; */
           align-items: center;
           align-content: center;
           text-align: center;
 
+          padding: 0;
+          margin: 0;
+
           border-radius: 20px;
 
           @include respond-to(mobile) {
             a.page-selector-container {
-              width: 80%;
+              width: 100%;
             }
           }
 
           .main_buttons_online_shops_container {
             width: 100%;
             display: flex;
-            flex-direction: row;
-            justify-content: center;
-            justify-items: center;
-
-            a.page-selector-container {
-              display: flex;
-              justify-content: center;
-              max-height: 30vh;
-              border-radius: 20px;
-              padding-bottom: 2rem;
-
-              transition: ease-in-out;
-              transition-duration: 400ms;
-
-              &:hover {
-                background-color: darken($background-color-light, 20%);
-                transition-duration: 300ms;
-                box-shadow: 0 6px 50px white;
-
-              }
-
-              img.page-selector-image {
-                width: 100%;
-                object-fit: contain;
-                transform: scale(1.25);
-                transition: ease-in-out;
-                transition-duration: 400ms;
-
-                @include respond-to(mobile) {
-                  transform: scale(1.20);
-
-                }
-
-                &:hover {
-                  transform: scale(1.30);
-                  transition-duration: 300ms;
-
-                }
-              }
-
-              text-align: center;
-            }
-          }
-
-          .main_buttons_services_container {
-            display: flex;
-            width: 100%;
-            position: bottom;
             flex-direction: row;
             justify-content: center;
             justify-items: center;
@@ -806,12 +761,70 @@ main {
             a.page-selector-container {
               display: flex;
               justify-content: center;
-              max-height: 35vh;
+              max-height: 60vh;
+              border-radius: 20px;
+              padding-bottom: 2rem;
+
+              transition: ease-in-out;
+              transition-duration: 400ms;
+
+              &:hover {
+                background-color: darken($background-color-light, 20%);
+                transition-duration: 300ms;
+                box-shadow: 0 6px 50px white;
+
+              }
+
+              img.page-selector-image {
+                width: 100%;
+                object-fit: contain;
+                /* transform: scale(1.25); */
+                transition: ease-in-out;
+                transition-duration: 400ms;
+
+                @include respond-to(mobile) {
+                  transform: scale(1.00);
+                }
+
+                &:hover {
+                  transform: scale(1.10);
+                  transition-duration: 300ms;
+
+                }
+              }
+
+              text-align: center;
+            }
+          }
+
+          .main_buttons_services_container {
+            display: flex;
+            width: 100%;
+            position: bottom;
+            flex-direction: row;
+            justify-content: center;
+            justify-items: center;
+            padding: 0;
+            margin: 0;
+
+            @include respond-to(mobile) {
+              display: grid;
+              grid-template-columns: repeat(1, 1fr);
+
+              a.page-selector-container {
+                max-height: 60vh;
+              }
+            }
+
+            a.page-selector-container {
+              display: flex;
+              justify-content: center;
+              width: 100%;
+              max-height: 65vh;
               border-radius: 20px;
 
               @include respond-to(mobile) {
-                transform: scale(1.00);
-                max-height: 40vh;
+                max-height: 65vh;
               }
 
               &:hover {

@@ -909,7 +909,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/" id="button_middle"
                     >
                         <img
-                             src="/navbar/button_template.png" class="button_middle_image" alt="Home"
+                             src="/navbar/nav_buttons/farmtasker.svg" class="button_middle_image" alt="Home"
                         />
                     </a>
                 </li>
@@ -919,7 +919,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/shop/food" id="button_middle"
                     >
                         <img
-                             src="/navbar/button_template.png" class="button_middle_image" alt="Food Shop"
+                             src="/navbar/nav_buttons/food_shop.png" class="button_middle_image" alt="Food Shop"
                         />
                     </a>
                 </li>
@@ -929,7 +929,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/shop/pet" id="button_middle"
                     >
                         <img
-                             src="/navbar/button_template.png" class="button_middle_image" alt="Pet Shop"
+                             src="/navbar/nav_buttons/pet_shop.png" class="button_middle_image" alt="Pet Shop"
                         />
                     </a>
                 </li>
@@ -939,7 +939,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/instructions" id="button_middle"
                     >
                         <img
-                             src="/navbar/button_template.png" class="button_middle_image" alt="Video Instructions"
+                             src="/navbar/nav_buttons/video_instructions.png" class="button_middle_image" alt="Video Instructions"
                         />
                     </a>
                 </li>
@@ -949,7 +949,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/blog/culinary-adventure" id="button_middle"
                     >
                         <img
-                             src="/navbar/button_template.png" class="button_middle_image" alt="Video Blogs"
+                             src="/navbar/nav_buttons/video_blog.png" class="button_middle_image" alt="Video Blogs"
                         />
                     </a>
                 </li>
@@ -959,7 +959,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/engineering" id="button_middle"
                     >
                         <img
-                             src="/navbar/button_template.png" class="button_middle_image" alt="Engineering"
+                             src="/navbar/nav_buttons/engineering.png" class="button_middle_image" alt="Engineering"
                         />
                     </a>
                 </li>
@@ -969,7 +969,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/about" id="button_middle"
                     >
                         <img
-                             src="/navbar/button_template.png" class="button_middle_image" alt="About Us"
+                             src="/navbar/nav_buttons/about_us.png" class="button_middle_image" alt="About Us"
                         />
                     </a>
                 </li>
