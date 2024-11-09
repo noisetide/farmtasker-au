@@ -885,7 +885,6 @@ dependencies = [
  "tower-http",
  "tracing",
  "tracing-subscriber",
- "wasm-bindgen",
 ]
 
 [[package]]

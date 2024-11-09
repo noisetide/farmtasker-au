@@ -30,13 +30,29 @@
       forEachSystem
       (system: let
         pkgs = nixpkgs.legacyPackages.${system};
+        leptos = pkgs.rustPlatform.buildRustPackage rec {
+          pname = "cargo-leptos";
+          version = "0.2.21";
+
+          src = pkgs.fetchFromGitHub {
+            owner = "leptos-rs";
+            repo = pname;
+            rev = "v${version}";
+            hash = "sha256-Oe65m9io7ihymUjylaWHQM/x7r0y/xXqD313H3oyjN8=";
+          };
+
+          cargoHash = "sha256-wZNtEr6IAy+OABpTm93rOhKAP1NEEYUvokjaVdoaSG4=";
+
+          buildFeatures = [ "no_downloads" ]; # cargo-leptos will try to install missing dependencies on its own otherwise
+          doCheck = false; # Check phase tries to query crates.io
+        };
         buildInputs = with pkgs; [
           # Cli
           bacon
           cargo-binutils
+          leptos
           cargo-watch
           cargo-shuttle
-          cargo-leptos
           cargo-generate
           dart-sass
           leptosfmt

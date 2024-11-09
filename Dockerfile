@@ -24,6 +24,7 @@ COPY . .
 
 # Build the app
 RUN cargo clean
+RUN wasm-bindgen --version
 RUN cargo leptos build --release -vv
 RUN sed -i 's|site-root = "target/site"|site-root = "site"|' Cargo.toml
 

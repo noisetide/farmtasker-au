@@ -218,11 +218,11 @@ a {
       display: none;
 
       @include respond-to(desktop) {
-        /* display: none; */
+        display: grid;
       }
 
       @include respond-to(tablet) {
-        display: none;
+        display: grid;
       }
     }
   }
