@@ -13,13 +13,19 @@ $background-color-dark: bisque;
   }
 
   @else if $media ==tablet {
-    @media (min-width: 750px) and (max-width: 1024px) {
+    @media (min-width: 751px) and (max-width: 1024px) {
       @content;
     }
   }
 
   @else if $media ==desktop {
     @media (min-width: 1025px) {
+      @content;
+    }
+  }
+
+  @else if $media ==small-screen {
+    @media (max-width: 500px) {
       @content;
     }
   }
@@ -49,22 +55,26 @@ a {
 /* Navbar styles */
 .navbar {
   background-color: $main-color;
+  width: 100%;
+  justify-content: center;
+  justify-items: center;
+  align-content: center;
+  align-items: center;
+  text-align: center;
 
   /* padding: 0.1rem; */
-  display: grid;
+  display: block;
   color: white;
-  flex-direction: row;
   min-height: 4rem;
   /* position: relative; */
 
   .banner-bg {
-    min-height: 16vh;
-    /* min-width: 90vw; */
-    /* margin: 0; */
-    /* padding: 0; */
+    min-height: 6rem;
+    margin: 0;
+    padding: 0;
 
     /* background-image: url('/banner-bg.jpg'); */
-    /* width: 50%; */
+    width: 100%;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: top center;
@@ -86,34 +96,117 @@ a {
     }
   }
 
-  .logo-container {
-    /* justify-content: center; */
-    display: flex;
-    position: top;
-    /* background-color: darken($main-color, 10%); */
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
-    border-radius: 5px;
+  .logo-container a:nth-child(2) img {
+    z-index: 10;
+  }
 
-    img {
-      max-height: 15vh;
-      min-height: 10vh;
+  .logo-container {
+    min-height: 6rem;
+
+    /* background-color: darken($main-color, 10%); */
+    border-radius: 5px;
+    max-height: 6rem;
+
+    .main_logo {
+      position: absolute;
+      display: flex;
+      left: 0;
+      top: 0;
+      z-index: 10;
       height: auto;
-      width: auto;
+      max-height: 6rem;
+      max-width: 6rem;
+
+      img {
+        object-fit: contain;
+        height: auto;
+        max-height: 6rem;
+        max-width: 6rem;
+      }
 
       @include respond-to(mobile) {
-        max-height: 14vh;
+        /* display: none; */
       }
     }
 
-    @include respond-to(tablet) {
-      position: top;
-      margin: 0;
+    button.navbar-menu-button {
       padding: 0;
+      margin: 0;
+      background-color: transparent;
+      border-color: transparent;
+      position: absolute;
+      top: 0;
+      left: 6rem;
+      z-index: 1;
+      height: auto;
+      max-height: 7rem;
+      max-width: 9rem;
+
+      img {
+        object-fit: contain;
+        height: auto;
+        max-height: 7rem;
+        max-width: 12rem;
+        transform: scaleX(-1) translateY(-3px) translateX(2rem);
+      }
+
+      &:hover {
+        cursor: pointer;
+      }
     }
 
-    @include respond-to(mobile) {
-      margin: 0;
-      padding: 0;
+    img.navbar-welcome {
+      position: absolute;
+      height: auto;
+      max-height: 8rem;
+      max-width: 12rem;
+      top: 0;
+      right: 6.8rem;
+
+      @include respond-to(small-screen) {
+        display: none;
+      }
+    }
+
+    a.shopping-cart-button {
+      position: absolute;
+      display: flex;
+      top: 0;
+      right: 0;
+      z-index: 1;
+      max-width: 10rem;
+
+      img {
+        object-fit: contain;
+        height: auto;
+        max-height: 5rem;
+        max-width: 10rem;
+        transform: scaleX(-1);
+      }
+
+      .shopping-cart-counter {
+        transform: scale(0.9);
+        background-color: lighten(red, 20%);
+        color: black;
+        border-color: black;
+        border-width: 5px;
+        border-radius: 90px;
+        position: absolute;
+        top: 2rem;
+        left: 1.6rem;
+        z-index: 10;
+        min-height: 0.5rem;
+        min-width: 0.5rem;
+        padding: 0.5rem;
+      }
+    }
+
+
+    img {
+      /* position: absolute; */
+      border-radius: 20px;
+      width: auto;
+      z-index: 1;
     }
   }
 
@@ -125,11 +218,11 @@ a {
       display: none;
 
       @include respond-to(desktop) {
-        display: block;
+        /* display: none; */
       }
 
       @include respond-to(tablet) {
-        display: block;
+        display: none;
       }
     }
   }
@@ -237,7 +330,7 @@ a {
 
     @include respond-to(mobile) {
       display: grid;
-      grid-template-columns: subgrid;
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 
@@ -249,90 +342,26 @@ a {
     }
   }
 
-  .shopping-cart-hide-block {
-    display: block;
-    position: absolute;
-    top: 1vh;
-    right: 2.5rem;
-    max-height: 4rem;
-    background-color: darken($main-color, 12.5%);
-    box-shadow: 0 4px 8px rgba(100, 100, 100, 0.1);
-    border-radius: 7px;
-
-
-    .current {
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
-    }
-
-
-    &:hover {
-      background-color: darken($main-color, 7%);
-      transition-duration: 300ms;
-    }
-
-
-    a {
-      border-radius: 7px;
-      padding: 1.35rem 1.5rem;
-      display: block;
-      background: none;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      text-decoration: none;
-      flex-direction: column;
-      justify-content: space-between;
-      color: white;
-      /* Adjust the height for spacing between bars */
-    }
-  }
-
-
   @include respond-to(mobile) {
-    /* flex-direction: row; */
+    flex-direction: row;
     margin: 0;
 
-    .navbar-hide-block {
-      display: block;
-      position: absolute;
-      top: 1vh;
-      left: 2.5rem;
-      max-height: 2rem;
-      background-color: darken($main-color, 12.5%);
-      box-shadow: 0 4px 8px rgba(100, 100, 100, 0.1);
-
-      &:hover {
-        background-color: darken($main-color, 7%);
-        transition-duration: 300ms;
-      }
-
-      border-radius: 7px;
-      padding: 1.0rem;
-
-      button {
-        display: block;
-        background: none;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 34px;
-        /* Adjust the height for spacing between bars */
-      }
-
-      .bar {
-        width: 1.6rem;
-        height: 4px;
-        background-color: white;
-        border-radius: 2px;
-      }
-    }
-
-
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+    align-content: center;
+    text-align: center;
+    width: 100%;
 
     .logo-container {
+      min-height: 10vh;
       width: 100%;
+
+      justify-content: center;
+      justify-items: center;
+      align-items: center;
+      align-content: center;
+      text-align: center;
 
       a {
         width: 100%;
@@ -486,6 +515,8 @@ main {
           .blog-container {
             .banner-image {
               height: auto;
+              border-radius: 50px;
+              background-color: darken($background-color-light, 5%);
               width: 100%;
               max-height: 70vh;
             }
@@ -498,6 +529,8 @@ main {
 
           .blog-container {
             .banner-image {
+              border-radius: 50px;
+              background-color: darken($background-color-light, 5%);
               height: auto;
               width: 100%;
               max-height: 70vh;
@@ -512,6 +545,8 @@ main {
           .blog-container {
             .banner-image {
               height: auto;
+              border-radius: 50px;
+              background-color: darken($background-color-light, 5%);
               width: 100%;
               max-height: 70vh;
             }

@@ -804,33 +804,33 @@ pub fn ShoppingCart() -> impl IntoView {
                         }>
                         "Clear"
                     </button>
-                    <Show
-                        when=move || {
-                            let stripe_data = match stripe_data.get()  {
-                                Some(ok) => ok,
-                                None => return false,
-                            }.unwrap();
-                            stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
-                        }
-                        fallback=move || view!{}
-                    >
-                        <button on:click=move |_| {
-                            let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
+                    // <Show
+                    //     when=move || {
+                    //         let stripe_data = match stripe_data.get()  {
+                    //             Some(ok) => ok,
+                    //             None => return false,
+                    //         }.unwrap();
+                    //         stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
+                    //     }
+                    //     fallback=move || view!{}
+                    // >
+                    //     <button on:click=move |_| {
+                    //         let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
 
-                            let mut url = String::new();
+                    //         let mut url = String::new();
 
-                            if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
-                                url = session.url.to_owned().expect("Checkout session has no url!!!");
-                                spawn_local(async move {
-                                    redirect_to_url(url).await;
-                                })
-                            } else {
-                                leptos::logging::log!("No active checkout session.")
-                            }
-                        }>
-                            "Back to checkout"
-                        </button>
-                    </Show>
+                    //         if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
+                    //             url = session.url.to_owned().expect("Checkout session has no url!!!");
+                    //             spawn_local(async move {
+                    //                 redirect_to_url(url).await;
+                    //             })
+                    //         } else {
+                    //             leptos::logging::log!("No active checkout session.")
+                    //         }
+                    //     }>
+                    //         "Back to checkout"
+                    //     </button>
+                    // </Show>
                 </div>
         </Show>
     }
@@ -872,33 +872,31 @@ pub fn NavBar() -> impl IntoView {
 
     view! {
         <nav class="navbar">
-            <div class="navbar-hide-block">
-                <button class="navbar-hide-button"
-                    on:click=move |_| {
-                        set_is_navbar_hidden.update(|n| *n = !*n);
-                    }
-                >
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                </button>
-            </div>
-            <div class="shopping-cart-hide-block">
-                <a href="/shop/cart" class="navbar-hide-button"
-                    class:current=move || {
-                        matches!(selected.get(), CurrentPage::ShoppingCart)
-                    }
-                >
-                    "🛒 "{move || match shopping_cart.get().0.values().map(|&v| v as usize).sum() {
-                        0 => "".to_string(),
-                        x => x.to_string(),
-                    }}
-                </a>
-            </div>
             <div class="banner-bg">
                 <div class="logo-container">
-                    <a href="/">
-                        <img src="/navbar/shapka/main_logo.png" alt="Farmtasker Logo" loading="lazy"/>
+                    <a href="/" class="main_logo">
+                        <img src="/navbar/shapka/webp/main_logo.webp" alt="Farmtasker Logo"/>
+                    </a>
+                    <button class="navbar-menu-button"
+                        on:click=move |_| {
+                            set_is_navbar_hidden.update(|n| *n = !*n);
+                        }
+                    >
+                        <img src="/navbar/shapka/webp/menu_bars_tag.webp" alt="Menu"/>
+                    </button>
+                    <img src="/navbar/shapka/webp/farm_products_marketplace_tag.webp" class="navbar-welcome" alt="Welcome to farm products marketplace!"/>
+                    <a href="/shop/cart" class="shopping-cart-button"
+                        class:current=move || {
+                            matches!(selected.get(), CurrentPage::ShoppingCart)
+                        }
+                    >
+                        <img src="/navbar/shapka/webp/shopping_cart_tag.webp"/>
+                        <div class="shopping-cart-counter">
+                            {move || match shopping_cart.get().0.values().map(|&v| v as usize).sum() {
+                                0 => "0".to_string(),
+                                x => x.to_string(),
+                            }}
+                        </div>
                     </a>
                 </div>
             </div>
@@ -909,7 +907,7 @@ pub fn NavBar() -> impl IntoView {
                         href="/" id="button_middle"
                     >
                         <img
-                             src="/navbar/nav_buttons/farmtasker.svg" class="button_middle_image" alt="Home"
+                             src="/navbar/nav_buttons/home.png" class="button_middle_image" alt="Home"
                         />
                     </a>
                 </li>

@@ -12,6 +12,7 @@ RUN cp cargo-binstall /usr/local/cargo/bin
 
 # Install cargo-leptos
 RUN cargo binstall cargo-leptos -y
+RUN cargo binstall wasm-bindgen-cli -y
 
 # Add the WASM target
 RUN rustup target add wasm32-unknown-unknown
@@ -22,6 +23,7 @@ WORKDIR /app
 COPY . .
 
 # Build the app
+RUN cargo clean
 RUN cargo leptos build --release -vv
 RUN sed -i 's|site-root = "target/site"|site-root = "site"|' Cargo.toml
 
