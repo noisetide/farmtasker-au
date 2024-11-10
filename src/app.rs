@@ -423,6 +423,7 @@ pub fn VideoInstructionsService() -> impl IntoView {
     view! {
         <div class="blog-container">
             <img class="banner-image" src="/banners/instructions.webp" alt="Instructions Service Banner"/>
+            <iframe class="embed-video" src="https://www.youtube.com/embed/daOJwUdwTME?si=GrQjf7z3ZiHD4WQF" title="Instructions" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
     }
 }
@@ -441,6 +442,7 @@ pub fn VideoBlog() -> impl IntoView {
     view! {
         <div class="blog-container">
             <img class="banner-image" src="/banners/video_blog.webp" alt="Video Blog Banner"/>
+            <iframe class="embed-video" src="https://www.youtube.com/embed/EFyeoMRsDN8?si=pqqFHuqhTuB5xNMV" title="Culinary Adventure" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
     }
 }
@@ -900,7 +902,10 @@ pub fn NavBar() -> impl IntoView {
                     </a>
                 </div>
             </div>
-            <ul class="nav_buttons" class:is-navbar-hidden=move || is_navbar_hidden()>
+            <ul class="nav_buttons"
+                class:is-navbar-hidden=move || is_navbar_hidden()
+                class:is-navbar-hidden-opposite=move || !is_navbar_hidden()
+                >
                 <li>
                     <a
                         class:current=move || {matches!(selected.get(), CurrentPage::HomePage)}

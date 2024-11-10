@@ -90,7 +90,7 @@ a {
     }
 
     @include respond-to(mobile) {
-      min-height: 10vh;
+      min-height: 6rem;
       background-position: left;
       background-size: cover;
     }
@@ -123,10 +123,6 @@ a {
         max-height: 6rem;
         max-width: 6rem;
       }
-
-      @include respond-to(mobile) {
-        /* display: none; */
-      }
     }
 
     button.navbar-menu-button {
@@ -140,13 +136,13 @@ a {
       z-index: 1;
       height: auto;
       max-height: 7rem;
-      max-width: 9rem;
+      max-width: 6rem;
 
       img {
         object-fit: contain;
         height: auto;
         max-height: 7rem;
-        max-width: 12rem;
+        max-width: 10rem;
         transform: scaleX(-1) translateY(-3px) translateX(2rem);
       }
 
@@ -172,9 +168,9 @@ a {
       position: absolute;
       display: flex;
       top: 0;
-      right: 0;
+      right: 2rem;
       z-index: 1;
-      max-width: 10rem;
+      max-width: 8rem;
 
       img {
         object-fit: contain;
@@ -211,18 +207,65 @@ a {
   }
 
   ul.is-navbar-hidden {
-    display: none;
-    background-color: transparent;
+    display: flex;
+
+    @include respond-to(mobile) {
+      display: none;
+    }
+
+    @include respond-to(desktop) {
+      display: flex;
+    }
+
+    @include respond-to(tablet) {
+      display: flex;
+    }
 
     li {
-      display: none;
+      display: block;
+
+      @include respond-to(mobile) {
+        display: none;
+      }
 
       @include respond-to(desktop) {
-        display: grid;
+        display: block;
       }
 
       @include respond-to(tablet) {
-        display: grid;
+        display: block;
+      }
+    }
+  }
+
+  ul.is-navbar-hidden-opposite {
+    display: flex;
+
+    @include respond-to(mobile) {
+      display: flex;
+    }
+
+    @include respond-to(desktop) {
+      display: none;
+    }
+
+    @include respond-to(tablet) {
+      display: none;
+    }
+
+    li {
+      display: block;
+
+      @include respond-to(mobile) {
+        display: block;
+      }
+
+      @include respond-to(desktop) {
+        display: none;
+      }
+
+      @include respond-to(tablet) {
+        display: none;
       }
     }
   }
@@ -494,7 +537,7 @@ main {
               .banner-image {
                 border-radius: 25px;
                 width: 100%;
-                max-height: 60vh;
+                max-height: 70vh;
               }
 
               .banner-photo {
@@ -513,14 +556,21 @@ main {
           text-align: center;
 
           .blog-container {
+            background-color: darken($background-color-light, 5%);
+            border-radius: 50px;
+
             .banner-image {
               height: auto;
-              border-radius: 50px;
-              background-color: darken($background-color-light, 5%);
               width: 100%;
-              max-height: 70vh;
+              max-height: 75vh;
+            }
+
+            .embed-video {
+              height: 35rem;
+              width: 90%;
             }
           }
+
         }
 
         .pager-content-instructions {
@@ -528,12 +578,20 @@ main {
           text-align: center;
 
           .blog-container {
+            background-color: darken($background-color-light, 5%);
+            border-radius: 50px;
+            margin: 2rem;
+
             .banner-image {
               border-radius: 50px;
-              background-color: darken($background-color-light, 5%);
               height: auto;
               width: 100%;
-              max-height: 70vh;
+              max-height: 80vh;
+            }
+
+            .embed-video {
+              height: 35rem;
+              width: auto;
             }
           }
         }
@@ -543,9 +601,12 @@ main {
           text-align: center;
 
           .blog-container {
+            background-color: darken($background-color-light, 5%);
+            border-radius: 50px;
+
             .banner-image {
-              height: auto;
               border-radius: 50px;
+              height: auto;
               background-color: darken($background-color-light, 5%);
               width: 100%;
               max-height: 70vh;
@@ -770,10 +831,12 @@ main {
           margin: 0;
 
           border-radius: 20px;
+          overflow: hidden;
 
           @include respond-to(mobile) {
             a.page-selector-container {
               width: 100%;
+              max-width: 100%;
             }
           }
 
@@ -790,8 +853,11 @@ main {
 
               a.page-selector-container {
                 max-height: 30vh;
+                max-width: 100%;
               }
             }
+
+            overflow: hidden;
 
             a.page-selector-container {
               display: flex;
@@ -809,6 +875,8 @@ main {
                 box-shadow: 0 6px 50px white;
 
               }
+
+              overflow: hidden;
 
               img.page-selector-image {
                 width: 100%;
@@ -851,6 +919,8 @@ main {
               }
             }
 
+            overflow: hidden;
+
             a.page-selector-container {
               display: flex;
               justify-content: center;
@@ -867,8 +937,11 @@ main {
                 box-shadow: 0 6px 50px white;
               }
 
+              overflow: hidden;
+
               img.page-selector-image {
                 width: 100%;
+                max-width: 100%;
                 object-fit: contain;
                 transform: scale(1.00);
 
