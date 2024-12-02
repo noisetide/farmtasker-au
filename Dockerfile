@@ -1,51 +1,33 @@
-# Get started with a build env with Rust nightly
-FROM rustlang/rust:nightly-bullseye as builder
+# NixOS Dockefile build env
+# https://mitchellh.com/writing/nix-with-dockerfiles
 
-# If you’re using stable, use this instead
-# FROM rust:1.74-bullseye as builder
+# Get started with nix build env
+FROM nixos/nix:latest AS builder
 
-# Install cargo-binstall, which makes it easier to install other
-# cargo extensions like cargo-leptos
-RUN wget https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz
-RUN tar -xvf cargo-binstall-x86_64-unknown-linux-musl.tgz
-RUN cp cargo-binstall /usr/local/cargo/bin
+# Copy our source and setup our working dir.
+COPY . /tmp/build
+WORKDIR /tmp/build
 
-# Install cargo-leptos
-RUN cargo binstall cargo-leptos -y
-RUN cargo binstall wasm-bindgen-cli -y
+# Build our Nix environment
+RUN nix build --verbose --print-build-logs --impure --extra-experimental-features "nix-command flakes" --option filter-syscalls false
 
-# Add the WASM target
-RUN rustup target add wasm32-unknown-unknown
+# Copy the Nix store closure into a directory. The Nix store closure is the
+# entire set of Nix store values that we need for our build.
+RUN mkdir /tmp/nix-store-closure
+RUN cp -R $(nix-store -qR result/) /tmp/nix-store-closure
 
-# Make an /app dir, which everything will eventually live in
-RUN mkdir -p /app
+# fix Cargo.toml
+RUN nix shell -p sed --run 'sed -i 's|site-root = "target/site"|site-root = "site"|' /tmp/nix-store-closure/Cargo.toml'
+
+# Final image is based on scratch. We copy a bunch of Nix dependencies
+# but they're fully self-contained so we don't need Nix anymore.
+FROM scratch
+
 WORKDIR /app
-COPY . .
 
-# Build the app
-RUN cargo clean
-RUN wasm-bindgen --version
-RUN cargo leptos build --release -vv
-RUN sed -i 's|site-root = "target/site"|site-root = "site"|' Cargo.toml
-
-FROM debian:bookworm-slim as runtime
-WORKDIR /app
-RUN apt-get update -y \
-  && apt-get install -y --no-install-recommends openssl ca-certificates \
-  && apt-get install -y --no-install-recommends wget curl sed \
-  && apt-get autoremove -y \
-  && apt-get clean -y \
-  && rm -rf /var/lib/apt/lists/*
-
-# -- NB: update binary name from "leptos_start" to match your app name in Cargo.toml --
-# Copy the server binary to the /app directory
-COPY --from=builder /app/target/release/farmtasker-au /app/
-
-# /target/site contains our JS/WASM/CSS, etc.
-COPY --from=builder /app/target/site /app/site
-
-# Copy Cargo.toml if it’s needed at runtime
-COPY --from=builder /app/Cargo.toml /app/
+# Copy /nix/store
+COPY --from=builder /tmp/nix-store-closure /nix/store
+COPY --from=builder /tmp/build/result /app
 
 # Set any required env variables and
 ENV RUST_LOG="info"
@@ -53,6 +35,5 @@ ENV LEPTOS_SITE_ADDR="0.0.0.0:8080"
 ENV LEPTOS_SITE_ROOT="site"
 EXPOSE 8080
 
-# -- NB: update binary name from "leptos_start" to match your app name in Cargo.toml --
 # Run the server
 CMD ["/app/farmtasker-au"]

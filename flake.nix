@@ -23,8 +23,78 @@
       forEachSystem
       (system: let
         pkgs = nixpkgs.legacyPackages.${system};
+        leptos = pkgs.rustPlatform.buildRustPackage rec {
+          pname = "cargo-leptos";
+          version = "0.2.22";
+
+          src = pkgs.fetchFromGitHub {
+            owner = "leptos-rs";
+            repo = pname;
+            rev = "v${version}";
+            hash = "sha256-QPCYKlbPHuSBmwfkKdYhcVF81Lnirf65IYao7UVxz9Q=";
+          };
+
+          cargoHash = "sha256-vtceKtYU8Jslk0PnQD/kGPFO4tDOp0TMYDFqkLy4j6U=";
+
+          buildFeatures = [ "no_downloads" ]; # cargo-leptos will try to install missing dependencies on its own otherwise
+          doCheck = false; # Check phase tries to query crates.io
+        };
       in {
-        default = pkgs.callPackage ./. {};
+        # default = pkgs.callPackage ./. {};
+        default =
+        let
+          toolchain = inputs.fenix.packages.${system}.combine [
+            inputs.fenix.packages.${system}.minimal.rustc
+            inputs.fenix.packages.${system}.minimal.cargo
+            inputs.fenix.packages.${system}.targets.wasm32-unknown-unknown.latest.rust-std
+          ];
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+
+        (pkgs.makeRustPlatform {
+          cargo = toolchain;
+          rustc = toolchain;
+        }).buildRustPackage {
+          pname = "farmtasker-au";
+          version = "0.1.0";
+          src = ./.;
+          cargoLock.lockFile = ./Cargo.lock;
+
+          doCheck = false;
+
+          nativeBuildInputs = [
+            leptos
+
+            pkgs.binaryen
+            pkgs.dart-sass
+          ];
+
+          buildPhase = ''
+            mkdir -p $out
+            cargo leptos --version
+            echo "Building farmtasker-au..."
+            cargo leptos build --release
+          '';
+
+          installPhase = ''
+            mkdir -p $out
+            ls -la $out
+
+            sed -i 's|site-root = "target/site"|site-root = "site"|' Cargo.toml
+            cp -r target/release/farmtasker-au $out/
+            cp -r target/site $out/
+            cp -r Cargo.toml $out/
+            ls -la $out
+          '';
+
+          meta = {
+            mainProgram = "../farmtasker-au";
+          };
+          shellHook = ''
+            export LEPTOS_SITE_ADDR="0.0.0.0:8080"
+            export LEPTOS_SITE_ROOT="site"
+          '';
+        };
       });
     devShells =
       forEachSystem
@@ -32,25 +102,26 @@
         pkgs = nixpkgs.legacyPackages.${system};
         leptos = pkgs.rustPlatform.buildRustPackage rec {
           pname = "cargo-leptos";
-          version = "0.2.21";
+          version = "0.2.22";
 
           src = pkgs.fetchFromGitHub {
             owner = "leptos-rs";
             repo = pname;
             rev = "v${version}";
-            hash = "sha256-Oe65m9io7ihymUjylaWHQM/x7r0y/xXqD313H3oyjN8=";
+            hash = "sha256-QPCYKlbPHuSBmwfkKdYhcVF81Lnirf65IYao7UVxz9Q=";
           };
 
-          cargoHash = "sha256-wZNtEr6IAy+OABpTm93rOhKAP1NEEYUvokjaVdoaSG4=";
+          cargoHash = "sha256-vtceKtYU8Jslk0PnQD/kGPFO4tDOp0TMYDFqkLy4j6U=";
 
           buildFeatures = [ "no_downloads" ]; # cargo-leptos will try to install missing dependencies on its own otherwise
           doCheck = false; # Check phase tries to query crates.io
         };
         buildInputs = with pkgs; [
           # Cli
+          leptos
+
           bacon
           cargo-binutils
-          leptos
           cargo-watch
           cargo-shuttle
           cargo-generate
