@@ -152,6 +152,17 @@ pub fn Routerer() -> impl IntoView {
                     }
                 }
             }/>
+            <Route path="/delivery" view={
+                move || {
+                    const CURRENTPAGE: CurrentPage = CurrentPage::Delivery;
+
+                    let setter = expect_context::<WriteSignal<CurrentPage>>();
+                    setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
+                    view! {
+                        <Pager page=Delivery currentpage=CURRENTPAGE/>
+                    }
+                }
+            }/>
             <Route path="/privacy" view={
                 move || {
                     const CURRENTPAGE: CurrentPage = CurrentPage::PrivacyPolicy;
@@ -187,34 +198,34 @@ pub fn Routerer() -> impl IntoView {
             }/>
             <Route path="/instructions" view={
                 move || {
-                    const CURRENTPAGE: CurrentPage = CurrentPage::VideoInstructionsService;
+                    const CURRENTPAGE: CurrentPage = CurrentPage::VideoInstructions;
 
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=VideoInstructionsService currentpage=CURRENTPAGE/>
+                        <Pager page=VideoInstructions currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/blog/culinary-adventure" view={
                 move || {
-                    const CURRENTPAGE: CurrentPage = CurrentPage::VideoBlog;
+                    const CURRENTPAGE: CurrentPage = CurrentPage::VideoBlogs;
 
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=VideoBlog currentpage=CURRENTPAGE/>
+                        <Pager page=VideoBlogs currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
-            <Route path="/engineering" view={
+            <Route path="/shop/eat" view={
                 move || {
-                    const CURRENTPAGE: CurrentPage = CurrentPage::Engineering;
+                    const CURRENTPAGE: CurrentPage = CurrentPage::EatNowShop;
 
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=Engineering currentpage=CURRENTPAGE/>
+                        <Pager page=EatNowShop currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
@@ -251,13 +262,14 @@ pub enum CurrentPage {
     PetShop,
     FoodShop,
     About,
+    Delivery,
     ProductItemDetails,
     PrivacyPolicy,
     TermsOfService,
     ShoppingCart,
-    VideoInstructionsService,
-    VideoBlog,
-    Engineering,
+    VideoInstructions,
+    VideoBlogs,
+    EatNowShop,
 }
 
 #[component]
@@ -278,13 +290,14 @@ where
                             CurrentPage::PetShop => {"pager-content-pet-shop pager-content-shop-general"},
                             CurrentPage::FoodShop => {"pager-content-foot-shop pager-content-shop-general"},
                             CurrentPage::About => {"pager-content-about"},
+                            CurrentPage::Delivery => {"pager-content-delivery"},
                             CurrentPage::PrivacyPolicy => {"pager-content-privacy-policy"},
                             CurrentPage::TermsOfService => {"pager-content-terms-of-service"},
                             CurrentPage::ShoppingCart => {"pager-content-shopping-cart"},
-                            CurrentPage::VideoInstructionsService => {"pager-content-instructions"},
-                            CurrentPage::VideoBlog => {"pager-content-video-blog"},
+                            CurrentPage::VideoInstructions => {"pager-content-video-instructions"},
+                            CurrentPage::VideoBlogs => {"pager-content-video-blogs"},
                             CurrentPage::ProductItemDetails => {"pager-content-product-item-details"},
-                            CurrentPage::Engineering => {"pager-content-engineering"},
+                            CurrentPage::EatNowShop => {"pager-content-eat-now-shop"},
                         }
                     >{page()}</div>
                 </div>
@@ -306,8 +319,8 @@ pub fn HomePage() -> impl IntoView {
             </a>
         </div>
         <div class="main_buttons_services_container">
-            <a href="/engineering" class="page-selector-container" id="button_farm_task_engineering">
-                <img class="page-selector-image" src="/main_buttons/engineering.png" alt="Engineering"/>
+            <a href="/shop/eat" class="page-selector-container" id="button_ready_to_eat_shop">
+                <img class="page-selector-image" src="/main_buttons/ready_to_eat_shop.png" alt="Cook & Eat Now"/>
             </a>
             <a href="/instructions" class="page-selector-container" id="button_farm_task_video_instructions_service">
                 <img class="page-selector-image" src="/main_buttons/instructions.png" alt="Video Instructions"/>
@@ -419,31 +432,34 @@ pub fn FoodShop() -> impl IntoView {
 }
 
 #[component]
-pub fn VideoInstructionsService() -> impl IntoView {
+pub fn VideoInstructions() -> impl IntoView {
     view! {
         <div class="blog-container">
-            <img class="banner-image" src="/banners/instructions.webp" alt="Instructions Service Banner"/>
+            <img class="banner-image" src="/banners/instructions.webp" alt="Video Instructions Banner"/>
             <iframe class="embed-video" src="https://www.youtube.com/embed/daOJwUdwTME?si=GrQjf7z3ZiHD4WQF" title="Instructions" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
     }
 }
 
 #[component]
-pub fn Engineering() -> impl IntoView {
+pub fn EatNowShop() -> impl IntoView {
     view! {
         <div class="blog-container">
-            <img class="banner-image" src="/banners/engineering.webp" alt="Farm Task Engineering Banner"/>
+            // <img class="banner-image" src="/banners/.webp" alt="Ready To Eat Banner"/>
         </div>
     }
 }
 
 #[component]
-pub fn VideoBlog() -> impl IntoView {
+pub fn VideoBlogs() -> impl IntoView {
     view! {
         <div class="blog-container">
             <img class="banner-image" src="/banners/video_blog.webp" alt="Video Blog Banner"/>
             <iframe class="embed-video" src="https://www.youtube.com/embed/EFyeoMRsDN8?si=pqqFHuqhTuB5xNMV" title="Culinary Adventure" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
+        <a href="/instructions" class="page-selector-container" id="button_farm_task_video_instructions">
+            <img style="max-height: 20rem" class="page-selector-image" src="/main_buttons/instructions.png" alt="Video Instructions"/>
+        </a>
     }
 }
 
@@ -454,6 +470,13 @@ pub fn About() -> impl IntoView {
             <img class="banner-image" src="/banners/about_us_cropped.webp" alt="About Us Banner"/>
             <img class="banner-photo" src="/photos/about_us_group_photo.webp" alt="About Us Photo Banner"/>
         </div>
+    }
+}
+
+#[component]
+pub fn Delivery() -> impl IntoView {
+    view! {
+        // TODO
     }
 }
 
@@ -912,8 +935,10 @@ pub fn NavBar() -> impl IntoView {
                         href="/" id="button_middle"
                     >
                         <img
-                             src="/navbar/nav_buttons/home.png" class="button_middle_image" alt="Home"
+                             style="filter: brightness(1.2)"
+                             src="/navbar/empty_button.png" class="button_middle_image" alt="Home"
                         />
+                        <span class="overlay-text">Home</span>
                     </a>
                 </li>
                 <li>
@@ -922,8 +947,10 @@ pub fn NavBar() -> impl IntoView {
                         href="/shop/food" id="button_middle"
                     >
                         <img
-                             src="/navbar/nav_buttons/food_shop.png" class="button_middle_image" alt="Food Shop"
+                             style="filter: brightness(1.2)"
+                             src="/navbar/empty_button.png" class="button_middle_image" alt="Food Shop"
                         />
+                        <span class="overlay-text">Food Shop</span>
                     </a>
                 </li>
                 <li>
@@ -932,38 +959,46 @@ pub fn NavBar() -> impl IntoView {
                         href="/shop/pet" id="button_middle"
                     >
                         <img
-                             src="/navbar/nav_buttons/pet_shop.png" class="button_middle_image" alt="Pet Shop"
+                             style="filter: brightness(1.2)"
+                             src="/navbar/empty_button.png" class="button_middle_image" alt="Farm Pet Food"
                         />
+                        <span class="overlay-text">Farm Pet Food</span>
                     </a>
                 </li>
                 <li>
                     <a
-                        class:current=move || {matches!(selected.get(), CurrentPage::VideoInstructionsService)}
-                        href="/instructions" id="button_middle"
+                        class:current=move || {matches!(selected.get(), CurrentPage::EatNowShop)}
+                        href="/shop/eat" id="button_middle"
                     >
                         <img
-                             src="/navbar/nav_buttons/video_instructions.png" class="button_middle_image" alt="Video Instructions"
+                             style="filter: brightness(1.2)"
+                             src="/navbar/empty_button.png" class="button_middle_image" alt="Cook & Eat Now"
                         />
+                        <span class="overlay-text">Cook & Eat Now</span>
                     </a>
                 </li>
                 <li>
                     <a
-                        class:current=move || {matches!(selected.get(), CurrentPage::VideoBlog)}
+                        class:current=move || {matches!(selected.get(), CurrentPage::VideoBlogs)}
                         href="/blog/culinary-adventure" id="button_middle"
                     >
                         <img
-                             src="/navbar/nav_buttons/video_blog.png" class="button_middle_image" alt="Video Blogs"
+                             style="filter: brightness(1.2)"
+                             src="/navbar/empty_button.png" class="button_middle_image" alt="Video Blogs"
                         />
+                        <span class="overlay-text">Video Blogs</span>
                     </a>
                 </li>
                 <li>
                     <a
-                        class:current=move || {matches!(selected.get(), CurrentPage::Engineering)}
-                        href="/engineering" id="button_middle"
+                        class:current=move || {matches!(selected.get(), CurrentPage::Delivery)}
+                        href="/delivery" id="button_middle"
                     >
                         <img
-                             src="/navbar/nav_buttons/engineering.png" class="button_middle_image" alt="Engineering"
+                             style="filter: brightness(1.2)"
+                             src="/navbar/empty_button.png" class="button_middle_image" alt="Delivery"
                         />
+                        <span class="overlay-text">Delivery</span>
                     </a>
                 </li>
                 <li>
@@ -972,8 +1007,10 @@ pub fn NavBar() -> impl IntoView {
                         href="/about" id="button_middle"
                     >
                         <img
-                             src="/navbar/nav_buttons/about_us.png" class="button_middle_image" alt="About Us"
+                             style="filter: brightness(1.2)"
+                             src="/navbar/empty_button.png" class="button_middle_image" alt="About Us"
                         />
+                        <span class="overlay-text">About Us</span>
                     </a>
                 </li>
                 // <li>

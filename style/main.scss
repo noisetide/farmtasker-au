@@ -276,14 +276,32 @@ a {
     border-radius: 5px;
     margin: 0;
     padding: 0;
-    /* gap: 0.5rem; */
     display: flex;
     background-color: darken($main-color, 5%);
     justify-content: center;
     align-content: center;
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 100%;
+
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: #888;
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: #f1f1f1;
+    }
 
     li {
-      width: 100%;
+      display: inline-flex;
+      /* Allows the li elements to be in a row */
+      width: auto;
+      /* Adjust as needed */
       align-content: center;
       justify-content: center;
 
@@ -302,7 +320,27 @@ a {
         justify-content: center;
         text-align: center;
         color: white;
-        display: flex;
+        position: relative;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        .overlay-text {
+          position: absolute;
+          align-content: center;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -52%);
+          width: 100%;
+          height: 100%;
+          color: darken($main-color, 10);
+          background-color: transparent;
+          white-space: nowrap;
+          text-align: center;
+          font-weight: 900;
+          font-size: clamp(0.7rem, 0.6vw, 0.6vw);
+        }
 
         img.button_middle_image {
           overflow: hidden;
@@ -331,7 +369,6 @@ a {
           text-decoration: underline !important;
           box-shadow: inset 0 -2px 25px rgba(255, 255, 255, 0.15);
 
-          /* background-color: lighten($main-color, 65%); */
           color: black;
           overflow: hidden;
 
@@ -347,13 +384,11 @@ a {
 
           &:hover {
             transition: 200ms;
-            /* background-color: lighten($main-color, 50%); */
           }
         }
 
         &:active {
           transition: 200ms;
-          /* background-color: darken($main-color, 50%); */
         }
 
         &:hover {
@@ -366,7 +401,6 @@ a {
           gap: 0;
           height: 2.5vh;
           width: auto;
-          /* margin: 0; */
         }
       }
     }
@@ -551,7 +585,7 @@ main {
 
         }
 
-        .pager-content-video-blog {
+        .pager-content-video-blogs {
           justify-content: center;
           text-align: center;
 
@@ -573,7 +607,7 @@ main {
 
         }
 
-        .pager-content-instructions {
+        .pager-content-video-instructions {
           justify-content: center;
           text-align: center;
 
@@ -596,7 +630,7 @@ main {
           }
         }
 
-        .pager-content-engineering {
+        .pager-content-ready-to-eat-shop {
           justify-content: center;
           text-align: center;
 
