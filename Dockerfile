@@ -16,14 +16,20 @@ RUN nix build --verbose --print-build-logs --impure --extra-experimental-feature
 RUN mkdir /tmp/nix-store-closure
 RUN cp -R $(nix-store -qR result/) /tmp/nix-store-closure
 
-# fix Cargo.toml
-RUN nix shell -p sed --run 'sed -i 's|site-root = "target/site"|site-root = "site"|' /tmp/nix-store-closure/Cargo.toml'
+RUN ls -la /tmp/nix-store-closure
 
 # Final image is based on scratch. We copy a bunch of Nix dependencies
 # but they're fully self-contained so we don't need Nix anymore.
-FROM scratch
+FROM debian:bookworm-slim as runtime
 
 WORKDIR /app
+
+RUN apt-get update -y \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && apt-get install -y --no-install-recommends wget curl sed \
+  && apt-get autoremove -y \
+  && apt-get clean -y \
+  && rm -rf /var/lib/apt/lists/*
 
 # Copy /nix/store
 COPY --from=builder /tmp/nix-store-closure /nix/store

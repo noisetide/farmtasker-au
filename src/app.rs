@@ -106,23 +106,23 @@ pub fn Routerer() -> impl IntoView {
             }/>
             <Route path="/shop/pet" view={
                 move || {
-                    const CURRENTPAGE: CurrentPage = CurrentPage::PetShop;
+                    const CURRENTPAGE: CurrentPage = CurrentPage::PetFood;
 
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=PetShop currentpage=CURRENTPAGE/>
+                        <Pager page=PetFood currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
             <Route path="/shop/food" view={
                 move || {
-                    const CURRENTPAGE: CurrentPage = CurrentPage::FoodShop;
+                    const CURRENTPAGE: CurrentPage = CurrentPage::FarmFood;
 
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=FoodShop currentpage=CURRENTPAGE/>
+                        <Pager page=FarmFood currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
@@ -220,12 +220,12 @@ pub fn Routerer() -> impl IntoView {
             }/>
             <Route path="/shop/eat" view={
                 move || {
-                    const CURRENTPAGE: CurrentPage = CurrentPage::EatNowShop;
+                    const CURRENTPAGE: CurrentPage = CurrentPage::EatNow;
 
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=EatNowShop currentpage=CURRENTPAGE/>
+                        <Pager page=EatNow currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
@@ -259,8 +259,9 @@ pub fn Routerer() -> impl IntoView {
 pub enum CurrentPage {
     None,
     HomePage,
-    PetShop,
-    FoodShop,
+    PetFood,
+    FarmFood,
+    EatNow,
     About,
     Delivery,
     ProductItemDetails,
@@ -269,7 +270,6 @@ pub enum CurrentPage {
     ShoppingCart,
     VideoInstructions,
     VideoBlogs,
-    EatNowShop,
 }
 
 #[component]
@@ -287,8 +287,8 @@ where
                         class=match currentpage {
                             CurrentPage::None => {"pager-content-none"},
                             CurrentPage::HomePage => {"pager-content-home-page"},
-                            CurrentPage::PetShop => {"pager-content-pet-shop pager-content-shop-general"},
-                            CurrentPage::FoodShop => {"pager-content-foot-shop pager-content-shop-general"},
+                            CurrentPage::PetFood => {"pager-content-pet-shop pager-content-shop-general"},
+                            CurrentPage::FarmFood => {"pager-content-foot-shop pager-content-shop-general"},
                             CurrentPage::About => {"pager-content-about"},
                             CurrentPage::Delivery => {"pager-content-delivery"},
                             CurrentPage::PrivacyPolicy => {"pager-content-privacy-policy"},
@@ -297,7 +297,7 @@ where
                             CurrentPage::VideoInstructions => {"pager-content-video-instructions"},
                             CurrentPage::VideoBlogs => {"pager-content-video-blogs"},
                             CurrentPage::ProductItemDetails => {"pager-content-product-item-details"},
-                            CurrentPage::EatNowShop => {"pager-content-eat-now-shop"},
+                            CurrentPage::EatNow => {"pager-content-eat-now-shop"},
                         }
                     >{page()}</div>
                 </div>
@@ -320,7 +320,7 @@ pub fn HomePage() -> impl IntoView {
         </div>
         <div class="main_buttons_services_container">
             <a href="/shop/eat" class="page-selector-container" id="button_ready_to_eat_shop">
-                <img class="page-selector-image" src="/main_buttons/ready_to_eat_shop.png" alt="Cook & Eat Now"/>
+                <img class="page-selector-image" src="/main_buttons/ready_to_eat_shop.png" alt="Eat Now"/>
             </a>
             <a href="/instructions" class="page-selector-container" id="button_farm_task_video_instructions_service">
                 <img class="page-selector-image" src="/main_buttons/instructions.png" alt="Video Instructions"/>
@@ -416,7 +416,7 @@ pub fn ProductItemDetailsPage(product_name: String) -> impl IntoView {
 }
 
 #[component]
-pub fn PetShop() -> impl IntoView {
+pub fn PetFood() -> impl IntoView {
     view! {
         <h1 class="shop-title">"Pet Food Shop"</h1>
         <ProductItemsList items_category="pet_food".to_string()/>
@@ -424,7 +424,7 @@ pub fn PetShop() -> impl IntoView {
 }
 
 #[component]
-pub fn FoodShop() -> impl IntoView {
+pub fn FarmFood() -> impl IntoView {
     view! {
         <h1 class="shop-title">"Farm Food Shop"</h1>
         <ProductItemsList items_category="food".to_string()/>
@@ -442,7 +442,7 @@ pub fn VideoInstructions() -> impl IntoView {
 }
 
 #[component]
-pub fn EatNowShop() -> impl IntoView {
+pub fn EatNow() -> impl IntoView {
     view! {
         <div class="blog-container">
             // <img class="banner-image" src="/banners/.webp" alt="Ready To Eat Banner"/>
@@ -752,7 +752,7 @@ pub fn ShoppingCart() -> impl IntoView {
                     <p>
                         "You can browse items in:"
                     </p>
-                    <a href="/shop/food">"Food Shop "</a>
+                    <a href="/shop/food">"Farm Food Shop "</a>
                     "or "
                     <a href="/shop/pet">"Pet Food Shop"</a>
                 </div>
@@ -943,38 +943,38 @@ pub fn NavBar() -> impl IntoView {
                 </li>
                 <li>
                     <a
-                        class:current=move || {matches!(selected.get(), CurrentPage::FoodShop)}
+                        class:current=move || {matches!(selected.get(), CurrentPage::FarmFood)}
                         href="/shop/food" id="button_middle"
                     >
                         <img
                              style="filter: brightness(1.2)"
                              src="/navbar/empty_button.png" class="button_middle_image" alt="Food Shop"
                         />
-                        <span class="overlay-text">Food Shop</span>
+                        <span class="overlay-text">Farm Food</span>
                     </a>
                 </li>
                 <li>
                     <a
-                        class:current=move || {matches!(selected.get(), CurrentPage::PetShop)}
+                        class:current=move || {matches!(selected.get(), CurrentPage::PetFood)}
                         href="/shop/pet" id="button_middle"
                     >
                         <img
                              style="filter: brightness(1.2)"
                              src="/navbar/empty_button.png" class="button_middle_image" alt="Farm Pet Food"
                         />
-                        <span class="overlay-text">Farm Pet Food</span>
+                        <span class="overlay-text">Pet Food</span>
                     </a>
                 </li>
                 <li>
                     <a
-                        class:current=move || {matches!(selected.get(), CurrentPage::EatNowShop)}
+                        class:current=move || {matches!(selected.get(), CurrentPage::EatNow)}
                         href="/shop/eat" id="button_middle"
                     >
                         <img
                              style="filter: brightness(1.2)"
-                             src="/navbar/empty_button.png" class="button_middle_image" alt="Cook & Eat Now"
+                             src="/navbar/empty_button.png" class="button_middle_image" alt="Eat Now"
                         />
-                        <span class="overlay-text">Cook & Eat Now</span>
+                        <span class="overlay-text">Eat Now</span>
                     </a>
                 </li>
                 <li>
