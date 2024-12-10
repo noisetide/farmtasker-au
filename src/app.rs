@@ -868,6 +868,10 @@ pub fn FooterBar() -> impl IntoView {
             <div class="footer-content">
                 <div class="footer-section">
                     <p>"© 2024 FARMTASKER PTY LTD. All rights reserved."</p>
+                    <p>
+                        "This website is licensed under the "
+                        <a href="https://www.gnu.org/licenses/lgpl-2.1.html" target="_blank">"GNU Lesser General Public License v2.1"</a>.
+                    </p>
                 </div>
                 <div class="footer-section">
                     <p>

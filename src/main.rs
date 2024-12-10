@@ -1,3 +1,28 @@
+//                   GNU LESSER GENERAL PUBLIC LICENSE
+//                        Version 2.1, February 1999
+//
+// fartmasker.au a marketplace website for local farmers in Tasmania.
+// Copyright (C) 2024 Dmytro Serdiukov & FARMTASKER PTY LTD
+//
+// This software is a free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This software is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//
+// See the GNU Lesser General Public License for more details.
+//
+// FARMTASKER PDY LTD, hereby disclaims all copyright interest in the
+// software `farmtasker.au' (a marketplace website for local farmers in Tasmania) written by Dmytro Serdiukov.
+//
+// 11 December 2024
+// Olesia Trukhanska, founder of FARMTASKER PTY LTD
+//
+// You can contact us at info@farmtasker.au
+
 #![allow(unused)]
 #[cfg(not(feature = "ssr"))]
 fn main() {}
