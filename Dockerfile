@@ -18,8 +18,6 @@ RUN cp -R $(nix-store -qR result/) /tmp/nix-store-closure
 
 RUN ls -la /tmp/nix-store-closure
 
-# Final image is based on scratch. We copy a bunch of Nix dependencies
-# but they're fully self-contained so we don't need Nix anymore.
 FROM debian:bookworm-slim as runtime
 
 WORKDIR /app
