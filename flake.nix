@@ -19,7 +19,7 @@
   } @ inputs: let
     forEachSystem = nixpkgs.lib.genAttrs (import systems);
   in {
-    packages = # TODO not yet implemented. Use Dockerfile instead
+    packages =
       forEachSystem
       (system: let
         pkgs = nixpkgs.legacyPackages.${system};

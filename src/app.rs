@@ -470,6 +470,43 @@ pub fn About() -> impl IntoView {
             <img class="banner-image" src="/banners/about_us_cropped.webp" alt="About Us Banner"/>
             <img class="banner-photo" src="/photos/about_us_group_photo.webp" alt="About Us Photo Banner"/>
         </div>
+        <div class="about-us-blocks-container">
+            <ul class="about-us-block">
+                <h3>"Olesia – Director & Co-Founder (50% Farmtasker PTY LTD)"</h3>
+                <h4>"With over 25 years of business and finance experience in Ukraine, Olesia is the driving force behind Farmtasker. She successfully launched her first online shop in 2004, showcasing her entrepreneurial vision."</h4>
+                    <h3>"Experience:"</h3>
+                        <li style="font-size: 16px">"Bookkeeping in Australia: May 2022 – present"</li>
+                        <li style="font-size: 16px">"Poultry processing expertise: December 2022 – present"</li>
+                    <h3>"Education:"</h3>
+                        <li style="font-size: 16px">"Master's Degree in Economics (2001)"</li>
+                <h4>"Olesia’s leadership combines strategic insight with hands-on industry knowledge, ensuring the smooth operation of Farmtasker."</h4>
+            </ul>
+            <ul class="about-us-block">
+                <h3>"Vasyl – Sales & Marketing Manager, Co-Founder (50% Farmtasker PTY LTD)"</h3>
+                <h4>"Vasyl brings a wealth of expertise with 10+ years of experience in government roles, including the State Tax Service of Ukraine and Legal Advisory for Kyiv Consulate. His qualifications are officially recognized by the Australian Government."</h4>
+                    <h3>"Experience:"</h3>
+                        <li style="font-size: 16px">"Sales & Business Management: Nearly 10 years of success in Ukraine"</li>
+                        <li style="font-size: 16px">"Poultry processing expertise: December 2022 – present"</li>
+                    <h3>"Education:"</h3>
+                        <li style="font-size: 16px">"Master’s Degree in Finance (2007)"</li>
+                        <li style="font-size: 16px">"Master’s Degree in Law (2011)"</li>
+                <h4>"Vasyl’s strategic sales approach and legal experience ensure Farmtasker delivers with professionalism and integrity."</h4>
+            </ul>
+            <ul class="about-us-block">
+                <h3>"Dmytro – Software Engineer, Farmtasker PTY LTD"</h3>
+                <h4>"As the tech backbone of Farmtasker, Dmytro combines his technical prowess with creative skills."</h4>
+                    <h3>"Experience:"</h3>
+                        <li style="font-size: 16px">"1.8 years as a Multimedia Officer, Future Digital Department, University of Tasmania"</li>
+                        <li style="font-size: 16px">"Kitchen hand experience: Agrarian Kitchen, New Norfolk (December 2023 – December 2024)"</li>
+                        <li style="font-size: 16px">"5 years of sound engineering and video editing experience"</li>
+                    <h3>"Education:"</h3>
+                        <li style="font-size: 16px">"Dmytro is currently pursuing his Bachelor’s Degree in Software Engineering (2025), playing a key role in building Farmtasker’s online presence and digital solutions."</li>
+            </ul>
+            <ul class="about-us-block">
+                <h3>"Margo – Co-Founders’ Daughter & Future Vet"</h3>
+                    <h4>"Born in 2012, Margo embodies the family’s next generation of passion and energy. A devoted animal lover, she aspires to become a veterinarian while actively contributing to family projects."</h4>
+            </ul>
+        </div>
     }
 }
 
@@ -868,10 +905,10 @@ pub fn FooterBar() -> impl IntoView {
             <div class="footer-content">
                 <div class="footer-section">
                     <p>"© 2024 FARMTASKER PTY LTD. All rights reserved."</p>
-                    <p>
-                        "This website is licensed under the "
-                        <a href="https://www.gnu.org/licenses/lgpl-2.1.html" target="_blank">"GNU Lesser General Public License v2.1"</a>.
-                    </p>
+                    // <p>
+                    //     "This website is licensed under the "
+                    //     <a href="https://www.gnu.org/licenses/lgpl-2.1.html" target="_blank">"GNU Lesser General Public License v2.1"</a>.
+                    // </p>
                 </div>
                 <div class="footer-section">
                     <p>

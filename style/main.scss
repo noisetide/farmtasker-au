@@ -1,8 +1,9 @@
 /* Variables for colors */
 $main-color: darkolivegreen;
-$accent-color: lighten(darkred, 8.5%);
 $background-color-light: #F6F6E5;
 $background-color-dark: bisque;
+$accent-color: $background-color-light;
+$accent-color2: lighten(bisque, 0.5%);
 
 /* Mixin for responsive design */
 @mixin respond-to($media) {
@@ -207,25 +208,38 @@ a {
   }
 
   ul.is-navbar-hidden {
-    display: flex;
 
     @include respond-to(mobile) {
       display: none;
+
+      a {
+        display: none;
+      }
     }
 
     @include respond-to(desktop) {
       display: flex;
+
+      a {
+        display: inline-flex;
+      }
     }
 
     @include respond-to(tablet) {
       display: flex;
+
+      a {
+        display: inline-flex;
+      }
     }
 
     li {
-      display: block;
-
       @include respond-to(mobile) {
         display: none;
+
+        a {
+          display: none;
+        }
       }
 
       @include respond-to(desktop) {
@@ -254,10 +268,14 @@ a {
     }
 
     li {
-      display: block;
+      display: inline-flex;
 
       @include respond-to(mobile) {
         display: block;
+
+        a {
+          display: flex;
+        }
       }
 
       @include respond-to(desktop) {
@@ -276,29 +294,14 @@ a {
     border-radius: 5px;
     margin: 0;
     padding: 0;
-    display: flex;
     background-color: darken($main-color, 5%);
     justify-content: center;
     align-content: center;
-    overflow-x: auto;
+    overflow-x: visible;
     white-space: nowrap;
     max-width: 100%;
 
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background-color: #888;
-      border-radius: 4px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background-color: #f1f1f1;
-    }
-
     li {
-      display: inline-flex;
       /* Allows the li elements to be in a row */
       width: auto;
       /* Adjust as needed */
@@ -322,7 +325,6 @@ a {
         color: white;
         position: relative;
 
-        display: inline-flex;
         align-items: center;
         justify-content: center;
 
@@ -456,13 +458,14 @@ a {
   align-content: center;
 
 
-
   .footer-content {
+    text-align: center;
     display: flex;
     justify-content: space-between;
 
     .footer-section {
       margin: 0;
+      text-align: center;
     }
   }
 
@@ -517,19 +520,36 @@ main {
         background-color: transparentize(darken($background-color-light, 10%), 0.15);
         display: flex;
 
-        justify-content: center;
-
         .pager-content-about {
           display: flex;
           flex-direction: column;
           align-items: center;
+          justify-content: center;
+          justify-items: center;
+          align-content: center;
 
           padding: 1rem;
-          /* justify-content: center; */
-          align-content: center;
           text-align: center;
 
+
           @include respond-to(desktop) {
+
+            .about-us-blocks-container {
+              display: flex;
+              flex-direction: column;
+              gap: 1rem;
+
+              .about-us-block {
+                text-align: left;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                text-align: left;
+                font-weight: bold;
+                padding: 2rem;
+                padding-bottom: 2rem;
+                background: linear-gradient(to bottom, $accent-color2, $accent-color);
+                border-radius: 20px;
+              }
+            }
 
             .blog-container {
               .banner-image {
@@ -551,6 +571,24 @@ main {
 
           @include respond-to(tablet) {
 
+            .about-us-blocks-container {
+              display: flex;
+              flex-direction: column;
+              gap: 1rem;
+
+              .about-us-block {
+                width: 90%;
+                text-align: left;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                text-align: left;
+                font-weight: bold;
+                padding: 2rem;
+                padding-bottom: 2rem;
+                background: linear-gradient(to bottom, $accent-color2, $accent-color);
+                border-radius: 20px;
+              }
+            }
+
             .blog-container {
               .banner-image {
                 border-radius: 25px;
@@ -567,6 +605,24 @@ main {
           }
 
           @include respond-to(mobile) {
+            .about-us-blocks-container {
+              display: flex;
+              flex-direction: column;
+              gap: 1rem;
+
+              .about-us-block {
+                width: 90%;
+                text-align: left;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                text-align: left;
+                font-weight: bold;
+                color: da2ken($main-color, 30%);
+                padding-bottom: 2rem;
+                background: linear-gradient(to bottom, $accent-color2, $accent-color);
+                border-radius: 20px;
+              }
+            }
+
             .blog-container {
               .banner-image {
                 border-radius: 25px;
