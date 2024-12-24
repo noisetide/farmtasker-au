@@ -776,6 +776,7 @@ pub mod sync {
                 },
                 description: value.description,
                 images: value.images,
+                local_images: None,
                 metadata: value.metadata,
                 name: value.name.unwrap_or_default(),
                 // package_dimensions: value.package_dimensions,

@@ -68,6 +68,7 @@ pub struct DbProduct {
     pub description: Option<String>,
     // A list of up to 8 URLs of images for this product, meant to be displayable to the customer
     pub images: Option<Vec<String>>,
+    pub local_images: Option<Vec<String>>,
     pub metadata: Option<HashMap<String, String>>,
     pub name: String,
     // pub package_dimensions: Option<PackageDimensions>,

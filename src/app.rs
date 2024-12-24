@@ -756,9 +756,9 @@ pub fn ShoppingCart() -> impl IntoView {
     let checkout_session = expect_context::<CheckoutSessionRes>();
     provide_context(checkout_session);
 
-    let loading = checkout_session.loading();
+    let checkout_loading = checkout_session.loading();
     let is_checkout_loading = move || {
-        if loading() {
+        if checkout_loading() {
             "Loading..."
         } else {
             let session = checkout_session
@@ -802,7 +802,20 @@ pub fn ShoppingCart() -> impl IntoView {
                                 let (product_id, _) = create_signal(product_id.clone());
                                 provide_context(product_id);
 
-                                let (product_name, _) = create_signal(stripe_data.get().unwrap().unwrap().products.into_iter().find(|x| x.id == product_id.get()).unwrap().name);
+                                let product_name = if let Some(product) = stripe_data
+                                    .get()
+                                    .unwrap()
+                                    .unwrap()
+                                    .products
+                                    .into_iter()
+                                    .find(|x| x.id == product_id.get())
+                                {
+                                    create_signal(product.name).0
+                                } else {
+                                    set_shopping_cart.update(|s| s.remove_single_product(&product_id.get()));
+                                    create_signal("Product".to_string()).0
+                                };
+
                                 provide_context(product_name);
                                 view! {
                                     <li>
