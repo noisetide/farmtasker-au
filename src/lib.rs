@@ -3,6 +3,7 @@ pub mod app;
 pub mod error_template;
 #[cfg(feature = "ssr")]
 pub mod fileserv;
+pub mod products_config;
 pub mod stripe_retypes;
 
 #[cfg(feature = "hydrate")]
@@ -61,6 +62,7 @@ pub async fn stater() -> Result<StripeData, leptos::ServerFnError> {
 use app::PagerPropsBuilder_Error_Missing_required_field_page;
 use leptos::{create_effect, Serializable, ServerFnError};
 use leptos_router::FromFormData;
+use products_config::CfgProduct;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -446,6 +448,49 @@ pub async fn new_checkout_session(
     leptos_axum::redirect(&checkout_session.clone().unwrap().url.unwrap());
 
     Ok(checkout_session.unwrap())
+}
+
+// Gets the StripeData from local automatically serialized json file
+#[leptos::server(
+    name = FetchLocalProductInfo,
+)]
+pub async fn fetch_local_product_info() -> Result<Vec<CfgProduct>, leptos::ServerFnError> {
+    use std::fs::File;
+    use std::io::Read;
+    use std::io::Write;
+    use std::path::Path;
+    use stripe::*;
+
+    info!("Fetching Local Stripe Data...");
+
+    // Retrieve the LEPTOS_SITE_ROOT environment variable for path of the data file
+    let site_root = std::env::var("LEPTOS_SITE_ROOT").unwrap_or_else(|_| "site".to_string());
+    let assets_dir = std::env::var("LEPTOS_ASSETS_DIR").unwrap_or_else(|_| "assets".to_string());
+
+    let products_config_file_path = Path::new(&site_root).join("products_config.json");
+    let products_config_public_file_path = Path::new(&assets_dir).join("products_config.json");
+
+    let final_products_config: Vec<CfgProduct> = if products_config_file_path.exists() {
+        let products_config_file_contents = std::fs::read_to_string(products_config_file_path)?;
+        let products_config: Vec<CfgProduct> = serde_json::from_str(&products_config_file_contents)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+        println!("Loaded data from file: {:?}", products_config);
+        products_config
+    } else {
+        // If the file doesn't exist, create new one by serializing StripeData::new_fetch()
+        let stripe_data = StripeData::new_fetch().await?;
+        let products_config = Vec::new(); // TODO!
+        let json_data = serde_json::to_string_pretty(&products_config)?;
+        std::fs::write(&products_config_file_path, json_data.clone())?;
+        std::fs::write(&products_config_public_file_path, json_data.clone())?;
+        println!(
+            "Created new file with synced data at: {}",
+            products_config_file_path.display()
+        );
+        products_config
+    };
+
+    Ok(final_products_config)
 }
 
 use log::*;
