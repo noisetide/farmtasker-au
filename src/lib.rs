@@ -21,9 +21,9 @@ pub async fn get_stripe_key() -> Result<String, leptos::ServerFnError> {
 }
 
 #[leptos::server(
-      name = Stater,
+      name = StripeStater,
 )]
-pub async fn stater() -> Result<StripeData, leptos::ServerFnError> {
+pub async fn stripe_stater() -> Result<StripeData, leptos::ServerFnError> {
     let state = match leptos::use_context::<Option<crate::AppState>>() {
         Some(ok) => {
             // leptos::logging::log!("GOT context AppState");
@@ -40,11 +40,12 @@ pub async fn stater() -> Result<StripeData, leptos::ServerFnError> {
             None => &AppState {
                 stripe_api_key: None,
                 stripe_data: None,
+                products_config: None,
             },
         })
         .await?;
 
-    // log::info!("Server data: {:#?}", data.stripe_data.clone());
+    // log::info!("Server data: {:#?}", appstate.stripe_data.clone());
     match appstate.stripe_data {
         Some(ok) => {
             // info!("StripeData Loaded...");
@@ -59,16 +60,57 @@ pub async fn stater() -> Result<StripeData, leptos::ServerFnError> {
     }
 }
 
+#[leptos::server(
+      name = ProductsStater,
+)]
+pub async fn products_stater() -> Result<CfgProducts, leptos::ServerFnError> {
+    let state = match leptos::use_context::<Option<crate::AppState>>() {
+        Some(ok) => {
+            // leptos::logging::log!("GOT context AppState");
+            ok
+        }
+        None => {
+            // leptos::logging::log!("No context AppState");
+            None
+        }
+    };
+    let axum::extract::State(appstate): axum::extract::State<crate::AppState> =
+        leptos_axum::extract_with_state(match &state {
+            Some(x) => x,
+            None => &AppState {
+                stripe_api_key: None,
+                stripe_data: None,
+                products_config: None,
+            },
+        })
+        .await?;
+
+    log::info!("Server data: {:#?}", appstate.products_config.clone());
+    match appstate.products_config {
+        Some(ok) => {
+            info!("Products Config Loaded...");
+            Ok(ok)
+        }
+        None => {
+            // error!("No StripeData!");
+            return Err(leptos::ServerFnError::ServerError(
+                "CfgProducts not found".into(),
+            ));
+        }
+    }
+}
+
 use app::PagerPropsBuilder_Error_Missing_required_field_page;
 use leptos::{create_effect, Serializable, ServerFnError};
 use leptos_router::FromFormData;
-use products_config::CfgProduct;
+use products_config::{CfgProduct, CfgProducts};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct AppState {
     pub stripe_api_key: Option<String>,
     pub stripe_data: Option<StripeData>,
+    pub products_config: Option<CfgProducts>,
 }
 
 use std::collections::HashMap;
@@ -172,7 +214,7 @@ pub async fn find_checkout_session_matches(
         }
     });
 
-    let stripe_data: StripeData = stater().await?;
+    let stripe_data: StripeData = stripe_stater().await?;
 
     Ok(stripe_data.checkout_sessions.iter().any(|session| {
         session.id == checkout_sessionid
@@ -183,6 +225,7 @@ pub async fn find_checkout_session_matches(
     }))
 }
 
+/// Creates new checkout session via stripe api using shopping cart items from client
 #[leptos::server(name = NewCheckoutSession)]
 pub async fn new_checkout_session(
     shopping_cart: HashMap<String, u8>, // shopping_cart input from storage
@@ -200,7 +243,7 @@ pub async fn new_checkout_session(
             return Err(ServerFnError::ServerError(err.to_string()));
         }
     });
-    let stripe_data: StripeData = stater().await?;
+    let stripe_data: StripeData = stripe_stater().await?;
 
     let base_url = match std::env::var("DEVPORT") {
         Ok(port) => "http://localhost:4444",
@@ -349,7 +392,7 @@ pub async fn new_checkout_session(
 
         stripe_sync();
 
-        let stripe_data: StripeData = stater().await?;
+        let stripe_data: StripeData = stripe_stater().await?;
 
         let existing_session = stripe_data
             .checkout_sessions
@@ -450,53 +493,169 @@ pub async fn new_checkout_session(
     Ok(checkout_session.unwrap())
 }
 
-// Gets the StripeData from local automatically serialized json file
 #[leptos::server(
-    name = FetchLocalProductInfo,
+    name = RefreshLocalProductInfo,
+    endpoint = "cfgsync", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
 )]
-pub async fn fetch_local_product_info() -> Result<Vec<CfgProduct>, leptos::ServerFnError> {
+pub async fn refresh_local_product_info(delete: bool) -> Result<(), leptos::ServerFnError> {
     use std::fs::File;
     use std::io::Read;
     use std::io::Write;
     use std::path::Path;
     use stripe::*;
 
-    info!("Fetching Local Stripe Data...");
+    info!("Refreshing Local CfgProducts...");
 
     // Retrieve the LEPTOS_SITE_ROOT environment variable for path of the data file
     let site_root = std::env::var("LEPTOS_SITE_ROOT").unwrap_or_else(|_| "site".to_string());
-    let assets_dir = std::env::var("LEPTOS_ASSETS_DIR").unwrap_or_else(|_| "assets".to_string());
+    let assets_dir = std::env::var("LEPTOS_ASSETS_DIR").unwrap_or_else(|_| "public".to_string());
+
+    // Config file paths
+    let products_config_file_path = Path::new(&site_root).join("products_config.json");
+    let products_config_public_file_path = Path::new(&assets_dir).join("products_config.json");
+
+    if products_config_file_path.exists() {
+        if delete {
+            // remove existing files
+            std::fs::remove_file(products_config_file_path.clone());
+            std::fs::remove_file(products_config_public_file_path.clone());
+
+            // If the file exists delete it, then recreate new one by serializing StripeData::new_fetch()
+            let stripe_data = StripeData::new_fetch().await?;
+            let stripe_products_config = StripeData::derive_products_config(stripe_data);
+            let json_data = serde_json::to_string_pretty(&stripe_products_config)?;
+            std::fs::create_dir_all(&site_root); // safe measure if dir doesn't exist
+            std::fs::create_dir_all(&assets_dir);
+            std::fs::write(&products_config_file_path, json_data.clone())?; // write to target/site/
+            std::fs::write(&products_config_public_file_path, json_data.clone())?; // write to public/
+            println!(
+                "Reset products config file, with new synced products data from stripe api at: {}",
+                products_config_file_path.display()
+            );
+            println!(
+                "Reset public products config file, with new synced products data from stripe api at: {}",
+                products_config_public_file_path.display()
+            );
+            Ok(())
+        } else {
+            // Refresh file with new products from stripe api
+            let stripe_data = StripeData::new_fetch().await?;
+            let stripe_products_config: CfgProducts =
+                StripeData::derive_products_config(stripe_data);
+
+            let local_products_config: CfgProducts = fetch_local_product_info().await?;
+
+            // Create new products config by adding missing products from stripedata to existing config if the local config is missing the products by id
+            let updated_products_config: CfgProducts = {
+                let mut h = Vec::new();
+
+                local_products_config.0.clone().into_iter().map(|p| {
+                    h.push(p.clone());
+                    stripe_products_config.0.clone().into_iter().map(|s| {
+                        if s.stripe_id != p.stripe_id {
+                            h.push(s)
+                        }
+                    });
+                });
+
+                CfgProducts(h)
+            };
+
+            // remove existing file
+            std::fs::remove_file(products_config_file_path.clone());
+            std::fs::remove_file(products_config_public_file_path.clone());
+
+            // Write serialized local data updated with new products from stripe api
+            let json_data = serde_json::to_string_pretty(&updated_products_config)?;
+            std::fs::create_dir_all(&site_root); // safe measure if dir doesn't exist
+            std::fs::create_dir_all(&assets_dir);
+            std::fs::write(&products_config_file_path, json_data.clone())?; // write to target/site/
+            std::fs::write(&products_config_public_file_path, json_data.clone())?; // write to public/
+            println!(
+                "Refreshed products config file with new products data at: {}",
+                products_config_file_path.display()
+            );
+            println!(
+                "Refreshed public products config file with new products data at: {}",
+                products_config_public_file_path.display()
+            );
+
+            Ok(())
+        }
+    } else {
+        // If the file doesn't exist, just create new one by serializing StripeData::new_fetch()
+        let stripe_data = StripeData::new_fetch().await?;
+        let stripe_products_config: CfgProducts = StripeData::derive_products_config(stripe_data);
+        let json_data = serde_json::to_string_pretty(&stripe_products_config)?;
+        std::fs::create_dir_all(&site_root); // safe measure if dir doesn't exist
+        std::fs::create_dir_all(&assets_dir);
+        std::fs::write(&products_config_file_path, json_data.clone())?; // write to target/site/
+        std::fs::write(&products_config_public_file_path, json_data.clone())?; // write to public/
+        println!(
+            "Recreated new products file with synced data at: {}",
+            products_config_file_path.display()
+        );
+        println!(
+            "Recreated new public products file with synced data at: {}",
+            products_config_public_file_path.display()
+        );
+        Ok(())
+    }
+}
+
+/// Fetches the Product Info from local automatically deserialized json file
+/// If file doesn't exist it serializes a new one from products data inside StripeData
+/// Return Vec of Products parameters like name and price and their images
+#[leptos::server(
+    name = FetchLocalProductInfo,
+)]
+pub async fn fetch_local_product_info() -> Result<CfgProducts, leptos::ServerFnError> {
+    use std::fs::File;
+    use std::io::Read;
+    use std::io::Write;
+    use std::path::Path;
+    use stripe::*;
+
+    info!("Fetching Local CfgProducts...");
+
+    // Retrieve the LEPTOS_SITE_ROOT environment variable for path of the data file
+    let site_root = std::env::var("LEPTOS_SITE_ROOT").unwrap_or_else(|_| "site".to_string());
+    let assets_dir = std::env::var("LEPTOS_ASSETS_DIR").unwrap_or_else(|_| "public".to_string());
 
     let products_config_file_path = Path::new(&site_root).join("products_config.json");
     let products_config_public_file_path = Path::new(&assets_dir).join("products_config.json");
 
-    let final_products_config: Vec<CfgProduct> = if products_config_file_path.exists() {
+    let final_products_config: CfgProducts = if products_config_file_path.exists() {
+        // if file exists then just read it into CfgProducts
         let products_config_file_contents = std::fs::read_to_string(products_config_file_path)?;
-        let products_config: Vec<CfgProduct> = serde_json::from_str(&products_config_file_contents)
+        let products_config: CfgProducts = serde_json::from_str(&products_config_file_contents)
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
-        println!("Loaded data from file: {:?}", products_config);
+        println!("Loaded datafrom file: {:#?}", products_config);
         products_config
     } else {
         // If the file doesn't exist, create new one by serializing StripeData::new_fetch()
         let stripe_data = StripeData::new_fetch().await?;
-        let products_config = Vec::new(); // TODO!
-        let json_data = serde_json::to_string_pretty(&products_config)?;
-        std::fs::write(&products_config_file_path, json_data.clone())?;
-        std::fs::write(&products_config_public_file_path, json_data.clone())?;
+        let stripe_products_config = StripeData::derive_products_config(stripe_data); // TODO!
+        let json_data = serde_json::to_string_pretty(&stripe_products_config)?;
+        std::fs::create_dir_all(&site_root); // safe measure if dir doesn't exist
+        std::fs::create_dir_all(&assets_dir);
+        std::fs::write(&products_config_file_path, json_data.clone())?; // write to target/site/
+        std::fs::write(&products_config_public_file_path, json_data.clone())?; // write to public/
         println!(
-            "Created new file with synced data at: {}",
+            "Created new products file with synced data at: {}",
             products_config_file_path.display()
         );
-        products_config
+        stripe_products_config
     };
 
     Ok(final_products_config)
 }
 
+// Fetches the data from stripe api and serializes it into StripeData struct returning it
 use log::*;
 use stripe_retypes::{DbCheckoutSession, DbCheckoutSessionStatus, DbProduct};
 #[leptos::server(
-    // name = FetchStripeData,
+    name = FetchStripeData,
     // endpoint = "fetch_stripe_data",
 )]
 pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
@@ -730,8 +889,36 @@ pub mod sync {
                 free_shipping_rate_id,
             }
         }
+        pub fn derive_products_config(self) -> CfgProducts {
+            let mut v = CfgProducts(Vec::new());
+            for p in self.products {
+                v.0.push(CfgProduct {
+                    item_number: None,
+                    stripe_id: Some(p.id),
+                    name: p.name,
+                    price: p.default_price,
+                    description: p.description,
+                    local_images: None,
+                    images: p.images,
+                    metadata: p.metadata,
+                })
+            }
+            v
+        }
         pub async fn new_fetch() -> Result<Self, ServerFnError> {
             fetch_stripe_data().await
+        }
+    }
+
+    impl CfgProducts {
+        pub async fn new_fetch_local() -> Result<Self, ServerFnError> {
+            fetch_local_product_info().await
+        }
+        pub async fn fetch_reset() -> Result<(), ServerFnError> {
+            refresh_local_product_info(true).await
+        }
+        pub async fn fetch_update() -> Result<(), ServerFnError> {
+            refresh_local_product_info(false).await
         }
     }
 
@@ -1010,12 +1197,14 @@ pub async fn redirect_to_url(url: String) -> Result<(), leptos::ServerFnError> {
     Ok(())
 }
 
+/// Synchronizes state of data between the stripe api and the runtime state of StripeData struct
 use leptos::*;
 #[server (
     name = StripeSync,
     // endpoint = "sync", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
 )]
 pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
+    use axum::http::HeaderMap;
     use log::*;
     use stripe::*;
 
@@ -1035,6 +1224,7 @@ pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
             None => &AppState {
                 stripe_api_key: None,
                 stripe_data: None,
+                products_config: None,
             },
         })
         .await?;

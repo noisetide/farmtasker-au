@@ -11,6 +11,7 @@ use leptos_use::*;
 use log::*;
 
 pub type StripeDataRes = Resource<(), Result<StripeData, ServerFnError>>;
+pub type CfgProductsRes = Resource<(), Result<CfgProducts, ServerFnError>>;
 pub type CheckoutSessionRes = Resource<i64, Result<DbCheckoutSession, ServerFnError>>;
 
 pub type CheckoutSessionIdRes = String;
@@ -22,7 +23,12 @@ pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
-    let stripe_data: StripeDataRes = create_resource(|| (), move |_| async { stater().await });
+    let stripe_data: StripeDataRes =
+        create_resource(|| (), move |_| async { stripe_stater().await });
+    provide_context(stripe_data);
+
+    let products_config: CfgProductsRes =
+        create_resource(|| (), move |_| async { products_stater().await });
     provide_context(stripe_data);
 
     let (current_page, set_current_page) = create_signal(CurrentPage::None);
@@ -128,7 +134,7 @@ pub fn Routerer() -> impl IntoView {
             }/>
             <Route path="/shop/products/:product_name"  view={
                 move || {
-                    let CURRENTPAGE: CurrentPage = CurrentPage::ProductItemDetails;
+                    let CURRENTPAGE: CurrentPage = CurrentPage::DbProductItemDetails;
 
                     let params = use_params_map();
                     let product_name = params.with(|params| params.get("product_name").cloned()).unwrap_or("no parameter".into());
@@ -137,7 +143,7 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=move || {view!{<ProductItemDetailsPage product_name=product_name.clone()/>}} currentpage=CURRENTPAGE/>
+                        <Pager page=move || {view!{<DbProductItemDetailsPage product_name=product_name.clone()/>}} currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
@@ -264,7 +270,7 @@ pub enum CurrentPage {
     EatNow,
     About,
     Delivery,
-    ProductItemDetails,
+    DbProductItemDetails,
     PrivacyPolicy,
     TermsOfService,
     ShoppingCart,
@@ -296,7 +302,7 @@ where
                             CurrentPage::ShoppingCart => {"pager-content-shopping-cart"},
                             CurrentPage::VideoInstructions => {"pager-content-video-instructions"},
                             CurrentPage::VideoBlogs => {"pager-content-video-blogs"},
-                            CurrentPage::ProductItemDetails => {"pager-content-product-item-details"},
+                            CurrentPage::DbProductItemDetails => {"pager-content-product-item-details"},
                             CurrentPage::EatNow => {"pager-content-eat-now-shop"},
                         }
                     >{page()}</div>
@@ -333,7 +339,7 @@ pub fn HomePage() -> impl IntoView {
 }
 
 #[component]
-pub fn ProductItemDetails(product: DbProduct) -> impl IntoView {
+pub fn DbProductItemDetails(product: DbProduct) -> impl IntoView {
     let (product, _) = create_signal(product);
     provide_context(product);
 
@@ -373,7 +379,7 @@ pub fn ProductItemDetails(product: DbProduct) -> impl IntoView {
 }
 
 #[component]
-pub fn ProductItemDetailsPage(product_name: String) -> impl IntoView {
+pub fn DbProductItemDetailsPage(product_name: String) -> impl IntoView {
     let stripe_data = expect_context::<StripeDataRes>();
     let (product_name, _) = create_signal(product_name);
     provide_context(product_name);
@@ -402,7 +408,7 @@ pub fn ProductItemDetailsPage(product_name: String) -> impl IntoView {
                     }) {
                         Some(product) => {
                             view!{
-                                <ProductItemDetails product=product/>
+                                <DbProductItemDetails product=product/>
                             }.into_view()
                         },
                         None => view!{
@@ -419,7 +425,7 @@ pub fn ProductItemDetailsPage(product_name: String) -> impl IntoView {
 pub fn PetFood() -> impl IntoView {
     view! {
         <h1 class="shop-title">"Pet Food Shop"</h1>
-        <ProductItemsList items_category="pet_food".to_string()/>
+        <DbProductItemsList items_category="pet_food".to_string()/>
     }
 }
 
@@ -427,7 +433,7 @@ pub fn PetFood() -> impl IntoView {
 pub fn FarmFood() -> impl IntoView {
     view! {
         <h1 class="shop-title">"Farm Food Shop"</h1>
-        <ProductItemsList items_category="food".to_string()/>
+        <DbProductItemsList items_category="food".to_string()/>
     }
 }
 
@@ -544,8 +550,9 @@ pub fn TermsOfService() -> impl IntoView {
         </div>
     }
 }
+
 #[component]
-pub fn ProductItem(product: DbProduct) -> impl IntoView {
+pub fn DbProductItem(product: DbProduct) -> impl IntoView {
     let (product, _) = create_signal(product);
     provide_context(product);
 
@@ -587,7 +594,7 @@ pub fn ProductItem(product: DbProduct) -> impl IntoView {
 }
 
 #[component]
-pub fn ProductItemsList(items_category: String) -> impl IntoView {
+pub fn DbProductItemsList(items_category: String) -> impl IntoView {
     let stripe_data = expect_context::<StripeDataRes>();
     let (items_category, set_items_category) = create_signal(items_category);
     provide_context(items_category);
@@ -616,7 +623,7 @@ pub fn ProductItemsList(items_category: String) -> impl IntoView {
                                 .map(|product| {
                                     view! {
                                         <li class="product-list-item">
-                                            <ProductItem product=product/>
+                                            <DbProductItem product=product/>
                                         </li>
                                     }
                                 })
@@ -666,9 +673,6 @@ pub fn CancelCheckout() -> impl IntoView {
     let set_submit_checkout = expect_context::<WriteSignal<CheckoutSessionUpdateRes>>();
     provide_context(set_submit_checkout);
 
-    let checkout_sessionid = expect_context::<Signal<CheckoutSessionIdRes>>();
-    provide_context(checkout_sessionid);
-
     let checkout_session = expect_context::<CheckoutSessionRes>();
     provide_context(checkout_session);
 
@@ -698,6 +702,10 @@ pub fn CancelCheckout() -> impl IntoView {
         <div>
             "Checkout Cancelled..."
         </div>
+        // <div>
+        //     "Checkout Session Id: "
+        //     {move || {checkout_sessionid.get()}}
+        // </div>
         // <Show
         //     when=move || {
         //         let stripe_data = match stripe_data.get()  {
@@ -722,7 +730,7 @@ pub fn CancelCheckout() -> impl IntoView {
         //             leptos::logging::log!("No active checkout session.")
         //         }
         //     }>
-        //         "Back to checkout"
+        //         "Back to checkout session"
         //     </button>
         // </Show>
 

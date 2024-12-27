@@ -70,6 +70,13 @@ async fn main() {
                 None
             }
         },
+        products_config: match products_config::CfgProducts::new_fetch_local().await {
+            Ok(ok) => Some(ok),
+            Err(err) => {
+                leptos::logging::log!("Can't fetch local CfgProducts");
+                None
+            }
+        }
     };
 
     assert!(

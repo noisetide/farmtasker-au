@@ -81,7 +81,7 @@ assets-dir = "public"
 site-addr = "0.0.0.0:4444"
 
 # The port to use for automatic reload monitoring
-reload-port = 3001
+reload-port = 3002
 
 # [Optional] Command to use when running end2end tests. It will run in the end2end dir.
 #   [Windows] for non-WSL use "npx.cmd playwright test"

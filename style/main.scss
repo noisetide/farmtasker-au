@@ -797,6 +797,19 @@ main {
           }
         }
 
+        .pager-content-shopping-cart {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          justify-items: center;
+          align-content: center;
+
+          padding: 1rem;
+          text-align: center;
+
+        }
+
         /* .pager-content-product-item-details, */
         .pager-content-shop-general {
           text-align: center;
