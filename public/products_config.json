@@ -1,0 +1,32 @@
+[
+  {
+    "stripe_id": "prod_QiIJctrNq28cCg",
+    "item_number": 1,
+    "name": "Quail Eggs Pack 18x",
+    "description": "Repudiandae omnis est necessitatibus ullam ex ullam qui aut. At eveniet velit veritatis. Quod fugiat commodi molestias eligendi aperiam eum eligendi deleniti.",
+    "price": {
+      "id": "price_1PqrjAEYo2pEQeDTwBT9iY4a",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1724397368,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 1500,
+      "unit_amount_decimal": "1500"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfUkhZU1N5Vnh3bTRka2lkVkJaU3F0anlk00jyddeJqv"
+    ],
+    "local_images": null,
+    "metadata": {
+      "category": "food",
+      "item_number": "1"
+    }
+  }
+]

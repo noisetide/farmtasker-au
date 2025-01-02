@@ -66,14 +66,14 @@ async fn main() {
         stripe_data: match farmtasker_au::StripeData::new_fetch().await {
             Ok(ok) => Some(ok),
             Err(err) => {
-                leptos::logging::log!("Can't fetch StripeData");
+                leptos::logging::log!("No StripeData in AppState");
                 None
             }
         },
-        products_config: match products_config::CfgProducts::new_fetch_local().await {
+        products_config: match fetch_local_product_info().await {
             Ok(ok) => Some(ok),
             Err(err) => {
-                leptos::logging::log!("Can't fetch local CfgProducts");
+                leptos::logging::log!("No local CfgProducts in AppState");
                 None
             }
         }
