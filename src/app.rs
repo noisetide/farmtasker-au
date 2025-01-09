@@ -27,9 +27,9 @@ pub fn App() -> impl IntoView {
         create_resource(|| (), move |_| async { stripe_stater().await });
     provide_context(stripe_data);
 
-    let products_config: CfgProductsRes =
-        create_resource(|| (), move |_| async { products_stater().await });
-    provide_context(stripe_data);
+    // let products_config: CfgProductsRes =
+    //     create_resource(|| (), move |_| async { products_stater().await });
+    // provide_context(products_config);
 
     let (current_page, set_current_page) = create_signal(CurrentPage::None);
     provide_context(current_page);
@@ -424,7 +424,6 @@ pub fn DbProductItemDetailsPage(product_name: String) -> impl IntoView {
 #[component]
 pub fn PetFood() -> impl IntoView {
     view! {
-        <h1 class="shop-title">"Pet Food Shop"</h1>
         <DbProductItemsList items_category="pet_food".to_string()/>
     }
 }
@@ -432,7 +431,6 @@ pub fn PetFood() -> impl IntoView {
 #[component]
 pub fn FarmFood() -> impl IntoView {
     view! {
-        <h1 class="shop-title">"Farm Food Shop"</h1>
         <DbProductItemsList items_category="food".to_string()/>
     }
 }

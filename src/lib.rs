@@ -520,10 +520,12 @@ pub async fn refresh_local_product_info(rewrite: bool) -> Result<String, leptos:
             let stripe_data = StripeData::new_fetch().await?;
             let stripe_products_config = StripeData::derive_products_config(stripe_data);
 
-            // TODO MAKE SCAN OF ASSET IMAGES IN DIR
+            // MAKE SCAN OF ASSET IMAGES IN DIR
             // Attach them to the local_images in CfgProduct
+            let updated_stripe_products_config: CfgProducts =
+                add_images_to_products_config(stripe_products_config.clone()).await?;
 
-            write_products_config(stripe_products_config, true).await
+            write_products_config(updated_stripe_products_config, true).await
         } else {
             // Refresh file with new products from stripe api
             let stripe_data = StripeData::new_fetch().await?;
@@ -560,10 +562,12 @@ pub async fn refresh_local_product_info(rewrite: bool) -> Result<String, leptos:
         let stripe_data = StripeData::new_fetch().await?;
         let stripe_products_config: CfgProducts = StripeData::derive_products_config(stripe_data);
 
-        // TODO MAKE SCAN OF ASSET IMAGES IN DIR
+        // MAKE SCAN OF ASSET IMAGES IN DIR
         // Attach them to the local_images in CfgProduct
+        let updated_stripe_products_config: CfgProducts =
+            add_images_to_products_config(stripe_products_config.clone()).await?;
 
-        write_products_config(stripe_products_config.clone(), true).await
+        write_products_config(updated_stripe_products_config.clone(), true).await
     }
 }
 
@@ -608,6 +612,27 @@ pub async fn fetch_local_product_info() -> Result<CfgProducts, leptos::ServerFnE
     };
 
     Ok(final_products_config)
+}
+
+/// Adds images to CfgProducts from assets
+#[leptos::server(
+    name = AddImagesToProductsConfig
+)]
+async fn add_images_to_products_config(
+    products_config: CfgProducts,
+) -> Result<CfgProducts, ServerFnError> {
+    use std::fs::File;
+    use std::io::Read;
+    use std::io::Write;
+    use std::path::Path;
+
+    for n in &products_config.0 {
+        info!("{:#?}", n.item_number);
+    }
+
+    let updated_products_config = products_config;
+
+    Ok(updated_products_config)
 }
 
 /// Writes the config file of CfgProducts
