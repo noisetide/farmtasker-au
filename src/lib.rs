@@ -884,7 +884,7 @@ pub mod sync {
                 cancel_url: value.cancel_url,
                 created: Some(value.created),
                 customer: match value.customer {
-                    Some(x) => Some(x.into_object().unwrap().into()),
+                    Some(x) => x.into_object().map(|x| x.into()),
                     _ => None,
                 },
                 customer_email: value.customer_email,
@@ -945,7 +945,7 @@ pub mod sync {
                 active: value.active.unwrap_or(false),
                 created: value.created,
                 default_price: match value.default_price {
-                    Some(x) => Some(x.into_object().unwrap().into()),
+                    Some(x) => x.into_object().map(|x| x.into()),
                     _ => None,
                 },
                 description: value.description,
