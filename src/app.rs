@@ -700,37 +700,37 @@ pub fn CancelCheckout() -> impl IntoView {
         <div>
             "Checkout Cancelled..."
         </div>
-        // <div>
-        //     "Checkout Session Id: "
-        //     {move || {checkout_sessionid.get()}}
-        // </div>
-        // <Show
-        //     when=move || {
-        //         let stripe_data = match stripe_data.get()  {
-        //             Some(ok) => ok,
-        //             None => return false,
-        //         }.unwrap();
-        //         stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
-        //     }
-        //     fallback=move || view!{}
-        // >
-        //     <button on:click=move |_| {
-        //         let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
+        <div>
+            "Checkout Session Id: "
+            {move || {checkout_sessionid.get()}}
+        </div>
+        <Show
+            when=move || {
+                let stripe_data = match stripe_data.get()  {
+                    Some(ok) => ok,
+                    None => return false,
+                }.unwrap();
+                stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
+            }
+            fallback=move || view!{}
+        >
+            <button on:click=move |_| {
+                let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
 
-        //         let mut url = String::new();
+                let mut url = String::new();
 
-        //         if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
-        //             url = session.url.to_owned().expect("Checkout session has no url!!!");
-        //             spawn_local(async move {
-        //                 redirect_to_url(url).await;
-        //             })
-        //         } else {
-        //             leptos::logging::log!("No active checkout session.")
-        //         }
-        //     }>
-        //         "Back to checkout session"
-        //     </button>
-        // </Show>
+                if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
+                    url = session.url.to_owned().expect("Checkout session has no url!!!");
+                    spawn_local(async move {
+                        redirect_to_url(url).await;
+                    })
+                } else {
+                    leptos::logging::log!("No active checkout session.")
+                }
+            }>
+                "Back to checkout session"
+            </button>
+        </Show>
 
     }
 }

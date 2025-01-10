@@ -225,7 +225,7 @@ pub async fn find_checkout_session_matches(
     }))
 }
 
-/// Creates new checkout session via stripe api using shopping cart items from client
+/// Creates new checkout session via stripe API using shopping cart items from client
 #[leptos::server(name = NewCheckoutSession)]
 pub async fn new_checkout_session(
     shopping_cart: HashMap<String, u8>, // shopping_cart input from storage
@@ -250,7 +250,7 @@ pub async fn new_checkout_session(
         Err(_) => "https://farmtasker.au",
     };
 
-    let cancel_url = format!("{:#}/cancel", base_url);
+    let cancel_url = format!("{:#}/shop/cart", base_url);
     let success_url = format!("{:#}/success", base_url);
 
     let mut params = stripe::CreateCheckoutSession::new();
@@ -383,114 +383,24 @@ pub async fn new_checkout_session(
     params.line_items = Some(line_items_vec);
     params.expand = &["line_items", "line_items.data.price.product"];
 
-    let checkout_session: Option<DbCheckoutSession> = if find_checkout_session_matches(
-        checkout_sessionid.clone(), // This check is actually not needed, but I don't want to touch the code. Creating a new checkout session with new line items every time is just fine.
-    )
-    .await?
-    {
-        leptos::logging::log!("Found matched session with id: {:#?}", checkout_sessionid);
+    let new_session = stripe::CheckoutSession::create(&client, params).await?;
 
-        stripe_sync();
-
-        let stripe_data: StripeData = stripe_stater().await?;
-
-        let existing_session = stripe_data
-            .checkout_sessions
-            .iter()
-            .find(|session| session.id == checkout_sessionid.clone())
-            .expect("No session with id");
-
-        // leptos::logging::log!(
-        //     "Checkout Session line_items: {:#?}",
-        //     existing_session.line_items.clone()
-        // );
-
-        leptos::logging::log!("Checking if the items are the same");
-
-        // Check if the shopping cart items match the existing session
-        match existing_session.line_items.clone() {
-            Some(line_items) => {
-                let mut does_cart_match = false;
-
-                let mut cart_prices_map: HashMap<String, u8> = HashMap::new();
-                for (cart_product_id, cart_product_quantity) in shopping_cart.0 {
-                    if let Some(product) = stripe_data
-                        .products
-                        .iter()
-                        .find(|p| p.id == *cart_product_id)
-                    {
-                        if let Some(db_price) = &product.default_price {
-                            // Map price ID to cart quantity
-                            cart_prices_map.insert(db_price.id.clone(), cart_product_quantity);
-                        }
-                    }
-                }
-
-                let mut line_items_prices_map: HashMap<String, u8> = HashMap::new();
-                for checkout_session_item in line_items {
-                    line_items_prices_map.insert(
-                        checkout_session_item.price.unwrap().id.to_string(),
-                        checkout_session_item
-                            .quantity
-                            .unwrap_or(0)
-                            .try_into()
-                            .unwrap(),
-                    );
-                }
-
-                // leptos::logging::log!("ShoppingCart: {:#?}", cart_prices_map.clone());
-                // leptos::logging::log!("ExistingSession: {:#?}", line_items_prices_map.clone());
-
-                does_cart_match = cart_prices_map == line_items_prices_map;
-
-                // If the does_cart_match the existing session, return the session ID
-                if does_cart_match {
-                    leptos::logging::log!(
-                        "Existing Checkout Session with matching cart and id {:#?} found!",
-                        checkout_sessionid
-                    );
-                    Some(existing_session.clone())
-                } else {
-                    leptos::logging::log!(
-                        "Shopping cart is NOT the same as session with id: {:#?}",
-                        checkout_sessionid
-                    );
-                    let new_session = stripe::CheckoutSession::create(&client, params).await?;
-
-                    info!(
-                            "Created NEW checkout session: {:#}, for {:#} $AUD. (Created: {:#} / Expires at: {:#} )",
-                            &new_session.id,
-                            new_session.amount_total.unwrap().clone() as f64 / 100.0,
-                            &new_session.created,
-                            &new_session.expires_at
-                        );
-
-                    Some(new_session.into())
-                }
-            }
-            None => {
-                return Err(ServerFnError::new("NO line items in existing session???"));
-            }
-        }
-    } else {
-        let new_session = stripe::CheckoutSession::create(&client, params).await?;
-
-        info!(
-                "Created NEW checkout session: {:#?}, for {:#?} $AUD. (Created: {:#?} / Expires at: {:#?} )",
-                &new_session.id,
-                new_session.amount_total.unwrap().clone() as f64 / 100.0,
-                &new_session.created,
-                &new_session.expires_at
-            );
-
-        Some(new_session.into())
-    };
+    info!(
+        "Created NEW checkout session: {:#?}, for {:#?} $AUD. (Created: {:#?} / Expires at: {:#?} )",
+        &new_session.id,
+        new_session.amount_total.unwrap_or(0).clone() as f64 / 100.0,
+        &new_session.created,
+        &new_session.expires_at
+    );
 
     stripe_sync();
 
-    leptos_axum::redirect(&checkout_session.clone().unwrap().url.unwrap());
+    leptos_axum::redirect(match &new_session.url.clone() {
+        Some(url) => url,
+        None => "/cancel",
+    });
 
-    Ok(checkout_session.unwrap())
+    Ok(new_session.into())
 }
 
 #[leptos::server(

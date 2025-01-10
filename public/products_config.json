@@ -25,8 +25,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "category": "food",
-      "item_number": "1"
+      "item_number": "1",
+      "category": "food"
     }
   }
 ]
