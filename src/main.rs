@@ -4,6 +4,9 @@
 // fartmasker.au a marketplace website for local farmers in Tasmania.
 // Copyright (C) 2024 Dmytro Serdiukov & FARMTASKER PTY LTD
 //
+// NOTE: All images, logos, and branding are the exclusive property of FARMTASKER PTY LTD and are not covered by the open-source license.
+// These assets may not be used publically without prior written permission.
+//
 // This software is a free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
@@ -17,9 +20,6 @@
 //
 // FARMTASKER PDY LTD, hereby disclaims all copyright interest in the
 // software `farmtasker.au' (a marketplace website for local farmers in Tasmania) written by Dmytro Serdiukov.
-//
-// 11 December 2024
-// Olesia Trukhanska, founder of FARMTASKER PTY LTD
 //
 // You can contact us at info@farmtasker.au
 
