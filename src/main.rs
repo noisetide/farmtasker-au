@@ -62,7 +62,6 @@ async fn main() {
     let stripe_client = stripe::Client::new(key.clone());
 
     let appstate = farmtasker_au::AppState {
-        stripe_api_key: Some(key.to_string()),
         stripe_data: match farmtasker_au::StripeData::new_fetch().await {
             Ok(ok) => Some(ok),
             Err(err) => {

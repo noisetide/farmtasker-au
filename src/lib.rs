@@ -38,7 +38,6 @@ pub async fn stripe_stater() -> Result<StripeData, leptos::ServerFnError> {
         leptos_axum::extract_with_state(match &state {
             Some(x) => x,
             None => &AppState {
-                stripe_api_key: None,
                 stripe_data: None,
                 products_config: None,
             },
@@ -61,9 +60,9 @@ pub async fn stripe_stater() -> Result<StripeData, leptos::ServerFnError> {
 }
 
 #[leptos::server(
-      name = ProductsStater,
+      name = AppStateStater,
 )]
-pub async fn products_stater() -> Result<CfgProducts, leptos::ServerFnError> {
+pub async fn appstate_stater() -> Result<AppState, leptos::ServerFnError> {
     let state = match leptos::use_context::<Option<crate::AppState>>() {
         Some(ok) => {
             // leptos::logging::log!("GOT context AppState");
@@ -74,30 +73,18 @@ pub async fn products_stater() -> Result<CfgProducts, leptos::ServerFnError> {
             None
         }
     };
+
     let axum::extract::State(appstate): axum::extract::State<crate::AppState> =
         leptos_axum::extract_with_state(match &state {
             Some(x) => x,
             None => &AppState {
-                stripe_api_key: None,
                 stripe_data: None,
                 products_config: None,
             },
         })
         .await?;
 
-    // log::info!("Server data: {:#?}", appstate.products_config.clone());
-    match appstate.products_config {
-        Some(ok) => {
-            // info!("Products Config Loaded...");
-            Ok(ok)
-        }
-        None => {
-            // error!("No StripeData!");
-            return Err(leptos::ServerFnError::ServerError(
-                "CfgProducts not found".into(),
-            ));
-        }
-    }
+    Ok(appstate)
 }
 
 use app::PagerPropsBuilder_Error_Missing_required_field_page;
@@ -108,7 +95,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct AppState {
-    pub stripe_api_key: Option<String>,
     pub stripe_data: Option<StripeData>,
     pub products_config: Option<CfgProducts>,
 }
@@ -1164,7 +1150,6 @@ pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
         leptos_axum::extract_with_state(match &state {
             Some(x) => x,
             None => &AppState {
-                stripe_api_key: None,
                 stripe_data: None,
                 products_config: None,
             },

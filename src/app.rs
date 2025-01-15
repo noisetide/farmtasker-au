@@ -35,6 +35,7 @@ use leptos_use::storage::*;
 use leptos_use::*;
 use log::*;
 
+pub type AppStateDataRes = Resource<(), Result<AppState, ServerFnError>>;
 pub type StripeDataRes = Resource<(), Result<StripeData, ServerFnError>>;
 pub type CfgProductsRes = Resource<(), Result<CfgProducts, ServerFnError>>;
 pub type CheckoutSessionRes = Resource<i64, Result<DbCheckoutSession, ServerFnError>>;
@@ -52,9 +53,9 @@ pub fn App() -> impl IntoView {
         create_resource(|| (), move |_| async { stripe_stater().await });
     provide_context(stripe_data);
 
-    // let products_config: CfgProductsRes =
-    //     create_resource(|| (), move |_| async { products_stater().await });
-    // provide_context(products_config);
+    let app_state: AppStateDataRes =
+        create_resource(|| (), move |_| async { appstate_stater().await });
+    provide_context(app_state);
 
     let (current_page, set_current_page) = create_signal(CurrentPage::None);
     provide_context(current_page);
@@ -618,16 +619,17 @@ pub fn DbProductItem(product: DbProduct) -> impl IntoView {
 
 #[component]
 pub fn DbProductItemsList(items_category: String) -> impl IntoView {
-    let stripe_data = expect_context::<StripeDataRes>();
+    let app_state = expect_context::<AppStateDataRes>();
     let (items_category, set_items_category) = create_signal(items_category);
     provide_context(items_category);
 
     view! {
         <Suspense fallback=move || view! {"loading data"}>
-            {move || match stripe_data.get() {
+            {move || match app_state.get() {
                 None => view! { <p>"Loading..."</p> }.into_view(),
-                Some(stripe_data) => {
-                    let stripe_data: StripeData = stripe_data.expect("Resource StripeData is not here on 'get()'");
+                Some(app_state) => {
+                    let stripe_data: StripeData = app_state.clone().expect("Resource AppState is not gere on 'get()").stripe_data.expect("Resource StripeData is not here on 'get()'");
+                    let products_config: CfgProducts = app_state.expect("Resource AppState is not gere on 'get()").products_config.expect("Resource StripeData is not here on 'get()'");
                     let items_category = expect_context::<ReadSignal<String>>();
                     provide_context(items_category);
 
