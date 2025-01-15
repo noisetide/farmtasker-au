@@ -252,12 +252,12 @@ pub fn Routerer() -> impl IntoView {
             }/>
             <Route path="/shop/eat" view={
                 move || {
-                    const CURRENTPAGE: CurrentPage = CurrentPage::EatNow;
+                    const CURRENTPAGE: CurrentPage = CurrentPage::ReadyToEat;
 
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=EatNow currentpage=CURRENTPAGE/>
+                        <Pager page=ReadyToEat currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
@@ -293,7 +293,7 @@ pub enum CurrentPage {
     HomePage,
     PetFood,
     FarmFood,
-    EatNow,
+    ReadyToEat,
     About,
     Delivery,
     DbProductItemDetails,
@@ -329,7 +329,7 @@ where
                             CurrentPage::VideoInstructions => {"pager-content-video-instructions"},
                             CurrentPage::VideoBlogs => {"pager-content-video-blogs"},
                             CurrentPage::DbProductItemDetails => {"pager-content-product-item-details"},
-                            CurrentPage::EatNow => {"pager-content-eat-now-shop"},
+                            CurrentPage::ReadyToEat => {"pager-content-eat-now-shop"},
                         }
                     >{page()}</div>
                 </div>
@@ -472,7 +472,7 @@ pub fn VideoInstructions() -> impl IntoView {
 }
 
 #[component]
-pub fn EatNow() -> impl IntoView {
+pub fn ReadyToEat() -> impl IntoView {
     view! {
         <div class="blog-container">
             // <img class="banner-image" src="/banners/.webp" alt="Ready To Eat Banner"/>
@@ -1055,7 +1055,7 @@ pub fn NavBar() -> impl IntoView {
                 </li>
                 <li>
                     <a
-                        class:current=move || {matches!(selected.get(), CurrentPage::EatNow)}
+                        class:current=move || {matches!(selected.get(), CurrentPage::ReadyToEat)}
                         href="/shop/eat" id="button_middle"
                     >
                         <img
