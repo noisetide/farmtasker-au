@@ -858,10 +858,6 @@ main {
             }
           }
 
-          .product-info {
-            padding: 1rem;
-
-          }
 
           .product-list-ul.product-list-item.product-item-container,
           .product-item-container {
@@ -872,6 +868,18 @@ main {
             /* justify-content: center; */
 
             /* min-height: 25vh; */
+
+            .product-info {
+              height: 3rem;
+
+              align-items: center;
+              align-content: center;
+              text-align: center;
+              justify-items: center;
+              justify-content: center;
+            }
+
+            width: 15rem;
 
             .product-item-image {
               min-height: 15vh;
