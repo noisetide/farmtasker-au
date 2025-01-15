@@ -391,7 +391,7 @@ pub async fn new_checkout_session(
 
 #[leptos::server(
     name = RefreshLocalProductInfo,
-    endpoint = "refresh_products_config", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
+    endpoint = "refresh_local_products_info", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
 )]
 pub async fn refresh_local_product_info(rewrite: bool) -> Result<String, leptos::ServerFnError> {
     use std::fs::File;
@@ -400,7 +400,8 @@ pub async fn refresh_local_product_info(rewrite: bool) -> Result<String, leptos:
     use std::path::Path;
     use stripe::*;
 
-    info!("Refreshing Local CfgProducts...");
+    tracing::info!("");
+    tracing::info!("Refreshing Local CfgProducts...");
 
     // Retrieve the LEPTOS_SITE_ROOT environment variable for path of the data file
     let site_root = std::env::var("LEPTOS_SITE_ROOT").unwrap_or_else(|_| "site".to_string());
@@ -448,7 +449,10 @@ pub async fn refresh_local_product_info(rewrite: bool) -> Result<String, leptos:
             }
 
             // Create new products config by adding missing products from stripedata to existing config if the local config is missing the products by id
-            let updated_products_config: CfgProducts = CfgProducts(h);
+            // MAKE SCAN OF ASSET IMAGES IN DIR
+            // Attach them to the local_images in CfgProduct
+            let updated_products_config: CfgProducts =
+                add_images_to_products_config(CfgProducts(h)).await?;
 
             // Write serialized local data updated with new products from stripe api
             write_products_config(updated_products_config, true).await
@@ -481,6 +485,7 @@ pub async fn fetch_local_product_info() -> Result<CfgProducts, leptos::ServerFnE
     use std::path::Path;
     use stripe::*;
 
+    info!("");
     info!("Fetching Local CfgProducts...");
 
     // Retrieve the LEPTOS_SITE_ROOT environment variable for path of the data file
@@ -495,7 +500,16 @@ pub async fn fetch_local_product_info() -> Result<CfgProducts, leptos::ServerFnE
         let products_config_file_contents = std::fs::read_to_string(products_config_file_path)?;
         let products_config: CfgProducts = serde_json::from_str(&products_config_file_contents)
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
-        println!("Loaded products data from file: {:#?}", products_config);
+
+        for p in &products_config.0 {
+            tracing::info!(
+                "CONFIG: #{:?} {:?} - #{:?} AUD ",
+                p.item_number.unwrap_or(-1),
+                p.name,
+                p.price.clone().unwrap().unit_amount.unwrap() as f64 / 100.0
+            );
+        }
+
         products_config
     } else {
         // If the file doesn't exist, create new one by serializing StripeData::new_fetch()
@@ -506,6 +520,8 @@ pub async fn fetch_local_product_info() -> Result<CfgProducts, leptos::ServerFnE
 
         stripe_products_config
     };
+
+    tracing::info!("CONFIG TOTAL: {:?}", final_products_config.clone().0.len());
 
     Ok(final_products_config)
 }
@@ -522,9 +538,15 @@ async fn add_images_to_products_config(
     use std::io::Write;
     use std::path::Path;
 
-    for n in &products_config.0 {
-        info!("{:#?}", n.item_number);
-    }
+    // Retrieve the LEPTOS_SITE_ROOT environment variable for path of the data file
+    let site_root = std::env::var("LEPTOS_SITE_ROOT").unwrap_or_else(|_| "site".to_string());
+
+    let products_assets_dir = format!("{}/", site_root);
+
+    &products_config.0.clone().iter().map(|n| {
+        assert_eq!(n.images.is_some(), true);
+        println!("{:?}", n.item_number.unwrap());
+    });
 
     let updated_products_config = products_config;
 
@@ -599,6 +621,7 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
     let mut product_list_params = ListProducts::new();
     product_list_params.active = Some(true);
     product_list_params.expand = &["data.default_price"];
+    product_list_params.limit = Some(100);
     let list_of_products_from_stripe_api = match Product::list(&client, &product_list_params).await
     {
         Ok(list) => list,
@@ -607,9 +630,11 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
             return Err(ServerFnError::ServerError(err.to_string()));
         }
     };
+    // tracing::info!("{:#?}", list_of_products_from_stripe_api); // DEBUG product info
 
     // Customers
-    let customer_list_params = ListCustomers::new();
+    let mut customer_list_params = ListCustomers::new();
+    customer_list_params.limit = Some(20); // WARN INFO important to not forget to change at some point
     let list_of_customers_from_stripe_api =
         match Customer::list(&client, &customer_list_params).await {
             Ok(list) => list,
@@ -660,11 +685,11 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
             })
     } {
         Some(first_shipping_rate) => {
-            info!(
-                "Found Default Shipping Rate ID: {:#?} for {:#?}$",
-                first_shipping_rate.id.to_string().clone(),
-                first_shipping_rate.fixed_amount.clone().unwrap().amount as f64 / 100.0,
-            );
+            // info!(
+            //     "Found Default Shipping Rate ID: {:#?} for {:#?}$",
+            //     first_shipping_rate.id.to_string().clone(),
+            //     first_shipping_rate.fixed_amount.clone().unwrap().amount as f64 / 100.0,
+            // );
             first_shipping_rate.id.to_string()
         }
         None => {
@@ -721,11 +746,11 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
             })
     } {
         Some(free_shipping_rate) => {
-            info!(
-                "Found Free Shipping Rate ID: {:#?} for {:#?}$",
-                free_shipping_rate.id.to_string().clone(),
-                free_shipping_rate.fixed_amount.clone().unwrap().amount as f64 / 100.0
-            );
+            // info!(
+            //     "Found Free Shipping Rate ID: {:#?} for {:#?}$",
+            //     free_shipping_rate.id.to_string().clone(),
+            //     free_shipping_rate.fixed_amount.clone().unwrap().amount as f64 / 100.0
+            // );
             free_shipping_rate.id.to_string()
         }
         None => {
@@ -765,9 +790,9 @@ pub async fn fetch_stripe_data() -> Result<StripeData, leptos::ServerFnError> {
         }
     };
 
-    info!("Default Shipping Rate ID: {:#?}", default_shipping_rate_id);
-    info!("Free Shipping Rate ID: {:#?}", free_shipping_rate_id);
-    leptos::logging::log!("\n");
+    // info!("Default Shipping Rate ID: {:#?}", default_shipping_rate_id);
+    // info!("Free Shipping Rate ID: {:#?}", free_shipping_rate_id);
+    // leptos::logging::log!("\n");
 
     Ok(StripeData::new(
         list_of_products_from_stripe_api,

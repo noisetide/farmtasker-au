@@ -1,14 +1,14 @@
 [
   {
-    "stripe_id": "prod_QiIJctrNq28cCg",
+    "stripe_id": "prod_RanByr31Cf2L5S",
     "item_number": 1,
-    "name": "Quail Eggs Pack 18x",
-    "description": "Repudiandae omnis est necessitatibus ullam ex ullam qui aut. At eveniet velit veritatis. Quod fugiat commodi molestias eligendi aperiam eum eligendi deleniti.",
+    "name": "Boned Seconds",
+    "description": null,
     "price": {
-      "id": "price_1PqrjAEYo2pEQeDTwBT9iY4a",
+      "id": "price_1QhbayEYo2pEQeDTgQvRDemA",
       "active": true,
       "billing_scheme": "PerUnit",
-      "created": 1724397368,
+      "created": 1736966740,
       "custom_unit_amount": null,
       "livemode": false,
       "lookup_key": null,
@@ -17,15 +17,345 @@
       "product": null,
       "recurring": null,
       "type_": "OneTime",
-      "unit_amount": 1500,
-      "unit_amount_decimal": "1500"
+      "unit_amount": 2500,
+      "unit_amount_decimal": "2500"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfUkhZU1N5Vnh3bTRka2lkVkJaU3F0anlk00jyddeJqv"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfUUM3WHNPQXJCSk5PUUhsa21qYTBrZjBM00J5girV1A"
     ],
     "local_images": null,
     "metadata": {
-      "item_number": "1",
+      "category": "food",
+      "item_number": "1"
+    }
+  },
+  {
+    "stripe_id": "prod_RakuNC7CCjT367",
+    "item_number": 11,
+    "name": "Mince 1kg",
+    "description": null,
+    "price": {
+      "id": "price_1QhZOiEYo2pEQeDTd4ASv5I9",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736958292,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 800,
+      "unit_amount_decimal": "800"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3Rfb3dsMVZFOWwyUnowV3FGOFM0cmJzeWpq00J4YkfirM"
+    ],
+    "local_images": null,
+    "metadata": {
+      "category": "pet_food",
+      "item_number": "11"
+    }
+  },
+  {
+    "stripe_id": "prod_Rakt0z2SOJGlqK",
+    "item_number": 10,
+    "name": "Smoked chicken",
+    "description": null,
+    "price": {
+      "id": "price_1QhZNLEYo2pEQeDTjDzgENGa",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736958207,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 3000,
+      "unit_amount_decimal": "3000"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfOEdlVVZqQUNlbjZ6MkRiODhpbVpZSDB000RZVucgeh"
+    ],
+    "local_images": null,
+    "metadata": {
+      "item_number": "10",
+      "category": "food"
+    }
+  },
+  {
+    "stripe_id": "prod_RakbZ92vPyZmKG",
+    "item_number": 9,
+    "name": "Hot-Smoked Boned Seconds",
+    "description": null,
+    "price": {
+      "id": "price_1QhZ6HEYo2pEQeDTzfaC21Wr",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736957149,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 2500,
+      "unit_amount_decimal": "2500"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfNUthcFhTU25CRkZhZGNlbmU0Z1RrNFIx00E6yv9VUq"
+    ],
+    "local_images": null,
+    "metadata": {
+      "category": "food",
+      "item_number": "9"
+    }
+  },
+  {
+    "stripe_id": "prod_RakWviW9kWsN9F",
+    "item_number": 8,
+    "name": "Smoked Drumsticks",
+    "description": null,
+    "price": {
+      "id": "price_1QhZ1GEYo2pEQeDTmtjjwoZm",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736956838,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 4500,
+      "unit_amount_decimal": "4500"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3Rfb3R3c0FUcGN4c3d4Rm9yVDE4eFZnYmlK00Z7Q5vGVS"
+    ],
+    "local_images": null,
+    "metadata": {
+      "item_number": "8",
+      "category": "food"
+    }
+  },
+  {
+    "stripe_id": "prod_RakR6bdXJZwMcF",
+    "item_number": 7,
+    "name": "Large Hot-Smoked Boned Quails",
+    "description": null,
+    "price": {
+      "id": "price_1QhYwuEYo2pEQeDTNGrQCNvJ",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736956568,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 4000,
+      "unit_amount_decimal": "4000"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfS1FxanVjNTlIc3ZROUtQSzhFaHlWY1B500qEVuhZ1H"
+    ],
+    "local_images": null,
+    "metadata": {
+      "category": "food",
+      "item_number": "7"
+    }
+  },
+  {
+    "stripe_id": "prod_RakOGCD9BURbmk",
+    "item_number": 6,
+    "name": "Jumbo Butterfly Boned Quails",
+    "description": null,
+    "price": {
+      "id": "price_1QhYu2EYo2pEQeDTDuZrQCXu",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736956390,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 4000,
+      "unit_amount_decimal": "4000"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfRENNa09sYlV5UEFvUEFnZXNwU0lzT2g100Fx5snkzF"
+    ],
+    "local_images": null,
+    "metadata": {
+      "item_number": "6",
+      "category": "food"
+    }
+  },
+  {
+    "stripe_id": "prod_Raf3Aj1PYA964H",
+    "item_number": 5,
+    "name": "Large Butterfly Boned Quails",
+    "description": null,
+    "price": {
+      "id": "price_1QhTj4EYo2pEQeDTdibS3VWF",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736936490,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 4000,
+      "unit_amount_decimal": "4000"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfR1BlZmkxeEsxZ0NlMWUxTGd1RUFXd1dB00tHzLYO8e"
+    ],
+    "local_images": null,
+    "metadata": {
+      "item_number": "5",
+      "category": "food"
+    }
+  },
+  {
+    "stripe_id": "prod_RaeoTQ7xzWwfK7",
+    "item_number": 4,
+    "name": "Jumbo Whole Quails",
+    "description": null,
+    "price": {
+      "id": "price_1QhTVFEYo2pEQeDTzEzdvzKN",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736935633,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 2500,
+      "unit_amount_decimal": "2500"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfVkZtakd2cHBZaFdHaTBEMVRFZjg2VHNp0084kbGgO1"
+    ],
+    "local_images": null,
+    "metadata": {
+      "item_number": "4",
+      "category": "food"
+    }
+  },
+  {
+    "stripe_id": "prod_RaenjSHBuGc1ER",
+    "item_number": 3,
+    "name": "Large Whole Quails",
+    "description": null,
+    "price": {
+      "id": "price_1QhTTkEYo2pEQeDTi5BVK29Z",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736935540,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 2000,
+      "unit_amount_decimal": "2000"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfVE5EaFZ5aUM1d3FSNnpEUDNVSWRsd0pX00z3fTJFFH"
+    ],
+    "local_images": null,
+    "metadata": {
+      "category": "food",
+      "item_number": "3"
+    }
+  },
+  {
+    "stripe_id": "prod_RZWcTKpCEY0Tj1",
+    "item_number": 2,
+    "name": "Medium Whole Quails",
+    "description": null,
+    "price": {
+      "id": "price_1QgNZcEYo2pEQeDT08gY6OqV",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736674512,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 1750,
+      "unit_amount_decimal": "1750"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfQVAwVVBHODVhYk1LZEZNWTh6anlzajdw00H74qW796"
+    ],
+    "local_images": null,
+    "metadata": {
+      "item_number": "2",
+      "category": "food"
+    }
+  },
+  {
+    "stripe_id": "prod_QiIJctrNq28cCg",
+    "item_number": 12,
+    "name": "Quail Eggs (18x Pack)",
+    "description": "Repudiandae omnis est necessitatibus ullam ex ullam qui aut. At eveniet velit veritatis. Quod fugiat commodi molestias eligendi aperiam eum eligendi deleniti.",
+    "price": {
+      "id": "price_1QgNW2EYo2pEQeDTnH3GSDsH",
+      "active": true,
+      "billing_scheme": "PerUnit",
+      "created": 1736674290,
+      "custom_unit_amount": null,
+      "livemode": false,
+      "lookup_key": null,
+      "metadata": {},
+      "nickname": null,
+      "product": null,
+      "recurring": null,
+      "type_": "OneTime",
+      "unit_amount": 1215,
+      "unit_amount_decimal": "1215"
+    },
+    "images": [
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfbW5tZ0RjdzNEaFVIam5NY0Z1OXhpVDl400JcNXqYGg"
+    ],
+    "local_images": null,
+    "metadata": {
+      "item_number": "12",
       "category": "food"
     }
   }

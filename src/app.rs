@@ -629,7 +629,7 @@ pub fn DbProductItemsList(items_category: String) -> impl IntoView {
                 None => view! { <p>"Loading..."</p> }.into_view(),
                 Some(app_state) => {
                     let stripe_data: StripeData = app_state.clone().expect("Resource AppState is not gere on 'get()").stripe_data.expect("Resource StripeData is not here on 'get()'");
-                    let products_config: CfgProducts = app_state.expect("Resource AppState is not gere on 'get()").products_config.expect("Resource StripeData is not here on 'get()'");
+                    let products_config: CfgProducts = app_state.clone().expect("Resource AppState is not gere on 'get()").products_config.expect("Resource StripeData is not here on 'get()'");
                     let items_category = expect_context::<ReadSignal<String>>();
                     provide_context(items_category);
 

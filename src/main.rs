@@ -44,7 +44,12 @@ pub use tracing_subscriber;
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
+    use std::collections::HashMap;
+
     tracing_subscriber::fmt::init();
+
+    tracing::info!("-------------------------------------------");
+    tracing::info!("Starting up...");
 
     // Setting get_configuration(None) means we'll be using cargo-leptos's env values
     // For deployment these variables are:
@@ -78,9 +83,16 @@ async fn main() {
         }
     };
 
+    refresh_local_product_info(false).await;
+    tracing::info!("");
+    
     assert!(
         &appstate.stripe_data.clone().is_some(), 
         "No StripeData in AppState during server init. Check if the StripeData could be fetched from internet.\nPlease verify that you have internet connection.",
+    );
+    assert!(
+        &appstate.products_config.clone().is_some(), 
+        "No CfgProducts in AppState during server init. Check if the products config could be initiated. How did this happen?",
     );
 
     let products = &appstate
@@ -88,9 +100,11 @@ async fn main() {
         .clone()
         .unwrap()
         .products;
+    tracing::info!("Listing products:");
     for i in products {
         tracing::info!(
-            "Product: {:#?} - {:#?}$ AUD",
+            "#{:?} Product: {:#?} - {:#?}$ AUD",
+            i.metadata.clone().unwrap_or(HashMap::new()).get("item_number").map_or("_", |v| v).parse().unwrap_or(-1),
             i.name,
             i.default_price.clone().unwrap().unit_amount.unwrap() as f64 / 100.0
         );
@@ -144,6 +158,7 @@ async fn main() {
         .with_state(leptos_options);
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
+    tracing::info!("-------------------------------------------");
     tracing::info!("Server started. listening on http://{}\n", &addr);
     axum::serve(listener, app.into_make_service())
         .await
