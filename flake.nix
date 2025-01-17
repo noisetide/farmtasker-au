@@ -25,16 +25,16 @@
         pkgs = nixpkgs.legacyPackages.${system};
         leptos = pkgs.rustPlatform.buildRustPackage rec {
           pname = "cargo-leptos";
-          version = "f03212fa370744c123865c8fccb4068a07d8da7d";
+          version = "87b156f4f0bc0374e7b5557d15bf79f1a12d7569";
 
           src = pkgs.fetchFromGitHub {
             owner = "leptos-rs";
             repo = pname;
             rev = "${version}";
-            hash = "sha256-KrcQ5DLaUK5vl7SamY6Tw53bOczs2BtCDpaDLbuytwg=";
+            hash = "sha256-v1gNH3pq5db/swsk79nEzgtR4jy3f/xHs4QaLnVcVYU=";
           };
 
-          cargoHash = "sha256-gaGcKw/zqhiP7LRHTtApGeg7QQe8yDlFVXyjGGTGznQ=";
+          cargoHash = "sha256-i/o0lDErgkGhFGKydkuL4Z9BYJRF/iCEfeFmjzgJ1YM=";
 
           buildFeatures = [ "no_downloads" ]; # cargo-leptos will try to install missing dependencies on its own otherwise
           doCheck = false; # Check phase tries to query crates.io
@@ -102,16 +102,16 @@
         pkgs = nixpkgs.legacyPackages.${system};
         leptos = pkgs.rustPlatform.buildRustPackage rec {
           pname = "cargo-leptos";
-          version = "f03212fa370744c123865c8fccb4068a07d8da7d";
+          version = "87b156f4f0bc0374e7b5557d15bf79f1a12d7569";
 
           src = pkgs.fetchFromGitHub {
             owner = "leptos-rs";
             repo = pname;
             rev = "${version}";
-            hash = "sha256-KrcQ5DLaUK5vl7SamY6Tw53bOczs2BtCDpaDLbuytwg=";
+            hash = "sha256-v1gNH3pq5db/swsk79nEzgtR4jy3f/xHs4QaLnVcVYU=";
           };
 
-          cargoHash = "sha256-gaGcKw/zqhiP7LRHTtApGeg7QQe8yDlFVXyjGGTGznQ=";
+          cargoHash = "sha256-i/o0lDErgkGhFGKydkuL4Z9BYJRF/iCEfeFmjzgJ1YM=";
 
           buildFeatures = [ "no_downloads" ]; # cargo-leptos will try to install missing dependencies on its own otherwise
           doCheck = false; # Check phase tries to query crates.io
