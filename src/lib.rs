@@ -538,15 +538,30 @@ async fn add_images_to_products_config(
     use std::io::Write;
     use std::path::Path;
 
+    info!("Adding images to CfgProducts...");
+
     // Retrieve the LEPTOS_SITE_ROOT environment variable for path of the data file
     let site_root = std::env::var("LEPTOS_SITE_ROOT").unwrap_or_else(|_| "site".to_string());
 
     let products_assets_dir = format!("{}/", site_root);
 
-    &products_config.0.clone().iter().map(|n| {
-        assert_eq!(n.images.is_some(), true);
-        println!("{:?}", n.item_number.unwrap());
-    });
+    for product in &products_config.0 {
+        assert_eq!(product.images.is_some(), true);
+
+        if let Some(item_number) = product.item_number {
+            // Build the path for the product's assets directory
+            let product_images_dir = format!("{}/products_assets/{}", site_root, item_number);
+
+            info!("{:#?}", product_images_dir);
+        }
+
+        info!(
+            "LOCAL IMAGES OF PRODUCT {:?}: {:#?}",
+            product.item_number.unwrap(),
+            // product.images.clone().unwrap().first().unwrap(),
+            product.local_images.clone()
+        );
+    }
 
     let updated_products_config = products_config;
 
@@ -1154,7 +1169,7 @@ pub async fn redirect_to_url(url: String) -> Result<(), leptos::ServerFnError> {
 use leptos::*;
 #[server (
     name = StripeSync,
-    // endpoint = "sync", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
+    endpoint = "sync", // WORKING BUT TODO IMPLEMENT AUTHENTIFICATION
 )]
 pub async fn stripe_sync() -> Result<serde_json::Value, leptos::ServerFnError> {
     use axum::http::HeaderMap;

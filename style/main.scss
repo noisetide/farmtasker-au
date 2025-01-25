@@ -691,18 +691,6 @@ main {
           justify-content: center;
           text-align: center;
 
-          .blog-container {
-            background-color: darken($background-color-light, 5%);
-            border-radius: 50px;
-
-            .banner-image {
-              border-radius: 50px;
-              height: auto;
-              background-color: darken($background-color-light, 5%);
-              width: 100%;
-              max-height: 70vh;
-            }
-          }
         }
 
         .pager-content-product-item-details {

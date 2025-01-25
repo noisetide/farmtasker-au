@@ -88,7 +88,7 @@
           '';
 
           meta = {
-            mainProgram = "../farmtasker-au";
+            mainProgram = "./farmtasker-au";
           };
           shellHook = ''
             export LEPTOS_SITE_ADDR="0.0.0.0:8080"

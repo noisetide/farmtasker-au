@@ -250,7 +250,7 @@ pub fn Routerer() -> impl IntoView {
                     }
                 }
             }/>
-            <Route path="/shop/eat" view={
+            <Route path="/shop/ready-to-eat" view={
                 move || {
                     const CURRENTPAGE: CurrentPage = CurrentPage::ReadyToEat;
 
@@ -317,10 +317,14 @@ where
                     <div
                         class="pager-content"
                         class=match currentpage {
+                            // Main pages
                             CurrentPage::None => {"pager-content-none"},
                             CurrentPage::HomePage => {"pager-content-home-page"},
+                            // Shop pages
                             CurrentPage::PetFood => {"pager-content-pet-shop pager-content-shop-general"},
-                            CurrentPage::FarmFood => {"pager-content-foot-shop pager-content-shop-general"},
+                            CurrentPage::FarmFood => {"pager-content-food-shop pager-content-shop-general"},
+                            CurrentPage::ReadyToEat => {"pager-content-ready-to-eat-shop pager-content-shop-general"},
+                            // Other pages
                             CurrentPage::About => {"pager-content-about"},
                             CurrentPage::Delivery => {"pager-content-delivery"},
                             CurrentPage::PrivacyPolicy => {"pager-content-privacy-policy"},
@@ -329,7 +333,6 @@ where
                             CurrentPage::VideoInstructions => {"pager-content-video-instructions"},
                             CurrentPage::VideoBlogs => {"pager-content-video-blogs"},
                             CurrentPage::DbProductItemDetails => {"pager-content-product-item-details"},
-                            CurrentPage::ReadyToEat => {"pager-content-eat-now-shop"},
                         }
                     >{page()}</div>
                 </div>
@@ -462,20 +465,18 @@ pub fn FarmFood() -> impl IntoView {
 }
 
 #[component]
+pub fn ReadyToEat() -> impl IntoView {
+    view! {
+        <DbProductItemsList items_category="ready_to_eat".to_string()/>
+    }
+}
+
+#[component]
 pub fn VideoInstructions() -> impl IntoView {
     view! {
         <div class="blog-container">
             <img class="banner-image" src="/banners/instructions.webp" alt="Video Instructions Banner"/>
             <iframe class="embed-video" src="https://www.youtube.com/embed/daOJwUdwTME?si=GrQjf7z3ZiHD4WQF" title="Instructions" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-        </div>
-    }
-}
-
-#[component]
-pub fn ReadyToEat() -> impl IntoView {
-    view! {
-        <div class="blog-container">
-            // <img class="banner-image" src="/banners/.webp" alt="Ready To Eat Banner"/>
         </div>
     }
 }
@@ -1056,13 +1057,13 @@ pub fn NavBar() -> impl IntoView {
                 <li>
                     <a
                         class:current=move || {matches!(selected.get(), CurrentPage::ReadyToEat)}
-                        href="/shop/eat" id="button_middle"
+                        href="/shop/ready-to-eat" id="button_middle"
                     >
                         <img
                              style="filter: brightness(1.2)"
-                             src="/navbar/empty_button.png" class="button_middle_image" alt="Eat Now"
+                             src="/navbar/empty_button.png" class="button_middle_image" alt="Ready To Eat"
                         />
-                        <span class="overlay-text">Eat Now</span>
+                        <span class="overlay-text">Ready To Eat</span>
                     </a>
                 </li>
                 <li>

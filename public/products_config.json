@@ -55,8 +55,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "item_number": "11",
-      "category": "pet_food"
+      "category": "pet_food",
+      "item_number": "11"
     }
   },
   {
@@ -86,7 +86,7 @@
     "local_images": null,
     "metadata": {
       "item_number": "10",
-      "category": "food"
+      "category": "ready_to_eat"
     }
   },
   {
@@ -116,14 +116,14 @@
     "local_images": null,
     "metadata": {
       "item_number": "9",
-      "category": "food"
+      "category": "ready_to_eat"
     }
   },
   {
     "stripe_id": "prod_RakWviW9kWsN9F",
     "item_number": 8,
     "name": "Smoked Drumsticks",
-    "description": null,
+    "description": "Enjoy the rich, smoky taste of our farm-raised smoked drumsticks. They are a premium choice for gourmet meals, snack platters, or entertaining guests. Sourced from a trusted farm in Tasmania, these drumsticks are carefully smoked for a bold flavour. The meat is tender, juicy, and ready to eat. Enjoy them straight from the pack—no extra prep needed! Order now to bring premium, farm-raised flavour to your table!",
     "price": {
       "id": "price_1QhZ1GEYo2pEQeDTmtjjwoZm",
       "active": true,
@@ -145,8 +145,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "item_number": "8",
-      "category": "food"
+      "category": "ready_to_eat",
+      "item_number": "8"
     }
   },
   {
@@ -175,8 +175,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "item_number": "7",
-      "category": "food"
+      "category": "food",
+      "item_number": "7"
     }
   },
   {
@@ -205,8 +205,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "category": "food",
-      "item_number": "6"
+      "item_number": "6",
+      "category": "food"
     }
   },
   {
@@ -235,8 +235,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "item_number": "5",
-      "category": "food"
+      "category": "food",
+      "item_number": "5"
     }
   },
   {
@@ -295,8 +295,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "category": "food",
-      "item_number": "3"
+      "item_number": "3",
+      "category": "food"
     }
   },
   {
@@ -325,8 +325,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "category": "food",
-      "item_number": "2"
+      "item_number": "2",
+      "category": "food"
     }
   },
   {
