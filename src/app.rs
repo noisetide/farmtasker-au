@@ -86,11 +86,11 @@ pub fn App() -> impl IntoView {
     provide_context(submit_checkout);
     provide_context(set_submit_checkout);
 
-    let checkout_session: CheckoutSessionRes =
-        create_resource(submit_checkout, move |x| async move {
-            new_checkout_session(shopping_cart.get().clone().0, checkout_sessionid.get()).await
-        });
-    provide_context(checkout_session);
+    // let checkout_session: CheckoutSessionRes =
+    //     create_resource(submit_checkout, move |x| async move {
+    //         new_checkout_session(shopping_cart.get().clone().0, checkout_sessionid.get()).await
+    //     });
+    // provide_context(checkout_session);
 
     view! {
         // injects a stylesheet into the document <head>
@@ -699,67 +699,66 @@ pub fn CancelCheckout() -> impl IntoView {
     let set_submit_checkout = expect_context::<WriteSignal<CheckoutSessionUpdateRes>>();
     provide_context(set_submit_checkout);
 
-    let checkout_session = expect_context::<CheckoutSessionRes>();
-    provide_context(checkout_session);
+    // let checkout_session = expect_context::<CheckoutSessionRes>();
+    // provide_context(checkout_session);
 
-    let loading = checkout_session.loading();
-    let is_loading = move || {
-        if loading() {
-            "Loading..."
-        } else {
-            let session = checkout_session
-                .get()
-                .map(|value| {
-                    value
-                        .map(|value2| {
-                            set_checkout_sessionid.update(|s| *s = value2.id.clone());
-                            value2.id
-                        })
-                        .unwrap_or_else(|x| "Loading 2".into())
-                })
-                .unwrap_or_else(|| "Loading".into());
-            // leptos::logging::log!("session: {:#?}", session);
-            // stripe_data.get().expect("no stripdata lol")
-            "Checkout"
-        }
-    };
+    // let loading = checkout_session.loading();
+    // let is_loading = move || {
+    //     if loading() {
+    //         "Loading..."
+    //     } else {
+    //         let session = checkout_session
+    //             .get()
+    //             .map(|value| {
+    //                 value
+    //                     .map(|value2| {
+    //                         set_checkout_sessionid.update(|s| *s = value2.id.clone());
+    //                         value2.id
+    //                     })
+    //                     .unwrap_or_else(|x| "Loading 2".into())
+    //             })
+    //             .unwrap_or_else(|| "Loading".into());
+    //         // leptos::logging::log!("session: {:#?}", session);
+    //         // stripe_data.get().expect("no stripdata lol")
+    //         "Checkout"
+    //     }
+    // };
 
     view! {
         <div>
             "Checkout Cancelled..."
         </div>
-        <div>
-            "Checkout Session Id: "
-            {move || {checkout_sessionid.get()}}
-        </div>
-        <Show
-            when=move || {
-                let stripe_data = match stripe_data.get()  {
-                    Some(ok) => ok,
-                    None => return false,
-                }.unwrap();
-                stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
-            }
-            fallback=move || view!{}
-        >
-            <button on:click=move |_| {
-                let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
+        // <div>
+        //     "Checkout Session Id: "
+        //     {move || {checkout_sessionid.get()}}
+        // </div>
+        // <Show
+        //     when=move || {
+        //         let stripe_data = match stripe_data.get()  {
+        //             Some(ok) => ok,
+        //             None => return false,
+        //         }.unwrap();
+        //         stripe_data.checkout_sessions.iter().any(|session| session.id == checkout_sessionid.get())
+        //     }
+        //     fallback=move || view!{}
+        // >
+        //     <button on:click=move |_| {
+        //         let stripe_data = stripe_data.get().expect("No StripeData!").unwrap();
 
-                let mut url = String::new();
+        //         let mut url = String::new();
 
-                if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
-                    url = session.url.to_owned().expect("Checkout session has no url!!!");
-                    spawn_local(async move {
-                        redirect_to_url(url).await;
-                    })
-                } else {
-                    leptos::logging::log!("No active checkout session.")
-                }
-            }>
-                "Back to checkout session"
-            </button>
-        </Show>
-
+        //         if let Some(session) = stripe_data.checkout_sessions.iter().find(|session| session.id == checkout_sessionid.get()) {
+        //             url = session.url.to_owned().expect("Checkout session has no url!!!");
+        //             spawn_local(async move {
+        //                 redirect_to_url(url).await;
+        //             })
+        //         } else {
+        //             leptos::logging::log!("No active checkout session.")
+        //         }
+        //     }>
+        //         "Back to checkout session"
+        //     </button>
+        // </Show>
     }
 }
 
@@ -787,30 +786,30 @@ pub fn ShoppingCart() -> impl IntoView {
     let checkout_sessionid = expect_context::<Signal<CheckoutSessionIdRes>>();
     provide_context(checkout_sessionid);
 
-    let checkout_session = expect_context::<CheckoutSessionRes>();
-    provide_context(checkout_session);
+    // let checkout_session = expect_context::<CheckoutSessionRes>();
+    // provide_context(checkout_session);
 
-    let checkout_loading = checkout_session.loading();
-    let is_checkout_loading = move || {
-        if checkout_loading() {
-            "Loading..."
-        } else {
-            let session = checkout_session
-                .get()
-                .map(|value| {
-                    value
-                        .map(|value2| {
-                            set_checkout_sessionid.update(|s| *s = value2.id.clone());
-                            value2.id
-                        })
-                        .unwrap_or_else(|x| "Loading 2".into())
-                })
-                .unwrap_or_else(|| "Loading".into());
-            // leptos::logging::log!("session: {:#?}", session);
-            // stripe_data.get().expect("no stripdata lol")
-            "Checkout"
-        }
-    };
+    // let checkout_loading = checkout_session.loading();
+    // let is_checkout_loading = move || {
+    //     if checkout_loading() {
+    //         "Loading..."
+    //     } else {
+    //         let session = checkout_session
+    //             .get()
+    //             .map(|value| {
+    //                 value
+    //                     .map(|value2| {
+    //                         set_checkout_sessionid.update(|s| *s = value2.id.clone());
+    //                         value2.id
+    //                     })
+    //                     .unwrap_or_else(|x| "Loading 2".into())
+    //             })
+    //             .unwrap_or_else(|| "Loading".into());
+    //         // leptos::logging::log!("session: {:#?}", session);
+    //         // stripe_data.get().expect("no stripdata lol")
+    //         "Checkout"
+    //     }
+    // };
 
     view! {
         <Show
@@ -895,16 +894,15 @@ pub fn ShoppingCart() -> impl IntoView {
                     <button class="checkout-button" on:click=move |_| {
                             let checkout_sessionid_before = checkout_sessionid.get();
 
-                            set_submit_checkout.update(|s| {
-                                *s += 1;
-                            });
-
-                            spawn_local(async {
+                            spawn_local(async move {
                                 stripe_sync().await;
+
+                                new_checkout_session(shopping_cart.get().0, checkout_sessionid.get()).await;
                             });
 
                         }>
-                        {is_checkout_loading} // checkout button text
+                        // {is_checkout_loading} // checkout button text
+                        "Checkout"
                     </button>
                     <button on:click=move |_| {
                             set_shopping_cart.update(|s| {

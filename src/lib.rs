@@ -351,6 +351,13 @@ pub async fn new_checkout_session(
 
     let mut line_items_vec = Vec::new();
 
+    if shopping_cart.0.is_empty().clone() {
+        error!("NO ITEMS in ShoppingCart. Couldn't create line_items");
+        return Err(leptos::ServerFnError::ServerError(
+            "NO ITEMS in ShoppingCart. Couldn't create line_items".into(),
+        ));
+    }
+
     for (product_id, quantity) in &shopping_cart.0 {
         if let Some(product) = stripe_data.products.iter().find(|p| p.id == *product_id) {
             let line_item = CreateCheckoutSessionLineItems {
@@ -364,6 +371,11 @@ pub async fn new_checkout_session(
                 ..Default::default()
             };
             line_items_vec.push(line_item);
+        } else {
+            error!("NO products in StripeData. Couldn't create line_items");
+            return Err(leptos::ServerFnError::ServerError(
+                "NO products in StripeData. Couldn't create line_items".into(),
+            ));
         }
     }
     params.line_items = Some(line_items_vec);

@@ -55,8 +55,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "category": "pet_food",
-      "item_number": "11"
+      "item_number": "11",
+      "category": "pet_food"
     }
   },
   {
@@ -85,8 +85,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "item_number": "10",
-      "category": "ready_to_eat"
+      "category": "ready_to_eat",
+      "item_number": "10"
     }
   },
   {
@@ -115,8 +115,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "item_number": "9",
-      "category": "ready_to_eat"
+      "category": "ready_to_eat",
+      "item_number": "9"
     }
   },
   {
@@ -145,8 +145,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "category": "ready_to_eat",
-      "item_number": "8"
+      "item_number": "8",
+      "category": "ready_to_eat"
     }
   },
   {
@@ -175,8 +175,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "category": "food",
-      "item_number": "7"
+      "item_number": "7",
+      "category": "food"
     }
   },
   {
@@ -325,8 +325,8 @@
     ],
     "local_images": null,
     "metadata": {
-      "item_number": "2",
-      "category": "food"
+      "category": "food",
+      "item_number": "2"
     }
   },
   {
