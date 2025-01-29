@@ -61,6 +61,10 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 
+    let site_root = std::env::var("LEPTOS_SITE_ROOT").expect("Missing LEPTOS_SITE_ROOT variable in env.");
+
+    tracing::info!("LEPTOS_SITE_ROOT={}", site_root);
+
     let key = std::env::var("STRIPE_KEY")
         .expect("Missing STRIPE_KEY variable in env. Please do 'export STRIPE_KEY=sk_*******'.\nYou can verify if env variable 'STRIPE_KEY' is present with 'env | grep STRIPE_KEY'");
 

@@ -77,18 +77,19 @@
           '';
 
           installPhase = ''
-            mkdir -p $out
+            mkdir -v -p $out
+            mkdir -v -p $out/bin
             ls -la $out
 
             sed -i 's|site-root = "target/site"|site-root = "site"|' Cargo.toml
-            cp -r target/release/farmtasker-au $out/
-            cp -r target/site $out/
-            cp -r Cargo.toml $out/
-            ls -la $out
+            cp -r target/release/farmtasker-au $out/bin/
+            cp -r target/site $out/bin/
+            cp -r Cargo.toml $out/bin/
+            ls -la $out/*
           '';
 
           meta = {
-            mainProgram = "./farmtasker-au";
+            mainProgram = "farmtasker-au";
           };
           shellHook = ''
             export LEPTOS_SITE_ADDR="0.0.0.0:8080"

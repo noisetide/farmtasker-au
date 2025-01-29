@@ -33,6 +33,8 @@ RUN apt-get update -y \
 COPY --from=builder /tmp/nix-store-closure /nix/store
 COPY --from=builder /tmp/build/result /app
 
+WORKDIR /app/bin
+
 # Set any required env variables and
 ENV RUST_LOG="info"
 ENV LEPTOS_SITE_ADDR="0.0.0.0:8080"
@@ -40,4 +42,4 @@ ENV LEPTOS_SITE_ROOT="site"
 EXPOSE 8080
 
 # Run the server
-CMD ["/app/farmtasker-au"]
+CMD ["/app/bin/farmtasker-au"]

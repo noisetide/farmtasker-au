@@ -549,33 +549,77 @@ async fn add_images_to_products_config(
     use std::io::Read;
     use std::io::Write;
     use std::path::Path;
+    use std::path::PathBuf;
 
     info!("Adding images to CfgProducts...");
 
     // Retrieve the LEPTOS_SITE_ROOT environment variable for path of the data file
     let site_root = std::env::var("LEPTOS_SITE_ROOT").unwrap_or_else(|_| "site".to_string());
 
-    let products_assets_dir = format!("{}/", site_root);
+    let products_assets_dir = Path::new(&site_root);
 
-    for product in &products_config.0 {
-        assert_eq!(product.images.is_some(), true);
+    let mut updated_products_config = products_config.clone();
+
+    for mut product in &mut updated_products_config.0 {
+        // assert_eq!(product.images.is_some(), true);
 
         if let Some(item_number) = product.item_number {
             // Build the path for the product's assets directory
-            let product_images_dir = format!("{}/products_assets/{}", site_root, item_number);
+            let product_images_dir_path = format!(
+                "{}/products_assets/{}/ready_assets/",
+                site_root, item_number
+            );
+            let product_images_dir_path = Path::new(&product_images_dir_path);
 
-            info!("{:#?}", product_images_dir);
+            if product_images_dir_path.exists() {
+                info!(
+                    "FOUND LOCAL IMAGES DIR OF PRODUCT {:?}: {:?}",
+                    item_number,
+                    product_images_dir_path.display()
+                );
+
+                let webp_files: Vec<PathBuf> = match std::fs::read_dir(product_images_dir_path) {
+                    Ok(entries) => entries
+                        .filter_map(|entry| entry.ok()) // Filter out errors
+                        .map(|entry| entry.path()) // Get the path
+                        .filter(|path| {
+                            path.is_file() && path.extension().map_or(false, |ext| ext == "webp")
+                        })
+                        .collect(),
+                    Err(_) => vec![], // Return empty Vec<PathBuf> if read_dir fails
+                };
+                let webp_files_local: Vec<PathBuf> = webp_files
+                    .into_iter()
+                    .filter_map(|path| {
+                        path.strip_prefix(site_root.clone())
+                            .ok()
+                            .map(|p| p.to_path_buf())
+                    })
+                    .collect();
+
+                // Set images
+                product.local_images = Some(webp_files_local);
+                // info!(
+                //     "LOCAL WEBP FILES for PRODUCT {:?}: {:#?}",
+                //     item_number, webp_files_local
+                // );
+            } else {
+                error!(
+                    "DID NOT FIND PRODUCT IMAGES DIR OF PRODUCT {:?}: {:?}",
+                    item_number,
+                    product_images_dir_path.display()
+                );
+            }
         }
+    }
 
+    for product in &updated_products_config.0 {
         info!(
-            "LOCAL IMAGES OF PRODUCT {:?}: {:#?}",
+            "FOUND LOCAL IMAGES OF PRODUCT {:?}: {:#?}",
             product.item_number.unwrap(),
-            // product.images.clone().unwrap().first().unwrap(),
             product.local_images.clone()
         );
     }
-
-    let updated_products_config = products_config;
 
     Ok(updated_products_config)
 }

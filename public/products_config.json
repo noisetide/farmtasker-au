@@ -3,7 +3,7 @@
     "stripe_id": "prod_RanByr31Cf2L5S",
     "item_number": 1,
     "name": "Boned Seconds",
-    "description": null,
+    "description": "Discover the premium taste of our farm-raised boned seconds, sourced from trusted Tasmanian farms. These tender quail boned seconds are fresh, sustainable, and perfect for gourmet dishes or everyday meals. Simple to cook—grill, stir-fry, or get creative—they bring delicate, natural flavor to any recipe. Enjoy premium quality at an affordable price and elevate your cooking with ease!",
     "price": {
       "id": "price_1QhbayEYo2pEQeDTgQvRDemA",
       "active": true,
@@ -21,12 +21,22 @@
       "unit_amount_decimal": "2500"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfUUM3WHNPQXJCSk5PUUhsa21qYTBrZjBM00J5girV1A"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfYUI1Rmw3dW1qZ01Objl5d0pzUW1ZbXh600IVlDh9xV"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/1/ready_assets/no_label.webp",
+      "products_assets/1/ready_assets/image_without_text.webp",
+      "products_assets/1/ready_assets/side_image.webp",
+      "products_assets/1/ready_assets/animation_template_1.webp",
+      "products_assets/1/ready_assets/thumbnail.webp",
+      "products_assets/1/ready_assets/front_image.webp",
+      "products_assets/1/ready_assets/animation_template_3.webp",
+      "products_assets/1/ready_assets/rear_view.webp",
+      "products_assets/1/ready_assets/animation_template_2.webp"
+    ],
     "metadata": {
-      "item_number": "1",
-      "category": "food"
+      "category": "food",
+      "item_number": "1"
     }
   },
   {
@@ -51,9 +61,15 @@
       "unit_amount_decimal": "800"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3Rfb3dsMVZFOWwyUnowV3FGOFM0cmJzeWpq00J4YkfirM"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfNkh1SVJYVGFOUm15RWtXOGx3WUowdnNN00suDznrku"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/11/ready_assets/back_view.webp",
+      "products_assets/11/ready_assets/untitled.webp",
+      "products_assets/11/ready_assets/side_view.webp",
+      "products_assets/11/ready_assets/thumbnail.webp",
+      "products_assets/11/ready_assets/no_label_no_name2.webp"
+    ],
     "metadata": {
       "item_number": "11",
       "category": "pet_food"
@@ -81,9 +97,13 @@
       "unit_amount_decimal": "3000"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfOEdlVVZqQUNlbjZ6MkRiODhpbVpZSDB000RZVucgeh"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfZzdraDBxMkt0bHB4ajFYVndRelJEZlFo00fNw9rSuo"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/10/ready_assets/no_price_tag.webp",
+      "products_assets/10/ready_assets/close_up.webp",
+      "products_assets/10/ready_assets/thumbnail.webp"
+    ],
     "metadata": {
       "category": "ready_to_eat",
       "item_number": "10"
@@ -111,9 +131,15 @@
       "unit_amount_decimal": "2500"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfNUthcFhTU25CRkZhZGNlbmU0Z1RrNFIx00E6yv9VUq"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfcmV2YTl0cm9KZjQxUDBCV2JwSGl6UnZV00aNqXuxzM"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/9/ready_assets/close_up_2.webp",
+      "products_assets/9/ready_assets/close_up.webp",
+      "products_assets/9/ready_assets/thumbnail.webp",
+      "products_assets/9/ready_assets/no_label.webp",
+      "products_assets/9/ready_assets/no_name.webp"
+    ],
     "metadata": {
       "category": "ready_to_eat",
       "item_number": "9"
@@ -141,9 +167,14 @@
       "unit_amount_decimal": "4500"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3Rfb3R3c0FUcGN4c3d4Rm9yVDE4eFZnYmlK00Z7Q5vGVS"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfQnFjbDhaYW50MFl0eG45ak0zSFpyenlj00vLN6wKwd"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/8/ready_assets/close_up.webp",
+      "products_assets/8/ready_assets/thumbnail.webp",
+      "products_assets/8/ready_assets/no_label.webp",
+      "products_assets/8/ready_assets/untitled.webp"
+    ],
     "metadata": {
       "item_number": "8",
       "category": "ready_to_eat"
@@ -171,9 +202,12 @@
       "unit_amount_decimal": "4000"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfS1FxanVjNTlIc3ZROUtQSzhFaHlWY1B500qEVuhZ1H"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfU0xicnJHamcwTzhSTkJZT1c5TFNZYW4w00B3fllhxs"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/7/ready_assets/thumbnail.webp",
+      "products_assets/7/ready_assets/untitled.webp"
+    ],
     "metadata": {
       "item_number": "7",
       "category": "food"
@@ -201,9 +235,15 @@
       "unit_amount_decimal": "4000"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfRENNa09sYlV5UEFvUEFnZXNwU0lzT2g100Fx5snkzF"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfbVlDVDdLSVg4TXhsMkVKd2NCdTNtcERp00LtOiImwm"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/6/ready_assets/untitled.webp",
+      "products_assets/6/ready_assets/rear_view.webp",
+      "products_assets/6/ready_assets/close_up.webp",
+      "products_assets/6/ready_assets/no_label.webp",
+      "products_assets/6/ready_assets/thumbnail.webp"
+    ],
     "metadata": {
       "item_number": "6",
       "category": "food"
@@ -231,12 +271,16 @@
       "unit_amount_decimal": "4000"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfR1BlZmkxeEsxZ0NlMWUxTGd1RUFXd1dB00tHzLYO8e"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfWVltSm1NVW5OYnpaekt5MFdZZDBFUE1i00NiTyaCJ2"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/5/ready_assets/untitled.webp",
+      "products_assets/5/ready_assets/thumbnail.webp",
+      "products_assets/5/ready_assets/no_label.webp"
+    ],
     "metadata": {
-      "category": "food",
-      "item_number": "5"
+      "item_number": "5",
+      "category": "food"
     }
   },
   {
@@ -261,12 +305,17 @@
       "unit_amount_decimal": "2500"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfVkZtakd2cHBZaFdHaTBEMVRFZjg2VHNp0084kbGgO1"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfbDR0OXF1UmdlRDFYMG9PeHVER2pnQVRM003KmhU4Ev"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/4/ready_assets/rear_view.webp",
+      "products_assets/4/ready_assets/no_label.webp",
+      "products_assets/4/ready_assets/thumbnail.webp",
+      "products_assets/4/ready_assets/animation_template.webp"
+    ],
     "metadata": {
-      "item_number": "4",
-      "category": "food"
+      "category": "food",
+      "item_number": "4"
     }
   },
   {
@@ -291,19 +340,24 @@
       "unit_amount_decimal": "2000"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfVE5EaFZ5aUM1d3FSNnpEUDNVSWRsd0pX00z3fTJFFH"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfSGtJbVNDRGplOElMaUs0WGRSOXFxRkFi003fQSlGAs"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/3/ready_assets/rear_view.webp",
+      "products_assets/3/ready_assets/unnamed.webp",
+      "products_assets/3/ready_assets/thumbnail.webp",
+      "products_assets/3/ready_assets/without_label.webp"
+    ],
     "metadata": {
-      "item_number": "3",
-      "category": "food"
+      "category": "food",
+      "item_number": "3"
     }
   },
   {
     "stripe_id": "prod_RZWcTKpCEY0Tj1",
     "item_number": 2,
     "name": "Medium Whole Quails",
-    "description": null,
+    "description": "Savor the rich flavor of our farm-raised medium whole quail, sustainably sourced from Tasmania. Tender and versatile, they're perfect for roasting, grilling, or braising. Enjoy their mild, natural taste in gourmet or everyday meals. Order an experience of premium farm-raised quail straight to your door. Get to taste the difference!",
     "price": {
       "id": "price_1QgNZcEYo2pEQeDT08gY6OqV",
       "active": true,
@@ -321,12 +375,17 @@
       "unit_amount_decimal": "1750"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfQVAwVVBHODVhYk1LZEZNWTh6anlzajdw00H74qW796"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfVjZ3RUs1TnVXamtzbTZzVmxZSHdseFBo00fLQm2JpJ"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/2/ready_assets/rear_view.webp",
+      "products_assets/2/ready_assets/thumbnail.webp",
+      "products_assets/2/ready_assets/image_without_text.webp",
+      "products_assets/2/ready_assets/without_label.webp"
+    ],
     "metadata": {
-      "category": "food",
-      "item_number": "2"
+      "item_number": "2",
+      "category": "food"
     }
   },
   {
@@ -351,12 +410,23 @@
       "unit_amount_decimal": "1215"
     },
     "images": [
-      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfbW5tZ0RjdzNEaFVIam5NY0Z1OXhpVDl400JcNXqYGg"
+      "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfSGh2Z3g2TVlvSTJ4a1FGNHpWcEowVXdx00DmbxPKuk"
     ],
-    "local_images": null,
+    "local_images": [
+      "products_assets/12/ready_assets/close_up_2.webp",
+      "products_assets/12/ready_assets/image_1.webp",
+      "products_assets/12/ready_assets/thumbnail.webp",
+      "products_assets/12/ready_assets/no_label.webp",
+      "products_assets/12/ready_assets/close_up_3.webp",
+      "products_assets/12/ready_assets/back_view.webp",
+      "products_assets/12/ready_assets/close_up_1.webp",
+      "products_assets/12/ready_assets/image_2.webp",
+      "products_assets/12/ready_assets/close_up_4.webp",
+      "products_assets/12/ready_assets/untitled.webp"
+    ],
     "metadata": {
-      "category": "food",
-      "item_number": "12"
+      "item_number": "12",
+      "category": "food"
     }
   }
 ]
