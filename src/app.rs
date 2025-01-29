@@ -39,9 +39,7 @@ pub type AppStateDataRes = Resource<(), Result<AppState, ServerFnError>>;
 pub type StripeDataRes = Resource<(), Result<StripeData, ServerFnError>>;
 pub type CfgProductsRes = Resource<(), Result<CfgProducts, ServerFnError>>;
 pub type CheckoutSessionRes = Resource<i64, Result<DbCheckoutSession, ServerFnError>>;
-
 pub type CheckoutSessionIdRes = String;
-
 pub type CheckoutSessionUpdateRes = i64;
 
 #[component]
@@ -368,89 +366,6 @@ pub fn HomePage() -> impl IntoView {
 }
 
 #[component]
-pub fn DbProductItemDetails(product: DbProduct) -> impl IntoView {
-    let (product, _) = create_signal(product);
-    provide_context(product);
-
-    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
-    provide_context(shopping_cart);
-    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
-    provide_context(set_shopping_cart);
-
-    view! {
-        <div class="product-item-container">
-            <Show
-                when=move || {product.get().images.is_some_and(|x| !x.is_empty())}
-                fallback=move || {view!{
-                    <div class="product-item-empty">
-                    </div>
-                }}
-            >
-                <img class="product-item-image" src={product.get().images.unwrap().first()}/>
-            </Show>
-            <div class="product-info">
-                <strong class="product-item-name">
-                    {product.get().name}
-                </strong>
-                <p class="product-item-description">
-                    {product.get().description.unwrap_or("No Description.".to_string())}
-                </p>
-            </div>
-            <button class="product-item-addtocart-button" on:click=move |_| {
-                set_shopping_cart.update(|s| {
-                    s.add_single_product(&product.get().id, 20);
-                });
-            }>
-            "Add To Cart $"{product.get().default_price.unwrap().unit_amount.unwrap() / 100}
-            </button>
-        </div>
-    }
-}
-
-#[component]
-pub fn DbProductItemDetailsPage(product_name: String) -> impl IntoView {
-    let stripe_data = expect_context::<StripeDataRes>();
-    let (product_name, _) = create_signal(product_name);
-    provide_context(product_name);
-
-    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
-    provide_context(shopping_cart);
-    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
-    provide_context(set_shopping_cart);
-
-    view! {
-        <Suspense fallback=move || view! {"loading data"}>
-            {move || match stripe_data.get() {
-                None => view! { <p>"Loading..."</p> }.into_view(),
-                Some(stripe_data) => {
-                    let stripe_data: StripeData = stripe_data.expect("Resource StripeData is not here on 'get()'");
-                    let product_name = expect_context::<ReadSignal<String>>();
-                    provide_context(product_name);
-
-
-                    match stripe_data.products.into_iter()
-                    .find(|product| {
-                        let cmp1 = product.name.to_lowercase().replace(" ", "-");
-                        let cmp2 = &product_name.get()[1..];
-
-                        cmp1 == cmp2
-                    }) {
-                        Some(product) => {
-                            view!{
-                                <DbProductItemDetails product=product/>
-                            }.into_view()
-                        },
-                        None => view!{
-                            <div>"NO PRODUCT WITH SUCH NAME"</div>
-                        }.into_view(),
-                    }
-                }
-            }}
-        </Suspense>
-    }
-}
-
-#[component]
 pub fn PetFood() -> impl IntoView {
     view! {
         <DbProductItemsList items_category="pet_food".to_string()/>
@@ -657,6 +572,89 @@ pub fn DbProductItemsList(items_category: String) -> impl IntoView {
                             }
                         </ul>
                     }.into_view()
+                }
+            }}
+        </Suspense>
+    }
+}
+
+#[component]
+pub fn DbProductItemDetails(product: DbProduct) -> impl IntoView {
+    let (product, _) = create_signal(product);
+    provide_context(product);
+
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+    provide_context(shopping_cart);
+    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+    provide_context(set_shopping_cart);
+
+    view! {
+        <div class="product-item-container">
+            <Show
+                when=move || {product.get().images.is_some_and(|x| !x.is_empty())}
+                fallback=move || {view!{
+                    <div class="product-item-empty">
+                    </div>
+                }}
+            >
+                <img class="product-item-image" src={product.get().images.unwrap().first()}/>
+            </Show>
+            <div class="product-info">
+                <strong class="product-item-name">
+                    {product.get().name}
+                </strong>
+                <p class="product-item-description">
+                    {product.get().description.unwrap_or("No Description.".to_string())}
+                </p>
+            </div>
+            <button class="product-item-addtocart-button" on:click=move |_| {
+                set_shopping_cart.update(|s| {
+                    s.add_single_product(&product.get().id, 20);
+                });
+            }>
+            "Add To Cart $"{product.get().default_price.unwrap().unit_amount.unwrap() / 100}
+            </button>
+        </div>
+    }
+}
+
+#[component]
+pub fn DbProductItemDetailsPage(product_name: String) -> impl IntoView {
+    let stripe_data = expect_context::<StripeDataRes>();
+    let (product_name, _) = create_signal(product_name);
+    provide_context(product_name);
+
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+    provide_context(shopping_cart);
+    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+    provide_context(set_shopping_cart);
+
+    view! {
+        <Suspense fallback=move || view! {"loading data"}>
+            {move || match stripe_data.get() {
+                None => view! { <p>"Loading..."</p> }.into_view(),
+                Some(stripe_data) => {
+                    let stripe_data: StripeData = stripe_data.expect("Resource StripeData is not here on 'get()'");
+                    let product_name = expect_context::<ReadSignal<String>>();
+                    provide_context(product_name);
+
+
+                    match stripe_data.products.into_iter()
+                    .find(|product| {
+                        let cmp1 = product.name.to_lowercase().replace(" ", "-");
+                        let cmp2 = &product_name.get()[1..];
+
+                        cmp1 == cmp2
+                    }) {
+                        Some(product) => {
+                            view!{
+                                <DbProductItemDetails product=product/>
+                            }.into_view()
+                        },
+                        None => view!{
+                            <div>"NO PRODUCT WITH SUCH NAME"</div>
+                        }.into_view(),
+                    }
                 }
             }}
         </Suspense>
@@ -944,36 +942,6 @@ pub fn ShoppingCart() -> impl IntoView {
 }
 
 #[component]
-pub fn FooterBar() -> impl IntoView {
-    view! {
-        <footer class="footerbar">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <p>"© 2024 FARMTASKER PTY LTD. All rights reserved for branding, images and logos. Code licensed under the General Public Licence (LGPL-2.1). See "<a href="https://github.com/rotteegher/farmtasker-au" target="_blank">"source code"</a>" for details."</p>
-
-                    // <p>
-                    //     "This website is licensed under the "
-                    //     <a href="https://www.gnu.org/licenses/lgpl-2.1.html" target="_blank">"GNU Lesser General Public License v2.1"</a>.
-                    // </p>
-                </div>
-                <div class="footer-section">
-                    <p>
-                        "Contact us: "
-                        <a href="mailto:info@farmtasker.au">"info@farmtasker.au"</a>
-                    </p>
-                </div>
-                // <div class="footer-section">
-                //     <p>
-                //         <a href="/privacy">"Privacy Policy"</a> |
-                //         <a href="/terms">"Terms of Service"</a>
-                //     </p>
-                // </div>
-            </div>
-        </footer>
-    }
-}
-
-#[component]
 pub fn NavBar() -> impl IntoView {
     let selected = expect_context::<ReadSignal<CurrentPage>>();
 
@@ -1109,5 +1077,35 @@ pub fn NavBar() -> impl IntoView {
                 // </li>
             </ul>
         </nav>
+    }
+}
+
+#[component]
+pub fn FooterBar() -> impl IntoView {
+    view! {
+        <footer class="footerbar">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <p>"© 2024 FARMTASKER PTY LTD. All rights reserved for branding, images and logos. Code licensed under the General Public Licence (LGPL-2.1). See "<a href="https://github.com/rotteegher/farmtasker-au" target="_blank">"source code"</a>" for details."</p>
+
+                    // <p>
+                    //     "This website is licensed under the "
+                    //     <a href="https://www.gnu.org/licenses/lgpl-2.1.html" target="_blank">"GNU Lesser General Public License v2.1"</a>.
+                    // </p>
+                </div>
+                <div class="footer-section">
+                    <p>
+                        "Contact us: "
+                        <a href="mailto:info@farmtasker.au">"info@farmtasker.au"</a>
+                    </p>
+                </div>
+                // <div class="footer-section">
+                //     <p>
+                //         <a href="/privacy">"Privacy Policy"</a> |
+                //         <a href="/terms">"Terms of Service"</a>
+                //     </p>
+                // </div>
+            </div>
+        </footer>
     }
 }
