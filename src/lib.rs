@@ -595,6 +595,7 @@ async fn add_images_to_products_config(
                             .ok()
                             .map(|p| p.to_path_buf())
                     })
+                    .map(|path| PathBuf::from(format!("/{}", path.display()))) // a trick to convert this path to absolute so css element <img src="path here"> displays it correctly from LEPTOS_SITE_ROOT dir
                     .collect();
 
                 // Set images

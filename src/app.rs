@@ -368,21 +368,21 @@ pub fn HomePage() -> impl IntoView {
 #[component]
 pub fn PetFood() -> impl IntoView {
     view! {
-        <DbProductItemsList items_category="pet_food".to_string()/>
+        <CfgProductItemsList items_category="pet_food".to_string()/>
     }
 }
 
 #[component]
 pub fn FarmFood() -> impl IntoView {
     view! {
-        <DbProductItemsList items_category="food".to_string()/>
+        <CfgProductItemsList items_category="food".to_string()/>
     }
 }
 
 #[component]
 pub fn ReadyToEat() -> impl IntoView {
     view! {
-        <DbProductItemsList items_category="ready_to_eat".to_string()/>
+        <CfgProductItemsList items_category="ready_to_eat".to_string()/>
     }
 }
 
@@ -534,46 +534,156 @@ pub fn DbProductItem(product: DbProduct) -> impl IntoView {
 }
 
 #[component]
-pub fn DbProductItemsList(items_category: String) -> impl IntoView {
+pub fn CfgProductItem(product: CfgProduct) -> impl IntoView {
+    let (product, _) = create_signal(product);
+    provide_context(product);
+
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+    provide_context(shopping_cart);
+    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+    provide_context(set_shopping_cart);
+
+    view! {
+        <div class="product-item-container">
+            <a href=move || {
+                let product_name = product.get().name.to_lowercase().replace(" ", "-");
+                format!("/shop/products/:{:#}", product_name)
+            }>
+                <Show
+                    when=move || {product.get().images.is_some_and(|x| !x.is_empty())}
+                    fallback=move || {view!{
+                        <div class="product-item-empty">
+                        </div>
+                    }}
+                >
+                    <img class="product-item-image" src=move || {
+                        let image_path = product
+                            .get()
+                            .local_images
+                            .as_ref()
+                            .expect("No local images for CfgProduct!")
+                            .iter()
+                            .find(|image_path| image_path.file_name().map_or(false, |name| name == "thumbnail.webp"))
+                            .map(|image_pathbuf| image_pathbuf.to_string_lossy().to_string()) // Convert to owned String
+                            .unwrap_or_else(|| {
+                                error!(
+                                    "Couldn't find thumbnail.webp for product! {}",
+                                    product.get().item_number.expect("No item_number of CfgProduct!")
+                                );
+                                "no_image_for_cfgproduct.webp".to_string() // Return owned String
+                            });
+                        image_path
+                    }/>
+                </Show>
+                <div class="product-info">
+                    <strong class="product-item-name">
+                        {product.get().name}
+                    </strong>
+                </div>
+            </a>
+            <button class="product-item-addtocart-button" on:click=move |_| {
+                set_shopping_cart.update(|s| {
+                    s.add_single_product(&product.get().stripe_id.expect("CfgProduct has no stripe_id!!!!"), 20);
+                });
+            }>
+            "Add To Cart $"{product.get().price.unwrap().unit_amount.unwrap() / 100}
+            </button>
+        </div>
+    }
+}
+
+#[component]
+pub fn CfgProductItemsList(items_category: String) -> impl IntoView {
     let app_state = expect_context::<AppStateDataRes>();
+    provide_context(app_state);
     let (items_category, set_items_category) = create_signal(items_category);
     provide_context(items_category);
 
     view! {
-        <Suspense fallback=move || view! {"loading data"}>
-            {move || match app_state.get() {
-                None => view! { <p>"Loading..."</p> }.into_view(),
-                Some(app_state) => {
-                    let stripe_data: StripeData = app_state.clone().expect("Resource AppState is not gere on 'get()").stripe_data.expect("Resource StripeData is not here on 'get()'");
-                    let products_config: CfgProducts = app_state.clone().expect("Resource AppState is not gere on 'get()").products_config.expect("Resource StripeData is not here on 'get()'");
-                    let items_category = expect_context::<ReadSignal<String>>();
-                    provide_context(items_category);
+        <Suspense fallback=move || view! {"Loading data..."}>
+            {
+                move || match app_state.get() {
+                    None => view! { <p>"Loading..."</p>}.into_view(),
+                    Some(app_state) => {
+                        let products_config: CfgProducts = app_state.clone().expect("Resource AppState is not here on 'get()").products_config.expect("Resource StripeData is not here on 'get()'");
+                        let items_category = expect_context::<ReadSignal<String>>();
+                        provide_context(items_category);
 
 
-                    view! {
-                        <ul class="product-list-ul">
-                            {
-                                stripe_data.products.into_iter()
-                                .filter(|product| {
-                                    product.metadata
-                                        .as_ref()
-                                        .and_then(|metadata| metadata.get("category"))
-                                        .map(|category| category == &items_category.get())
-                                        .unwrap_or(false)
-                                })
-                                .map(|product| {
-                                    view! {
-                                        <li class="product-list-item">
-                                            <DbProductItem product=product/>
-                                        </li>
-                                    }
-                                })
-                                .collect::<Vec<_>>()
-                            }
-                        </ul>
-                    }.into_view()
+                        view! {
+                            <ul class="product-list-ul">
+                                {
+                                    products_config.0.into_iter()
+                                    .filter(|product| {
+                                        product.metadata
+                                            .as_ref()
+                                            .and_then(|metadata| metadata.get("category"))
+                                            .map(|category| category == &items_category.get())
+                                            .unwrap_or(false)
+                                    })
+                                    .map(|product| {
+                                        view! {
+                                            <li class="product-list-item">
+                                                <CfgProductItem product=product/>
+                                            </li>
+                                        }
+                                    })
+                                    .collect::<Vec<_>>()
+                                }
+                            </ul>
+                        }.into_view()
+                    }
                 }
-            }}
+
+            }
+        </Suspense>
+    }
+}
+
+#[component]
+pub fn DbProductItemsList(items_category: String) -> impl IntoView {
+    let app_state = expect_context::<AppStateDataRes>();
+    provide_context(app_state);
+    let (items_category, set_items_category) = create_signal(items_category);
+    provide_context(items_category);
+
+    view! {
+        <Suspense fallback=move || view! {"Loading data..."}>
+            {
+                move || match app_state.get() {
+                    None => view! { <p>"Loading..."</p> }.into_view(),
+                    Some(app_state) => {
+                        let stripe_data: StripeData = app_state.clone().expect("Resource AppState is not here on 'get()").stripe_data.expect("Resource StripeData is not here on 'get()'");
+                        let products_config: CfgProducts = app_state.clone().expect("Resource AppState is not here on 'get()").products_config.expect("Resource StripeData is not here on 'get()'");
+                        let items_category = expect_context::<ReadSignal<String>>();
+                        provide_context(items_category);
+
+
+                        view! {
+                            <ul class="product-list-ul">
+                                {
+                                    stripe_data.products.into_iter()
+                                    .filter(|product| {
+                                        product.metadata
+                                            .as_ref()
+                                            .and_then(|metadata| metadata.get("category"))
+                                            .map(|category| category == &items_category.get())
+                                            .unwrap_or(false)
+                                    })
+                                    .map(|product| {
+                                        view! {
+                                            <li class="product-list-item">
+                                                <DbProductItem product=product/>
+                                            </li>
+                                        }
+                                    })
+                                    .collect::<Vec<_>>()
+                                }
+                            </ul>
+                        }.into_view()
+                    }
+                }
+            }
         </Suspense>
     }
 }
