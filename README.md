@@ -118,7 +118,7 @@ software `farmtasker.au' (a marketplace website for local farmers in Tasmania) w
 11 December 2024
 Olesia Trukhanska, founder of FARMTASKER PTY LTD
 
-You can contact us at info@farmtasker.au
+You can contact us at farmtasker@gmail.com
 ```
 See `LICENSE` file or [GNU LGPL](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html).
 

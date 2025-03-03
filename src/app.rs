@@ -21,7 +21,7 @@
 // FARMTASKER PDY LTD, hereby disclaims all copyright interest in the
 // software `farmtasker.au' (a marketplace website for local farmers in Tasmania) written by Dmytro Serdiukov.
 //
-// You can contact us at info@farmtasker.au
+// You can contact us at farmtasker@gmail.com
 
 #![allow(unused)]
 use crate::error_template::{AppError, ErrorTemplate};
@@ -391,7 +391,15 @@ pub fn VideoInstructions() -> impl IntoView {
     view! {
         <div class="blog-container">
             <img class="banner-image" src="/banners/instructions.webp" alt="Video Instructions Banner"/>
-            <iframe class="embed-video" src="https://www.youtube.com/embed/daOJwUdwTME?si=GrQjf7z3ZiHD4WQF" title="Instructions" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <iframe
+                class="embed-video"
+                src="https://www.youtube.com/embed/daOJwUdwTME?si=GrQjf7z3ZiHD4WQF"
+                title="Instructions"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+            ></iframe>
         </div>
     }
 }
@@ -401,7 +409,15 @@ pub fn VideoBlogs() -> impl IntoView {
     view! {
         <div class="blog-container">
             <img class="banner-image" src="/banners/video_blog.webp" alt="Video Blog Banner"/>
-            <iframe class="embed-video" src="https://www.youtube.com/embed/EFyeoMRsDN8?si=pqqFHuqhTuB5xNMV" title="Culinary Adventure" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <iframe
+                class="embed-video"
+                src="https://www.youtube.com/embed/EFyeoMRsDN8?si=pqqFHuqhTuB5xNMV"
+                title="Culinary Adventure"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+            ></iframe>
         </div>
         <a href="/instructions" class="page-selector-container" id="button_farm_task_video_instructions">
             <img style="max-height: 20rem" class="page-selector-image" src="/main_buttons/instructions.png" alt="Video Instructions"/>
@@ -470,7 +486,7 @@ pub fn PrivacyPolicy() -> impl IntoView {
             <h1>"Privacy Policy"</h1>
             <p>
                 "Our Privacy Policy is currently being prepared and will be available soon. If you have any questions, please contact us at "
-                <a href="mailto:info@farmtasker.au">" info@farmtasker.au"</a>
+                <a href="mailto:farmtasker@gmail.com">" farmtasker@gmail.com"</a>
                 "."
             </p>
         </div>
@@ -484,7 +500,7 @@ pub fn TermsOfService() -> impl IntoView {
             <h1>"Terms of Service"</h1>
             <p>
                 "Our Terms of Service are currently being prepared and will be available soon. If you have any questions, please contact us at "
-                <a href="mailto:info@farmtasker.au">" info@farmtasker.au"</a>
+                <a href="mailto:farmtasker@gmail.com">" farmtasker@gmail.com"</a>
                 "."
             </p>
         </div>
@@ -605,7 +621,9 @@ pub fn CfgProductItemsList(items_category: String) -> impl IntoView {
                 move || match app_state.get() {
                     None => view! { <p>"Loading..."</p>}.into_view(),
                     Some(app_state) => {
-                        let products_config: CfgProducts = app_state.clone().expect("Resource AppState is not here on 'get()").products_config.expect("Resource StripeData is not here on 'get()'");
+                        let products_config: CfgProducts = app_state.clone()
+                            .expect("Resource AppState is not here on 'get()")
+                            .products_config.expect("Resource StripeData is not here on 'get()'");
                         let items_category = expect_context::<ReadSignal<String>>();
                         provide_context(items_category);
 
@@ -653,8 +671,13 @@ pub fn DbProductItemsList(items_category: String) -> impl IntoView {
                 move || match app_state.get() {
                     None => view! { <p>"Loading..."</p> }.into_view(),
                     Some(app_state) => {
-                        let stripe_data: StripeData = app_state.clone().expect("Resource AppState is not here on 'get()").stripe_data.expect("Resource StripeData is not here on 'get()'");
-                        let products_config: CfgProducts = app_state.clone().expect("Resource AppState is not here on 'get()").products_config.expect("Resource StripeData is not here on 'get()'");
+                        let stripe_data: StripeData = app_state.clone()
+                            .expect("Resource AppState is not here on 'get()")
+                            .stripe_data.expect("Resource StripeData is not here on 'get()'");
+
+                        let products_config: CfgProducts = app_state.clone()
+                            .expect("Resource AppState is not here on 'get()")
+                            .products_config.expect("Resource StripeData is not here on 'get()'");
                         let items_category = expect_context::<ReadSignal<String>>();
                         provide_context(items_category);
 
@@ -1206,7 +1229,8 @@ pub fn FooterBar() -> impl IntoView {
                 <div class="footer-section">
                     <p>
                         "Contact us: "
-                        <a href="mailto:info@farmtasker.au">"info@farmtasker.au"</a>
+                        <a href="mailto:farmtasker@gmail.com">"farmtasker@gmail.com"</a>
+                        " +61484753577"
                     </p>
                 </div>
                 // <div class="footer-section">

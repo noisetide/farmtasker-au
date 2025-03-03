@@ -291,7 +291,8 @@ pub async fn new_checkout_session(
     //             // Up to 100 characters.
     //             label: String::from("I understand that I live within the delivery route "),
 
-    //             // The value for this option, not displayed to the customer, used by your integration to reconcile the option selected by the customer.
+    //             // The value for this option, not displayed to the customer,
+    //             // used by your integration to reconcile the option selected by the customer.
     //             //
     //             // Must be unique to this option, alphanumeric, and up to 100 characters.
     //             value: String::from("deliverycollection"),
@@ -460,7 +461,8 @@ pub async fn refresh_local_product_info(rewrite: bool) -> Result<String, leptos:
                 }
             }
 
-            // Create new products config by adding missing products from stripedata to existing config if the local config is missing the products by id
+            // Create new products config by adding missing products from stripedata
+            // to existing config if the local config is missing the products by id
             // MAKE SCAN OF ASSET IMAGES IN DIR
             // Attach them to the local_images in CfgProduct
             let updated_products_config: CfgProducts =
