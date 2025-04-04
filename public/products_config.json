@@ -24,19 +24,19 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfYUI1Rmw3dW1qZ01Objl5d0pzUW1ZbXh600IVlDh9xV"
     ],
     "local_images": [
-      "/products_assets/1/ready_assets/animation_template_1.webp",
-      "/products_assets/1/ready_assets/side_image.webp",
-      "/products_assets/1/ready_assets/thumbnail.webp",
-      "/products_assets/1/ready_assets/animation_template_2.webp",
-      "/products_assets/1/ready_assets/no_label.webp",
-      "/products_assets/1/ready_assets/rear_view.webp",
-      "/products_assets/1/ready_assets/front_image.webp",
+      "/products_assets/1/ready_assets/animation_template_3.webp",
       "/products_assets/1/ready_assets/image_without_text.webp",
-      "/products_assets/1/ready_assets/animation_template_3.webp"
+      "/products_assets/1/ready_assets/animation_template_2.webp",
+      "/products_assets/1/ready_assets/rear_view.webp",
+      "/products_assets/1/ready_assets/no_label.webp",
+      "/products_assets/1/ready_assets/side_image.webp",
+      "/products_assets/1/ready_assets/front_image.webp",
+      "/products_assets/1/ready_assets/animation_template_1.webp",
+      "/products_assets/1/ready_assets/thumbnail.webp"
     ],
     "metadata": {
-      "item_number": "1",
-      "category": "food"
+      "category": "food",
+      "item_number": "1"
     }
   },
   {
@@ -65,14 +65,14 @@
     ],
     "local_images": [
       "/products_assets/11/ready_assets/untitled.webp",
-      "/products_assets/11/ready_assets/thumbnail.webp",
-      "/products_assets/11/ready_assets/no_label_no_name2.webp",
+      "/products_assets/11/ready_assets/back_view.webp",
       "/products_assets/11/ready_assets/side_view.webp",
-      "/products_assets/11/ready_assets/back_view.webp"
+      "/products_assets/11/ready_assets/no_label_no_name2.webp",
+      "/products_assets/11/ready_assets/thumbnail.webp"
     ],
     "metadata": {
-      "category": "pet_food",
-      "item_number": "11"
+      "item_number": "11",
+      "category": "pet_food"
     }
   },
   {
@@ -100,13 +100,13 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfZzdraDBxMkt0bHB4ajFYVndRelJEZlFo00fNw9rSuo"
     ],
     "local_images": [
+      "/products_assets/10/ready_assets/no_price_tag.webp",
       "/products_assets/10/ready_assets/thumbnail.webp",
-      "/products_assets/10/ready_assets/close_up.webp",
-      "/products_assets/10/ready_assets/no_price_tag.webp"
+      "/products_assets/10/ready_assets/close_up.webp"
     ],
     "metadata": {
-      "category": "ready_to_eat",
-      "item_number": "10"
+      "item_number": "10",
+      "category": "ready_to_eat"
     }
   },
   {
@@ -134,15 +134,15 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfcmV2YTl0cm9KZjQxUDBCV2JwSGl6UnZV00aNqXuxzM"
     ],
     "local_images": [
-      "/products_assets/9/ready_assets/thumbnail.webp",
-      "/products_assets/9/ready_assets/no_label.webp",
-      "/products_assets/9/ready_assets/no_name.webp",
+      "/products_assets/9/ready_assets/close_up_2.webp",
       "/products_assets/9/ready_assets/close_up.webp",
-      "/products_assets/9/ready_assets/close_up_2.webp"
+      "/products_assets/9/ready_assets/no_label.webp",
+      "/products_assets/9/ready_assets/thumbnail.webp",
+      "/products_assets/9/ready_assets/no_name.webp"
     ],
     "metadata": {
-      "item_number": "9",
-      "category": "ready_to_eat"
+      "category": "ready_to_eat",
+      "item_number": "9"
     }
   },
   {
@@ -170,10 +170,10 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfQnFjbDhaYW50MFl0eG45ak0zSFpyenlj00vLN6wKwd"
     ],
     "local_images": [
-      "/products_assets/8/ready_assets/thumbnail.webp",
       "/products_assets/8/ready_assets/untitled.webp",
-      "/products_assets/8/ready_assets/close_up.webp",
-      "/products_assets/8/ready_assets/no_label.webp"
+      "/products_assets/8/ready_assets/no_label.webp",
+      "/products_assets/8/ready_assets/thumbnail.webp",
+      "/products_assets/8/ready_assets/close_up.webp"
     ],
     "metadata": {
       "item_number": "8",
@@ -205,8 +205,8 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfU0xicnJHamcwTzhSTkJZT1c5TFNZYW4w00B3fllhxs"
     ],
     "local_images": [
-      "/products_assets/7/ready_assets/untitled.webp",
-      "/products_assets/7/ready_assets/thumbnail.webp"
+      "/products_assets/7/ready_assets/thumbnail.webp",
+      "/products_assets/7/ready_assets/untitled.webp"
     ],
     "metadata": {
       "item_number": "7",
@@ -238,11 +238,11 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfbVlDVDdLSVg4TXhsMkVKd2NCdTNtcERp00LtOiImwm"
     ],
     "local_images": [
-      "/products_assets/6/ready_assets/no_label.webp",
       "/products_assets/6/ready_assets/thumbnail.webp",
+      "/products_assets/6/ready_assets/untitled.webp",
       "/products_assets/6/ready_assets/close_up.webp",
       "/products_assets/6/ready_assets/rear_view.webp",
-      "/products_assets/6/ready_assets/untitled.webp"
+      "/products_assets/6/ready_assets/no_label.webp"
     ],
     "metadata": {
       "category": "food",
@@ -274,13 +274,13 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfWVltSm1NVW5OYnpaekt5MFdZZDBFUE1i00NiTyaCJ2"
     ],
     "local_images": [
-      "/products_assets/5/ready_assets/untitled.webp",
+      "/products_assets/5/ready_assets/no_label.webp",
       "/products_assets/5/ready_assets/thumbnail.webp",
-      "/products_assets/5/ready_assets/no_label.webp"
+      "/products_assets/5/ready_assets/untitled.webp"
     ],
     "metadata": {
-      "item_number": "5",
-      "category": "food"
+      "category": "food",
+      "item_number": "5"
     }
   },
   {
@@ -308,10 +308,10 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfbDR0OXF1UmdlRDFYMG9PeHVER2pnQVRM003KmhU4Ev"
     ],
     "local_images": [
-      "/products_assets/4/ready_assets/thumbnail.webp",
-      "/products_assets/4/ready_assets/no_label.webp",
       "/products_assets/4/ready_assets/rear_view.webp",
-      "/products_assets/4/ready_assets/animation_template.webp"
+      "/products_assets/4/ready_assets/animation_template.webp",
+      "/products_assets/4/ready_assets/no_label.webp",
+      "/products_assets/4/ready_assets/thumbnail.webp"
     ],
     "metadata": {
       "category": "food",
@@ -343,9 +343,9 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfSGtJbVNDRGplOElMaUs0WGRSOXFxRkFi003fQSlGAs"
     ],
     "local_images": [
+      "/products_assets/3/ready_assets/rear_view.webp",
       "/products_assets/3/ready_assets/unnamed.webp",
       "/products_assets/3/ready_assets/without_label.webp",
-      "/products_assets/3/ready_assets/rear_view.webp",
       "/products_assets/3/ready_assets/thumbnail.webp"
     ],
     "metadata": {
@@ -378,14 +378,14 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfVjZ3RUs1TnVXamtzbTZzVmxZSHdseFBo00fLQm2JpJ"
     ],
     "local_images": [
-      "/products_assets/2/ready_assets/without_label.webp",
-      "/products_assets/2/ready_assets/rear_view.webp",
       "/products_assets/2/ready_assets/thumbnail.webp",
+      "/products_assets/2/ready_assets/rear_view.webp",
+      "/products_assets/2/ready_assets/without_label.webp",
       "/products_assets/2/ready_assets/image_without_text.webp"
     ],
     "metadata": {
-      "category": "food",
-      "item_number": "2"
+      "item_number": "2",
+      "category": "food"
     }
   },
   {
@@ -413,20 +413,20 @@
       "https://files.stripe.com/links/MDB8YWNjdF8xUFVpbWRFWW8ycEVRZURUfGZsX3Rlc3RfSGh2Z3g2TVlvSTJ4a1FGNHpWcEowVXdx00DmbxPKuk"
     ],
     "local_images": [
-      "/products_assets/12/ready_assets/close_up_4.webp",
+      "/products_assets/12/ready_assets/close_up_3.webp",
+      "/products_assets/12/ready_assets/thumbnail.webp",
       "/products_assets/12/ready_assets/no_label.webp",
+      "/products_assets/12/ready_assets/close_up_2.webp",
+      "/products_assets/12/ready_assets/image_2.webp",
+      "/products_assets/12/ready_assets/close_up_4.webp",
       "/products_assets/12/ready_assets/back_view.webp",
       "/products_assets/12/ready_assets/close_up_1.webp",
-      "/products_assets/12/ready_assets/image_2.webp",
-      "/products_assets/12/ready_assets/untitled.webp",
-      "/products_assets/12/ready_assets/close_up_3.webp",
-      "/products_assets/12/ready_assets/close_up_2.webp",
       "/products_assets/12/ready_assets/image_1.webp",
-      "/products_assets/12/ready_assets/thumbnail.webp"
+      "/products_assets/12/ready_assets/untitled.webp"
     ],
     "metadata": {
-      "item_number": "12",
-      "category": "food"
+      "category": "food",
+      "item_number": "12"
     }
   }
 ]

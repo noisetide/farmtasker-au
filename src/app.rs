@@ -18,7 +18,7 @@
 //
 // See the GNU Lesser General Public License for more details.
 //
-// FARMTASKER PDY LTD, hereby disclaims all copyright interest in the
+// FARMTASKER PTY LTD, hereby disclaims all copyright interest in the
 // software `farmtasker.au' (a marketplace website for local farmers in Tasmania) written by Dmytro Serdiukov.
 //
 // You can contact us at farmtasker@gmail.com
@@ -107,15 +107,15 @@ pub fn App() -> impl IntoView {
             }
             .into_view()
         }>
-            <nav>
+            <nav class="navbar_nav">
                 <NavBar/>
             </nav>
-            <main>
+            <main class="main_main">
                 <Routerer/>
             </main>
-            <div>
+            <footer class="footerbar_footer">
                 <FooterBar/>
-            </div>
+            </footer>
         </Router>
     }
 }
@@ -1219,7 +1219,9 @@ pub fn FooterBar() -> impl IntoView {
         <footer class="footerbar">
             <div class="footer-content">
                 <div class="footer-section">
-                    <p>"© 2024 FARMTASKER PTY LTD. All rights reserved for branding, images and logos. Code licensed under the General Public Licence (LGPL-2.1). See "<a href="https://github.com/rotteegher/farmtasker-au" target="_blank">"source code"</a>" for details."</p>
+                    <p>
+                        <div>"© 2024 FARMTASKER PTY LTD. All rights reserved for branding, images and logos."</div>
+                        "Code licensed under the Lesser General Public Licence (LGPL-2.1). See "<a href="https://github.com/rotteegher/farmtasker-au" target="_blank">"source code"</a>" for details."</p>
 
                     // <p>
                     //     "This website is licensed under the "
@@ -1230,7 +1232,8 @@ pub fn FooterBar() -> impl IntoView {
                     <p>
                         "Contact us: "
                         <a href="mailto:farmtasker@gmail.com">"farmtasker@gmail.com"</a>
-                        " +61484753577"
+                        <a href="mailto:info@farmtasker.au">"info@farmtasker.au"</a>
+                        <div>" +61484753577"</div>
                     </p>
                 </div>
                 // <div class="footer-section">

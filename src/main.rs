@@ -18,7 +18,7 @@
 //
 // See the GNU Lesser General Public License for more details.
 //
-// FARMTASKER PDY LTD, hereby disclaims all copyright interest in the
+// FARMTASKER PTY LTD, hereby disclaims all copyright interest in the
 // software `farmtasker.au' (a marketplace website for local farmers in Tasmania) written by Dmytro Serdiukov.
 //
 // You can contact us at farmtasker@gmail.com
@@ -61,12 +61,15 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 
-    let site_root = std::env::var("LEPTOS_SITE_ROOT").expect("Missing LEPTOS_SITE_ROOT variable in env.");
+    let site_root =
+        std::env::var("LEPTOS_SITE_ROOT").expect("Missing LEPTOS_SITE_ROOT variable in env.");
 
     tracing::info!("LEPTOS_SITE_ROOT={}", site_root);
 
     let key = std::env::var("STRIPE_KEY")
-        .expect("Missing STRIPE_KEY variable in env. Please do 'export STRIPE_KEY=sk_*******'.\nYou can verify if env variable 'STRIPE_KEY' is present with 'env | grep STRIPE_KEY'");
+        .expect("Missing STRIPE_KEY variable in env.
+                \nPlease do 'export STRIPE_KEY=sk_*******'.
+                \nYou can verify if env variable 'STRIPE_KEY' is present with 'env | grep STRIPE_KEY'");
 
     let stripe_client = stripe::Client::new(key.clone());
 
@@ -84,40 +87,42 @@ async fn main() {
                 leptos::logging::log!("No local CfgProducts in AppState");
                 None
             }
-        }
+        },
     };
 
     refresh_local_product_info(false).await;
     tracing::info!("");
-    
+
     assert!(
-        &appstate.stripe_data.clone().is_some(), 
-        "No StripeData in AppState during server init. Check if the StripeData could be fetched from internet.\nPlease verify that you have internet connection.",
+        &appstate.stripe_data.clone().is_some(),
+        "No StripeData in AppState during server init.
+        \nCheck if the StripeData could be fetched from internet.
+        \nPlease verify that you have internet connection.",
     );
     assert!(
-        &appstate.products_config.clone().is_some(), 
-        "No CfgProducts in AppState during server init. Check if the products config could be initiated. How did this happen?",
+        &appstate.products_config.clone().is_some(),
+        "No CfgProducts in AppState during server init.
+        \nCheck if the products config could be initiated.
+        \nHow did this happen?",
     );
 
-    let products = &appstate
-        .stripe_data
-        .clone()
-        .unwrap()
-        .products;
+    let products = &appstate.stripe_data.clone().unwrap().products;
     tracing::info!("Listing products:");
     for i in products {
         tracing::info!(
             "#{:?} Product: {:#?} - {:#?}$ AUD",
-            i.metadata.clone().unwrap_or(HashMap::new()).get("item_number").map_or("_", |v| v).parse().unwrap_or(-1),
+            i.metadata
+                .clone()
+                .unwrap_or(HashMap::new())
+                .get("item_number")
+                .map_or("_", |v| v)
+                .parse()
+                .unwrap_or(-1),
             i.name,
             i.default_price.clone().unwrap().unit_amount.unwrap() as f64 / 100.0
         );
     }
-    let customers = &appstate
-        .stripe_data
-        .clone()
-        .unwrap()
-        .customers;
+    let customers = &appstate.stripe_data.clone().unwrap().customers;
 
     let checkout_sessions = &appstate
         .stripe_data

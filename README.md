@@ -1,11 +1,15 @@
 <picture>
+    <source srcset="https://raw.githubusercontent.com/rotteegher/farmtasker-au/master/public/main_logo.svg" media="(prefers-color-scheme: dark)">
+    <img src="https://raw.githubusercontent.com/rotteegher/farmtasker-au/master/public/main_logo.svg" alt="Farmtasker Logo">
+</picture>
+<picture>
     <source srcset="https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_Solid_White.svg" media="(prefers-color-scheme: dark)">
     <img src="https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_RGB.svg" alt="Leptos Logo">
 </picture>
 
-# Leptos Axum Application.
+# [Farmtasker](https://farmtasker.au) Leptos Axum Application.
 
-This is an application of [Leptos](https://github.com/leptos-rs/leptos) web framework and the [cargo-leptos](https://github.com/akesson/cargo-leptos) Rust tool using [Axum](https://github.com/tokio-rs/axum) web server.
+This is an application of [Leptos](https://github.com/leptos-rs/leptos) web framework which uses [cargo-leptos](https://github.com/akesson/cargo-leptos), and with [Axum](https://github.com/tokio-rs/axum) as a web server.
 
 ## Prerequisites:
 
@@ -112,7 +116,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU Lesser General Public License for more details.
 
-FARMTASKER PDY LTD, hereby disclaims all copyright interest in the
+FARMTASKER PTY LTD, hereby disclaims all copyright interest in the
 software `farmtasker.au' (a marketplace website for local farmers in Tasmania) written by Dmytro Serdiukov.
 
 11 December 2024
