@@ -750,8 +750,6 @@ pub fn ImageListDisplay(images: Vec<std::path::PathBuf>, class: String) -> impl 
                 <img
                     class={img_class.get()}
                     src={move || current_image().display().to_string()}
-                    // on:click={move |_| {leptos::logging::log!("TEST");}}
-                    href=move || {current_image().display().to_string()}
                     style={move || format!("opacity: {}; transition: 0.1s ease-in-out;", img_opacity.get())}
                 />
             </Show>
@@ -763,7 +761,7 @@ pub fn ImageListDisplay(images: Vec<std::path::PathBuf>, class: String) -> impl 
                     } else {
                         current_index.get() - 1
                     };
-                    leptos::logging::log!("len: {}, i: {}, p: {}", len, new_index, current_image().display());
+                    // leptos::logging::log!("len: {}, i: {}, p: {}", len, new_index, current_image().display());
                     set_current_index.set(new_index);
                 } else {
                     panic!("Images Vec<std::path::PathBuf> is empty")
@@ -775,7 +773,7 @@ pub fn ImageListDisplay(images: Vec<std::path::PathBuf>, class: String) -> impl 
                 let len = images_signal.get().len();
                 if len > 0 {
                     let new_index = (current_index.get() + 1) % len;
-                    leptos::logging::log!("len: {}, i: {}, p: {}", len, new_index, current_image().display());
+                    // leptos::logging::log!("len: {}, i: {}, p: {}", len, new_index, current_image().display());
                     set_current_index.set(new_index);
                 } else {
                     panic!("Images Vec<std::path::PathBuf> is empty")
