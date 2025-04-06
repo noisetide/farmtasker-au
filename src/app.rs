@@ -709,29 +709,81 @@ pub fn CfgProductItemDetailsPage(product_name: String) -> impl IntoView {
 }
 
 #[component]
-pub fn ImageListDisplay(images: Vec<std::path::PathBuf>, img_class: String) -> impl IntoView {
-    let (img_class, _) = create_signal(img_class);
+pub fn ImageListDisplay(images: Vec<std::path::PathBuf>, class: String) -> impl IntoView {
+    let (img_class, _) = create_signal(class);
     provide_context(img_class);
     let (images_signal, _) = create_signal(images.clone());
     provide_context(images_signal);
 
-    let (current_image, set_current_image) =
-        create_signal(images.first().cloned().unwrap_or_default());
-    provide_context(current_image);
-    provide_context(set_current_image);
+    let (current_index, set_current_index) = create_signal(0usize);
+    let current_image = move || {
+        images_signal
+            .get()
+            .get(current_index.get())
+            .cloned()
+            .unwrap_or_default()
+    };
+
+    let (img_opacity, set_img_opacity) = create_signal(1.0);
+
+    let change_image_with_fade = move |new_index: usize| {
+        set_img_opacity.set(0.0); // fade out
+        set_timeout(
+            move || {
+                set_current_index.set(new_index); // switch image after fade out
+                set_img_opacity.set(1.0); // fade in
+            },
+            std::time::Duration::from_millis(300),
+        );
+    };
 
     view! {
-        <Show
-            when=move || {!images_signal.get().is_empty()} // when not empty images show
-            fallback=move || {view!{
-                <div class="product-item-empty">
-                    "Sorry, no images due to error. Contact support."
-                </div>
-            }}
-        >
-            // <img class=img_class src={images_signal.get().first().unwrap_or(&std::path::PathBuf::from("no_local_image_found_error")).to_owned().display().to_string()}/>
-            <img class=move || {img_class.get()} src={current_image.get().display().to_string()}/>
-        </Show>
+        <div class="image_display">
+            <Show
+                when=move || {!images_signal.get().is_empty()} // when not empty images show
+                fallback=move || {view!{
+                    <div class="product-item-empty">
+                        "Sorry, no images due to error. Contact support."
+                    </div>
+                }}
+            >
+                <img
+                    class={img_class.get()}
+                    src={move || current_image().display().to_string()}
+                    // on:click={move |_| {leptos::logging::log!("TEST");}}
+                    href=move || {current_image().display().to_string()}
+                    style={move || format!("opacity: {}; transition: 0.1s ease-in-out;", img_opacity.get())}
+                />
+            </Show>
+            <button class=move || {format!("{}-button-left", img_class.get())} on:click=move |_| {
+                let len = images_signal.get().len();
+                if len > 0 {
+                    let new_index = if current_index.get() == 0 {
+                        len - 1
+                    } else {
+                        current_index.get() - 1
+                    };
+                    leptos::logging::log!("len: {}, i: {}, p: {}", len, new_index, current_image().display());
+                    set_current_index.set(new_index);
+                } else {
+                    panic!("Images Vec<std::path::PathBuf> is empty")
+                }
+            }>
+                "<-"
+            </button>
+            <button class=move || {format!("{}-button-right", img_class.get())} on:click=move |_| {
+                let len = images_signal.get().len();
+                if len > 0 {
+                    let new_index = (current_index.get() + 1) % len;
+                    leptos::logging::log!("len: {}, i: {}, p: {}", len, new_index, current_image().display());
+                    set_current_index.set(new_index);
+                } else {
+                    panic!("Images Vec<std::path::PathBuf> is empty")
+                }
+            }>
+                "->"
+            </button>
+        </div>
     }
 }
 
@@ -756,7 +808,7 @@ pub fn ProductItemDetailsContent(product: CfgProduct) -> impl IntoView {
                 }}
             >
                 // <img class="product-item-image" src={product.get().local_images.unwrap().first().unwrap_or(&std::path::PathBuf::from("no_local_image_found_error")).to_owned().display().to_string()}/>
-                <ImageListDisplay images={product.get().local_images.expect("None local_images")} img_class="product-item-image".to_string() />
+                <ImageListDisplay images={product.get().local_images.expect("None local_images")} class="product-item-image".to_string() />
             </Show>
             <div class="product-info">
                 <strong class="product-item-name">
