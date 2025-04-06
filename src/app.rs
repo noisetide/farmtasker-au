@@ -37,7 +37,7 @@ use log::*;
 
 pub type AppStateDataRes = Resource<(), Result<AppState, ServerFnError>>;
 pub type StripeDataRes = Resource<(), Result<StripeData, ServerFnError>>;
-pub type CfgProductsRes = Resource<(), Result<CfgProducts, ServerFnError>>;
+// pub type CfgProductsRes = Resource<(), Result<CfgProducts, ServerFnError>>;
 pub type CheckoutSessionRes = Resource<i64, Result<DbCheckoutSession, ServerFnError>>;
 pub type CheckoutSessionIdRes = String;
 pub type CheckoutSessionUpdateRes = i64;
@@ -158,7 +158,7 @@ pub fn Routerer() -> impl IntoView {
             }/>
             <Route path="/shop/products/:product_name"  view={
                 move || {
-                    let CURRENTPAGE: CurrentPage = CurrentPage::DbProductItemDetails;
+                    let CURRENTPAGE: CurrentPage = CurrentPage::ProductItemDetailsPage;
 
                     let params = use_params_map();
                     let product_name = params.with(|params| params.get("product_name").cloned()).unwrap_or("no parameter".into());
@@ -167,7 +167,7 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=move || {view!{<DbProductItemDetailsPage product_name=product_name.clone()/>}} currentpage=CURRENTPAGE/>
+                        <Pager page=move || {view!{<CfgProductItemDetailsPage product_name=product_name.clone()/>}} currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
@@ -294,7 +294,7 @@ pub enum CurrentPage {
     ReadyToEat,
     About,
     Delivery,
-    DbProductItemDetails,
+    ProductItemDetailsPage,
     PrivacyPolicy,
     TermsOfService,
     ShoppingCart,
@@ -330,7 +330,7 @@ where
                             CurrentPage::ShoppingCart => {"pager-content-shopping-cart"},
                             CurrentPage::VideoInstructions => {"pager-content-video-instructions"},
                             CurrentPage::VideoBlogs => {"pager-content-video-blogs"},
-                            CurrentPage::DbProductItemDetails => {"pager-content-product-item-details"},
+                            CurrentPage::ProductItemDetailsPage => {"pager-content-product-item-details"},
                         }
                     >{page()}</div>
                 </div>
@@ -659,6 +659,125 @@ pub fn CfgProductItemsList(items_category: String) -> impl IntoView {
 }
 
 #[component]
+pub fn CfgProductItemDetailsPage(product_name: String) -> impl IntoView {
+    // let stripe_data = expect_context::<StripeDataRes>();
+    let app_state = expect_context::<AppStateDataRes>();
+    provide_context(app_state);
+
+    let (product_name, _) = create_signal(product_name);
+    provide_context(product_name);
+
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+    provide_context(shopping_cart);
+    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+    provide_context(set_shopping_cart);
+
+    view! {
+        <Suspense fallback=move || view! {"loading data"}>
+            {move || match app_state.get() {
+                None => view! { <p>"Loading..."</p> }.into_view(),
+                Some(app_state) => {
+                    // let stripe_data: StripeData = stripe_data.expect("Resource StripeData is not here on 'get()'");
+                    let products_config: CfgProducts = app_state.clone()
+                        .expect("Resource AppState is not here on 'get()")
+                        .products_config.expect("Resource StripeData is not here on 'get()'");
+
+                    let product_name = expect_context::<ReadSignal<String>>();
+                    provide_context(product_name);
+
+
+                    match products_config.0.into_iter()
+                    .find(|product| {
+                        let cmp1 = product.name.to_lowercase().replace(" ", "-");
+                        let cmp2 = &product_name.get()[1..];
+
+                        cmp1 == cmp2
+                    }) {
+                        Some(product) => {
+                            view!{
+                                <ProductItemDetailsContent product=product/>
+                            }.into_view()
+                        },
+                        None => view!{
+                            <div>"NO PRODUCT WITH SUCH NAME"</div>
+                        }.into_view(),
+                    }
+                }
+            }}
+        </Suspense>
+    }
+}
+
+#[component]
+pub fn ImageListDisplay(images: Vec<std::path::PathBuf>, img_class: String) -> impl IntoView {
+    let (img_class, _) = create_signal(img_class);
+    provide_context(img_class);
+    let (images_signal, _) = create_signal(images.clone());
+    provide_context(images_signal);
+
+    let (current_image, set_current_image) =
+        create_signal(images.first().cloned().unwrap_or_default());
+    provide_context(current_image);
+    provide_context(set_current_image);
+
+    view! {
+        <Show
+            when=move || {!images_signal.get().is_empty()} // when not empty images show
+            fallback=move || {view!{
+                <div class="product-item-empty">
+                    "Sorry, no images due to error. Contact support."
+                </div>
+            }}
+        >
+            // <img class=img_class src={images_signal.get().first().unwrap_or(&std::path::PathBuf::from("no_local_image_found_error")).to_owned().display().to_string()}/>
+            <img class=move || {img_class.get()} src={current_image.get().display().to_string()}/>
+        </Show>
+    }
+}
+
+#[component]
+pub fn ProductItemDetailsContent(product: CfgProduct) -> impl IntoView {
+    let (product, _) = create_signal(product);
+    provide_context(product);
+
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+    provide_context(shopping_cart);
+    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+    provide_context(set_shopping_cart);
+
+    view! {
+        <div class="product-item-container">
+            <Show
+                when=move || {product.get().local_images.is_some_and(|x| !x.is_empty())} // when not empty images show
+                fallback=move || {view!{
+                    <div class="product-item-empty">
+                        "Sorry, no image. Contact support."
+                    </div>
+                }}
+            >
+                // <img class="product-item-image" src={product.get().local_images.unwrap().first().unwrap_or(&std::path::PathBuf::from("no_local_image_found_error")).to_owned().display().to_string()}/>
+                <ImageListDisplay images={product.get().local_images.expect("None local_images")} img_class="product-item-image".to_string() />
+            </Show>
+            <div class="product-info">
+                <strong class="product-item-name">
+                    {product.get().name}
+                </strong>
+                <p class="product-item-description">
+                    {product.get().description.unwrap_or("No Description.".to_string())}
+                </p>
+            </div>
+            <button class="product-item-addtocart-button" on:click=move |_| {
+                set_shopping_cart.update(|s| {
+                    s.add_single_product(&product.get().stripe_id.expect("Couldn't add_single_product() to ShoppingCart, because stripe_id field of CfgProduct is None for some reason."), 20);
+                });
+            }>
+            "Add To Cart $"{product.get().price.unwrap().unit_amount.unwrap() / 100}
+            </button>
+        </div>
+    }
+}
+
+#[component]
 pub fn DbProductItemsList(items_category: String) -> impl IntoView {
     let app_state = expect_context::<AppStateDataRes>();
     provide_context(app_state);
@@ -711,88 +830,48 @@ pub fn DbProductItemsList(items_category: String) -> impl IntoView {
     }
 }
 
-#[component]
-pub fn DbProductItemDetails(product: DbProduct) -> impl IntoView {
-    let (product, _) = create_signal(product);
-    provide_context(product);
+// // REIMPLEMENTED into Cfg!!!
+// #[component]
+// pub fn DbProductItemDetailsPage(product_name: String) -> impl IntoView {
+//     let stripe_data = expect_context::<StripeDataRes>();
+//     let (product_name, _) = create_signal(product_name);
+//     provide_context(product_name);
 
-    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
-    provide_context(shopping_cart);
-    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
-    provide_context(set_shopping_cart);
+//     let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+//     provide_context(shopping_cart);
+//     let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+//     provide_context(set_shopping_cart);
 
-    view! {
-        <div class="product-item-container">
-            <Show
-                when=move || {product.get().images.is_some_and(|x| !x.is_empty())}
-                fallback=move || {view!{
-                    <div class="product-item-empty">
-                    </div>
-                }}
-            >
-                <img class="product-item-image" src={product.get().images.unwrap().first()}/>
-            </Show>
-            <div class="product-info">
-                <strong class="product-item-name">
-                    {product.get().name}
-                </strong>
-                <p class="product-item-description">
-                    {product.get().description.unwrap_or("No Description.".to_string())}
-                </p>
-            </div>
-            <button class="product-item-addtocart-button" on:click=move |_| {
-                set_shopping_cart.update(|s| {
-                    s.add_single_product(&product.get().id, 20);
-                });
-            }>
-            "Add To Cart $"{product.get().default_price.unwrap().unit_amount.unwrap() / 100}
-            </button>
-        </div>
-    }
-}
+//     view! {
+//         <Suspense fallback=move || view! {"loading data"}>
+//             {move || match stripe_data.get() {
+//                 None => view! { <p>"Loading..."</p> }.into_view(),
+//                 Some(stripe_data) => {
+//                     let stripe_data: StripeData = stripe_data.expect("Resource StripeData is not here on 'get()'");
+//                     let product_name = expect_context::<ReadSignal<String>>();
+//                     provide_context(product_name);
 
-#[component]
-pub fn DbProductItemDetailsPage(product_name: String) -> impl IntoView {
-    let stripe_data = expect_context::<StripeDataRes>();
-    let (product_name, _) = create_signal(product_name);
-    provide_context(product_name);
+//                     match stripe_data.products.into_iter()
+//                     .find(|product| {
+//                         let cmp1 = product.name.to_lowercase().replace(" ", "-");
+//                         let cmp2 = &product_name.get()[1..];
 
-    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
-    provide_context(shopping_cart);
-    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
-    provide_context(set_shopping_cart);
-
-    view! {
-        <Suspense fallback=move || view! {"loading data"}>
-            {move || match stripe_data.get() {
-                None => view! { <p>"Loading..."</p> }.into_view(),
-                Some(stripe_data) => {
-                    let stripe_data: StripeData = stripe_data.expect("Resource StripeData is not here on 'get()'");
-                    let product_name = expect_context::<ReadSignal<String>>();
-                    provide_context(product_name);
-
-
-                    match stripe_data.products.into_iter()
-                    .find(|product| {
-                        let cmp1 = product.name.to_lowercase().replace(" ", "-");
-                        let cmp2 = &product_name.get()[1..];
-
-                        cmp1 == cmp2
-                    }) {
-                        Some(product) => {
-                            view!{
-                                <DbProductItemDetails product=product/>
-                            }.into_view()
-                        },
-                        None => view!{
-                            <div>"NO PRODUCT WITH SUCH NAME"</div>
-                        }.into_view(),
-                    }
-                }
-            }}
-        </Suspense>
-    }
-}
+//                         cmp1 == cmp2
+//                     }) {
+//                         Some(product) => {
+//                             view!{
+//                                 <DbProductItemDetails product=product/>
+//                             }.into_view()
+//                         },
+//                         None => view!{
+//                             <div>"NO PRODUCT WITH SUCH NAME"</div>
+//                         }.into_view(),
+//                     }
+//                 }
+//             }}
+//         </Suspense>
+//     }
+// }
 
 #[component]
 pub fn SuccessCheckout() -> impl IntoView {
@@ -1232,7 +1311,8 @@ pub fn FooterBar() -> impl IntoView {
                     <p>
                         "Contact us: "
                         <a href="mailto:farmtasker@gmail.com">"farmtasker@gmail.com"</a>
-                        <a href="mailto:info@farmtasker.au">"info@farmtasker.au"</a>
+                        " or"
+                        <a href="mailto:info@farmtasker.au">" info@farmtasker.au"</a>
                         <div>" +61484753577"</div>
                     </p>
                 </div>
