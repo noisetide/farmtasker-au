@@ -1027,6 +1027,9 @@ pub fn ShoppingCart() -> impl IntoView {
     let stripe_data = expect_context::<StripeDataRes>();
     provide_context(stripe_data);
 
+    let app_state = expect_context::<AppStateDataRes>();
+    provide_context(app_state);
+
     let shopping_cart = expect_context::<Signal<ShoppingCart>>();
     provide_context(shopping_cart);
 
@@ -1348,9 +1351,10 @@ pub fn FooterBar() -> impl IntoView {
         <footer class="footerbar">
             <div class="footer-content">
                 <div class="footer-section">
-                    <p>
-                        <div>"© 2024 FARMTASKER PTY LTD. All rights reserved for branding, images and logos."</div>
-                        "Code licensed under the Lesser General Public Licence (LGPL-2.1). See "<a href="https://github.com/rotteegher/farmtasker-au" target="_blank">"source code"</a>" for details."</p>
+                    // <p>
+                    //     <div>"© 2024 FARMTASKER PTY LTD. All rights reserved for branding, images and logos."</div>
+                    //     "Code licensed under the Lesser General Public Licence (LGPL-2.1). See "<a href="https://github.com/rotteegher/farmtasker-au" target="_blank">"source code"</a>" for details."
+                    // </p>
 
                     // <p>
                     //     "This website is licensed under the "
