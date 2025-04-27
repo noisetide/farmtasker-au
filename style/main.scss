@@ -55,6 +55,7 @@ a {
 
 /* Navbar styles */
 .navbar {
+  transition-duration: 300ms;
   background-color: $main-color;
   width: 100%;
   justify-content: center;
@@ -127,6 +128,7 @@ a {
     }
 
     button.navbar-menu-button {
+      transition-duration: 300ms;
       padding: 0;
       margin: 0;
       background-color: transparent;
@@ -289,7 +291,8 @@ a {
   }
 
   ul.nav_buttons {
-    transition: 200ms;
+    transition: 500ms;
+    transition-duration: 300ms;
     list-style: none;
     border-radius: 5px;
     margin: 0;
@@ -454,6 +457,9 @@ a {
   color: $main-color;
   background-color: $background-color-dark;
   padding-top: 0.5rem;
+  justify-items: center;
+  justify-content: center;
+  align-items: center;
 
   text-align: center;
   /* height: 200px; */
@@ -471,9 +477,11 @@ a {
   .footer-content {
     text-align: center;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    align-self: center;
 
     .footer-section {
+      align-self: center;
       /* margin: 0; */
       text-align: center;
     }

@@ -38,7 +38,7 @@ use log::*;
 pub type AppStateDataRes = Resource<(), Result<AppState, ServerFnError>>;
 pub type StripeDataRes = Resource<(), Result<StripeData, ServerFnError>>;
 // pub type CfgProductsRes = Resource<(), Result<CfgProducts, ServerFnError>>;
-pub type CheckoutSessionRes = Resource<i64, Result<DbCheckoutSession, ServerFnError>>;
+// pub type CheckoutSessionRes = Resource<i64, Result<DbCheckoutSession, ServerFnError>>;
 pub type CheckoutSessionIdRes = String;
 pub type CheckoutSessionUpdateRes = i64;
 
@@ -507,47 +507,48 @@ pub fn TermsOfService() -> impl IntoView {
     }
 }
 
-#[component]
-pub fn DbProductItem(product: DbProduct) -> impl IntoView {
-    let (product, _) = create_signal(product);
-    provide_context(product);
+// // REIMPLEMENTED into Cfg!!!
+// #[component]
+// pub fn DbProductItem(product: DbProduct) -> impl IntoView {
+//     let (product, _) = create_signal(product);
+//     provide_context(product);
 
-    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
-    provide_context(shopping_cart);
-    let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
-    provide_context(set_shopping_cart);
+//     let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+//     provide_context(shopping_cart);
+//     let set_shopping_cart = expect_context::<WriteSignal<ShoppingCart>>();
+//     provide_context(set_shopping_cart);
 
-    view! {
-        <div class="product-item-container">
-            <a href=move || {
-                let product_name = product.get().name.to_lowercase().replace(" ", "-");
-                format!("/shop/products/:{:#}", product_name)
-            }>
-                <Show
-                    when=move || {product.get().images.is_some_and(|x| !x.is_empty())}
-                    fallback=move || {view!{
-                        <div class="product-item-empty">
-                        </div>
-                    }}
-                >
-                    <img class="product-item-image" src={product.get().images.unwrap().first()}/>
-                </Show>
-                <div class="product-info">
-                    <strong class="product-item-name">
-                        {product.get().name}
-                    </strong>
-                </div>
-            </a>
-            <button class="product-item-addtocart-button" on:click=move |_| {
-                set_shopping_cart.update(|s| {
-                    s.add_single_product(&product.get().id, 20);
-                });
-            }>
-            "Add To Cart $"{product.get().default_price.unwrap().unit_amount.unwrap() / 100}
-            </button>
-        </div>
-    }
-}
+//     view! {
+//         <div class="product-item-container">
+//             <a href=move || {
+//                 let product_name = product.get().name.to_lowercase().replace(" ", "-");
+//                 format!("/shop/products/:{:#}", product_name)
+//             }>
+//                 <Show
+//                     when=move || {product.get().images.is_some_and(|x| !x.is_empty())}
+//                     fallback=move || {view!{
+//                         <div class="product-item-empty">
+//                         </div>
+//                     }}
+//                 >
+//                     <img class="product-item-image" src={product.get().images.unwrap().first()}/>
+//                 </Show>
+//                 <div class="product-info">
+//                     <strong class="product-item-name">
+//                         {product.get().name}
+//                     </strong>
+//                 </div>
+//             </a>
+//             <button class="product-item-addtocart-button" on:click=move |_| {
+//                 set_shopping_cart.update(|s| {
+//                     s.add_single_product(&product.get().id, 20);
+//                 });
+//             }>
+//             "Add To Cart $"{product.get().default_price.unwrap().unit_amount.unwrap() / 100}
+//             </button>
+//         </div>
+//     }
+// }
 
 #[component]
 pub fn CfgProductItem(product: CfgProduct) -> impl IntoView {
@@ -599,7 +600,7 @@ pub fn CfgProductItem(product: CfgProduct) -> impl IntoView {
             </a>
             <button class="product-item-addtocart-button" on:click=move |_| {
                 set_shopping_cart.update(|s| {
-                    s.add_single_product(&product.get().stripe_id.expect("CfgProduct has no stripe_id!!!!"), 20);
+                    s.add_single_product(&product.get().stripe_id, 20);
                 });
             }>
             "Add To Cart $"{product.get().price.unwrap().unit_amount.unwrap() / 100}
@@ -695,7 +696,7 @@ pub fn CfgProductItemDetailsPage(product_name: String) -> impl IntoView {
                     }) {
                         Some(product) => {
                             view!{
-                                <ProductItemDetailsContent product=product/>
+                                <CfgProductItemDetailsContent product=product/>
                             }.into_view()
                         },
                         None => view!{
@@ -786,7 +787,7 @@ pub fn ImageListDisplay(images: Vec<std::path::PathBuf>, class: String) -> impl 
 }
 
 #[component]
-pub fn ProductItemDetailsContent(product: CfgProduct) -> impl IntoView {
+pub fn CfgProductItemDetailsContent(product: CfgProduct) -> impl IntoView {
     let (product, _) = create_signal(product);
     provide_context(product);
 
@@ -818,7 +819,7 @@ pub fn ProductItemDetailsContent(product: CfgProduct) -> impl IntoView {
             </div>
             <button class="product-item-addtocart-button" on:click=move |_| {
                 set_shopping_cart.update(|s| {
-                    s.add_single_product(&product.get().stripe_id.expect("Couldn't add_single_product() to ShoppingCart, because stripe_id field of CfgProduct is None for some reason."), 20);
+                    s.add_single_product(&product.get().stripe_id, 20);
                 });
             }>
             "Add To Cart $"{product.get().price.unwrap().unit_amount.unwrap() / 100}
@@ -828,57 +829,93 @@ pub fn ProductItemDetailsContent(product: CfgProduct) -> impl IntoView {
 }
 
 #[component]
-pub fn DbProductItemsList(items_category: String) -> impl IntoView {
+pub fn CfgProductItemShoppingCartCounter(product: CfgProduct) -> impl IntoView {
+    let (product, _) = create_signal(product);
     let app_state = expect_context::<AppStateDataRes>();
     provide_context(app_state);
-    let (items_category, set_items_category) = create_signal(items_category);
-    provide_context(items_category);
+    let shopping_cart = expect_context::<Signal<ShoppingCart>>();
+    provide_context(shopping_cart);
 
     view! {
-        <Suspense fallback=move || view! {"Loading data..."}>
-            {
-                move || match app_state.get() {
-                    None => view! { <p>"Loading..."</p> }.into_view(),
-                    Some(app_state) => {
-                        let stripe_data: StripeData = app_state.clone()
-                            .expect("Resource AppState is not here on 'get()")
-                            .stripe_data.expect("Resource StripeData is not here on 'get()'");
-
-                        let products_config: CfgProducts = app_state.clone()
-                            .expect("Resource AppState is not here on 'get()")
-                            .products_config.expect("Resource StripeData is not here on 'get()'");
-                        let items_category = expect_context::<ReadSignal<String>>();
-                        provide_context(items_category);
-
-
-                        view! {
-                            <ul class="product-list-ul">
-                                {
-                                    stripe_data.products.into_iter()
-                                    .filter(|product| {
-                                        product.metadata
-                                            .as_ref()
-                                            .and_then(|metadata| metadata.get("category"))
-                                            .map(|category| category == &items_category.get())
-                                            .unwrap_or(false)
-                                    })
-                                    .map(|product| {
-                                        view! {
-                                            <li class="product-list-item">
-                                                <DbProductItem product=product/>
-                                            </li>
-                                        }
-                                    })
-                                    .collect::<Vec<_>>()
-                                }
-                            </ul>
-                        }.into_view()
-                    }
-                }
+        <Show
+            when=move || {
+                shopping_cart
+                    .get()
+                    .0
+                    .keys()
+                    .find(|stripe_id| product.get().stripe_id == stripe_id.to_owned().to_owned()).unwrap().clone()
+                     == app_state.get()
+                        .expect("No AppState!")
+                        .expect("No AppState!")
+                        .products_config
+                        .expect("No products_config in AppState!")
+                        .0
+                        .iter()
+                        .find(|appstate_cfg_product| appstate_cfg_product.stripe_id == product.get().stripe_id).unwrap().stripe_id
             }
-        </Suspense>
+            fallback=move || {view!{
+                <div>
+                </div>
+            }}
+        >
+            <div class="product-item-shopping-cart-counter" class=product.get().stripe_id>
+
+            </div>
+        </Show>
     }
 }
+// // REIMPLEMENTED into Cfg!!!
+// #[component]
+// pub fn DbProductItemsList(items_category: String) -> impl IntoView {
+//     let app_state = expect_context::<AppStateDataRes>();
+//     provide_context(app_state);
+//     let (items_category, set_items_category) = create_signal(items_category);
+//     provide_context(items_category);
+
+//     view! {
+//         <Suspense fallback=move || view! {"Loading data..."}>
+//             {
+//                 move || match app_state.get() {
+//                     None => view! { <p>"Loading..."</p> }.into_view(),
+//                     Some(app_state) => {
+//                         let stripe_data: StripeData = app_state.clone()
+//                             .expect("Resource AppState is not here on 'get()")
+//                             .stripe_data.expect("Resource StripeData is not here on 'get()'");
+
+//                         let products_config: CfgProducts = app_state.clone()
+//                             .expect("Resource AppState is not here on 'get()")
+//                             .products_config.expect("Resource StripeData is not here on 'get()'");
+//                         let items_category = expect_context::<ReadSignal<String>>();
+//                         provide_context(items_category);
+
+//                         view! {
+//                             <ul class="product-list-ul">
+//                                 {
+//                                     stripe_data.products.into_iter()
+//                                     .filter(|product| {
+//                                         product.metadata
+//                                             .as_ref()
+//                                             .and_then(|metadata| metadata.get("category"))
+//                                             .map(|category| category == &items_category.get())
+//                                             .unwrap_or(false)
+//                                     })
+//                                     .map(|product| {
+//                                         view! {
+//                                             <li class="product-list-item">
+//                                                 <DbProductItem product=product/>
+//                                             </li>
+//                                         }
+//                                     })
+//                                     .collect::<Vec<_>>()
+//                                 }
+//                             </ul>
+//                         }.into_view()
+//                     }
+//                 }
+//             }
+//         </Suspense>
+//     }
+// }
 
 // // REIMPLEMENTED into Cfg!!!
 // #[component]
@@ -930,7 +967,9 @@ pub fn SuccessCheckout() -> impl IntoView {
 
     view! {
         <p>
-            "Checkout completed successfully!"
+            "Checkout session with id"
+            {checkout_sessionid()}
+            " completed successfully!"
         </p>
         <p>
             "You should find details of your order in your email soon."
@@ -1350,19 +1389,20 @@ pub fn FooterBar() -> impl IntoView {
     view! {
         <footer class="footerbar">
             <div class="footer-content">
-                <div class="footer-section">
-                    // <p>
-                    //     <div>"© 2024 FARMTASKER PTY LTD. All rights reserved for branding, images and logos."</div>
-                    //     "Code licensed under the Lesser General Public Licence (LGPL-2.1). See "<a href="https://github.com/rotteegher/farmtasker-au" target="_blank">"source code"</a>" for details."
-                    // </p>
+                // <div class="footer-section">
+                //     <p>
+                //         <div>"© 2024 FARMTASKER PTY LTD. All rights reserved."</div>
+                //         "Code licensed under the Lesser General Public Licence (LGPL-2.1). See "<a href="https://github.com/rotteegher/farmtasker-au" target="_blank">"source code"</a>" for details."
+                //     </p>
 
-                    // <p>
-                    //     "This website is licensed under the "
-                    //     <a href="https://www.gnu.org/licenses/lgpl-2.1.html" target="_blank">"GNU Lesser General Public License v2.1"</a>.
-                    // </p>
-                </div>
+                //     <p>
+                //         "This website is licensed under the "
+                //         <a href="https://www.gnu.org/licenses/lgpl-2.1.html" target="_blank">"GNU Lesser General Public License v2.1"</a>.
+                //     </p>
+                // </div>
                 <div class="footer-section">
                     <p>
+                        <div>"© 2025 FARMTASKER PTY LTD. All rights reserved."</div>
                         "Contact us: "
                         <a href="mailto:farmtasker@gmail.com">"farmtasker@gmail.com"</a>
                         " or"

@@ -101,7 +101,7 @@ pub struct AppState {
 
 use std::collections::HashMap;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct ShoppingCart(HashMap<String, u8>);
+pub struct ShoppingCart(HashMap<String /* stripe_id */, u8 /* amount */>);
 
 impl ShoppingCart {
     pub fn add_single_product(&mut self, product_id: &String, add_limit: u8) {
@@ -921,7 +921,7 @@ pub mod sync {
                         Some(ref x) => x.get("item_number").cloned().and_then(|i| i.parse().ok()),
                         _ => None,
                     },
-                    stripe_id: Some(p.id),
+                    stripe_id: p.id,
                     name: p.name,
                     price: p.default_price,
                     description: p.description,

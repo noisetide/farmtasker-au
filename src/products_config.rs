@@ -8,7 +8,7 @@ pub struct CfgProducts(pub Vec<CfgProduct>);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CfgProduct {
-    pub stripe_id: Option<String>,
+    pub stripe_id: String,
     pub item_number: Option<i64>,
     pub name: String,
     pub description: Option<String>,
