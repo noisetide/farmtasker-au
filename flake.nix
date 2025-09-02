@@ -5,6 +5,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     systems.url = "github:nix-systems/default";
     devenv.url = "github:cachix/devenv";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs = { nixpkgs.follows = "nixpkgs"; };
+    };
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -25,20 +29,26 @@
         pkgs = nixpkgs.legacyPackages.${system};
         leptos = pkgs.rustPlatform.buildRustPackage rec {
           pname = "cargo-leptos";
-          version = "87b156f4f0bc0374e7b5557d15bf79f1a12d7569";
-          useFetchCargoVendor = true;
+          version = "b8883fbe007c4b180b3d7054284f111f908b55ac";
+
+          # remove: useFetchCargoVendor = true;   # not needed in 25.05+
 
           src = pkgs.fetchFromGitHub {
             owner = "leptos-rs";
             repo = pname;
-            rev = "${version}";
-            hash = "sha256-v1gNH3pq5db/swsk79nEzgtR4jy3f/xHs4QaLnVcVYU=";
+            rev = version;
+            hash = "sha256-N+3IUbZNOhfa57Yt0mKsaDwijGZ8Hje1Xq8yNcyYpCU=";
           };
 
-          cargoHash = "sha256-fyOlMagXrpfMsaLffeXolTgMldN9u6RQ08Zak9MdC4U=";
+          cargoHash = "sha256-kCpEzprNIkoMgyp5reXuzknSLdEl0/SxUb7Uh/zK5uY=";
 
-          buildFeatures = [ "no_downloads" ]; # cargo-leptos will try to install missing dependencies on its own otherwise
-          doCheck = false; # Check phase tries to query crates.io
+          buildFeatures = [ "no_downloads" ];
+          doCheck = false;
+
+          # >>> key bits
+          nativeBuildInputs = [ pkgs.pkg-config ];   # let openssl-sys find system openssl
+          buildInputs = [ pkgs.openssl ];
+          OPENSSL_NO_VENDOR = 1;                     # force using system OpenSSL
         };
       in {
         # default = pkgs.callPackage ./. {};
@@ -104,20 +114,26 @@
         pkgs = nixpkgs.legacyPackages.${system};
         leptos = pkgs.rustPlatform.buildRustPackage rec {
           pname = "cargo-leptos";
-          version = "87b156f4f0bc0374e7b5557d15bf79f1a12d7569";
-          useFetchCargoVendor = true;
+          version = "b8883fbe007c4b180b3d7054284f111f908b55ac";
+
+          # remove: useFetchCargoVendor = true;   # not needed in 25.05+
 
           src = pkgs.fetchFromGitHub {
             owner = "leptos-rs";
             repo = pname;
-            rev = "${version}";
-            hash = "sha256-v1gNH3pq5db/swsk79nEzgtR4jy3f/xHs4QaLnVcVYU=";
+            rev = version;
+            hash = "sha256-N+3IUbZNOhfa57Yt0mKsaDwijGZ8Hje1Xq8yNcyYpCU=";
           };
 
-          cargoHash = "sha256-fyOlMagXrpfMsaLffeXolTgMldN9u6RQ08Zak9MdC4U=";
+          cargoHash = "sha256-kCpEzprNIkoMgyp5reXuzknSLdEl0/SxUb7Uh/zK5uY=";
 
-          buildFeatures = [ "no_downloads" ]; # cargo-leptos will try to install missing dependencies on its own otherwise
-          doCheck = false; # Check phase tries to query crates.io
+          buildFeatures = [ "no_downloads" ];
+          doCheck = false;
+
+          # >>> key bits
+          nativeBuildInputs = [ pkgs.pkg-config ];   # let openssl-sys find system openssl
+          buildInputs = [ pkgs.openssl ];
+          OPENSSL_NO_VENDOR = 1;                     # force using system OpenSSL
         };
         buildInputs = with pkgs; [
           # Cli
@@ -134,6 +150,7 @@
           leptosfmt
           trunk
           binaryen
+          perl
 
           sqlx-cli
 
