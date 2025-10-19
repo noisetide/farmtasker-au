@@ -27,7 +27,6 @@ tower = "0.5.1"
 tower-http = "0.5"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-axum_session = "0.14.2"
 inquire = "0.7.5"
 async-stripe = { version = "*", features = ["runtime-tokio-hyper-rustls"]}
 tower-http = { version = "0.5", features = ["fs"]}
