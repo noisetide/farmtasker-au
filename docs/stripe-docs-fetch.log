@@ -1,0 +1,16 @@
+Attempted to fetch Stripe API docs (products/prices) and async-stripe docs via curl.
+
+Command:
+  curl -L https://stripe.com/docs/api/prices/object | rg -n "immutable|cannot|update|amount|currency" | head -n 20
+Result:
+  curl: (56) CONNECT tunnel failed, response 403
+
+Command:
+  curl -L -A "Mozilla/5.0" https://stripe.com/docs/api/prices/object | rg -n "immutable|cannot|update|amount|currency" | head -n 20
+Result:
+  curl: (56) CONNECT tunnel failed, response 403
+
+Command:
+  curl -L https://docs.rs/async-stripe/latest/async_stripe/ | head -n 20
+Result:
+  curl: (56) CONNECT tunnel failed, response 403
