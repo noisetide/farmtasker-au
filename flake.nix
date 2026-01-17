@@ -190,9 +190,9 @@
               languages.rust = {
                 enable = true;
                 channel = "nightly";
-                toolchain = {
-                  rustc = pkgs.rustc;
-                };
+                # toolchain = {
+                #   rustc = pkgs.rustc;
+                # };
                 targets = ["wasm32-unknown-unknown"];
               };
 
