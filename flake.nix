@@ -29,7 +29,7 @@
         pkgs = nixpkgs.legacyPackages.${system};
         leptos = pkgs.rustPlatform.buildRustPackage rec {
           pname = "cargo-leptos";
-          version = "b8883fbe007c4b180b3d7054284f111f908b55ac";
+          version = "4eb9df185b553cf4385174a55575d32f258cbfc2";
 
           # remove: useFetchCargoVendor = true;   # not needed in 25.05+
 
@@ -37,10 +37,10 @@
             owner = "leptos-rs";
             repo = pname;
             rev = version;
-            hash = "sha256-N+3IUbZNOhfa57Yt0mKsaDwijGZ8Hje1Xq8yNcyYpCU=";
+            hash = "sha256-MCKTe2MWAJqPygn30lqI+vb1GFOES8Ew9+GoPeUa7RY=";
           };
 
-          cargoHash = "sha256-kCpEzprNIkoMgyp5reXuzknSLdEl0/SxUb7Uh/zK5uY=";
+          cargoHash = "sha256-5e51FWWXw9V/Yt1nh6pjKfyZEhezVnWegLx/axajBWs=";
 
           buildFeatures = [ "no_downloads" ];
           doCheck = false;
@@ -114,7 +114,7 @@
         pkgs = nixpkgs.legacyPackages.${system};
         leptos = pkgs.rustPlatform.buildRustPackage rec {
           pname = "cargo-leptos";
-          version = "b8883fbe007c4b180b3d7054284f111f908b55ac";
+          version = "4eb9df185b553cf4385174a55575d32f258cbfc2";
 
           # remove: useFetchCargoVendor = true;   # not needed in 25.05+
 
@@ -122,10 +122,10 @@
             owner = "leptos-rs";
             repo = pname;
             rev = version;
-            hash = "sha256-N+3IUbZNOhfa57Yt0mKsaDwijGZ8Hje1Xq8yNcyYpCU=";
+            hash = "sha256-MCKTe2MWAJqPygn30lqI+vb1GFOES8Ew9+GoPeUa7RY=";
           };
 
-          cargoHash = "sha256-kCpEzprNIkoMgyp5reXuzknSLdEl0/SxUb7Uh/zK5uY=";
+          cargoHash = "sha256-5e51FWWXw9V/Yt1nh6pjKfyZEhezVnWegLx/axajBWs=";
 
           buildFeatures = [ "no_downloads" ];
           doCheck = false;
@@ -191,7 +191,7 @@
                 enable = true;
                 channel = "nightly";
                 toolchain = {
-                  rustc = pkgs.rustc-wasm32;
+                  rustc = pkgs.rustc;
                 };
                 targets = ["wasm32-unknown-unknown"];
               };
