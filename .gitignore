@@ -19,3 +19,6 @@ playwright/.cache/
 .devenv
 .direnv
 
+# Local SQLite data
+data/
+*.sqlite

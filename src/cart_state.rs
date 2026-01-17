@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct ShoppingCart(HashMap<String /* stripe_id */, u8 /* amount */>);
+pub struct ShoppingCart(pub HashMap<String /* stripe_id */, u8 /* amount */>);
 
 impl ShoppingCart {
     pub fn add_single_product(&mut self, product_id: &String, add_limit: u8) {

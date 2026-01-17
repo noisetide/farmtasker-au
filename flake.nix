@@ -29,26 +29,23 @@
         pkgs = nixpkgs.legacyPackages.${system};
         leptos = pkgs.rustPlatform.buildRustPackage rec {
           pname = "cargo-leptos";
-          version = "4eb9df185b553cf4385174a55575d32f258cbfc2";
-
-          # remove: useFetchCargoVendor = true;   # not needed in 25.05+
+          version = "5b0f74d8de368a457485787a97e0fd63f7b02eef";
 
           src = pkgs.fetchFromGitHub {
             owner = "leptos-rs";
             repo = pname;
             rev = version;
-            hash = "sha256-MCKTe2MWAJqPygn30lqI+vb1GFOES8Ew9+GoPeUa7RY=";
+            hash = "sha256-OhGppUYbRnsYjuiu3Sys+073o4ZiVqMqlt8apeY7Oho=";
           };
 
-          cargoHash = "sha256-5e51FWWXw9V/Yt1nh6pjKfyZEhezVnWegLx/axajBWs=";
+          cargoHash = "sha256-ou8swAP0W8jOab9yTvA/7mFkvI6YskXUsqLNHzIJdiY=";
 
           buildFeatures = [ "no_downloads" ];
           doCheck = false;
 
-          # >>> key bits
-          nativeBuildInputs = [ pkgs.pkg-config ];   # let openssl-sys find system openssl
+          nativeBuildInputs = [ pkgs.pkg-config ];
           buildInputs = [ pkgs.openssl ];
-          OPENSSL_NO_VENDOR = 1;                     # force using system OpenSSL
+          OPENSSL_NO_VENDOR = 1;
         };
       in {
         # default = pkgs.callPackage ./. {};
@@ -75,6 +72,11 @@
 
           nativeBuildInputs = [
             leptos
+
+            pkgs.clang
+            pkgs.glibc.dev
+            pkgs.gcc
+            pkgs.binutils
 
             pkgs.binaryen
             pkgs.dart-sass
@@ -114,30 +116,35 @@
         pkgs = nixpkgs.legacyPackages.${system};
         leptos = pkgs.rustPlatform.buildRustPackage rec {
           pname = "cargo-leptos";
-          version = "4eb9df185b553cf4385174a55575d32f258cbfc2";
-
-          # remove: useFetchCargoVendor = true;   # not needed in 25.05+
+          version = "5b0f74d8de368a457485787a97e0fd63f7b02eef";
 
           src = pkgs.fetchFromGitHub {
             owner = "leptos-rs";
             repo = pname;
             rev = version;
-            hash = "sha256-MCKTe2MWAJqPygn30lqI+vb1GFOES8Ew9+GoPeUa7RY=";
+            hash = "sha256-OhGppUYbRnsYjuiu3Sys+073o4ZiVqMqlt8apeY7Oho=";
           };
 
-          cargoHash = "sha256-5e51FWWXw9V/Yt1nh6pjKfyZEhezVnWegLx/axajBWs=";
+          cargoHash = "sha256-ou8swAP0W8jOab9yTvA/7mFkvI6YskXUsqLNHzIJdiY=";
 
           buildFeatures = [ "no_downloads" ];
           doCheck = false;
 
-          # >>> key bits
-          nativeBuildInputs = [ pkgs.pkg-config ];   # let openssl-sys find system openssl
+          nativeBuildInputs = [
+            pkgs.pkg-config
+          ];
           buildInputs = [ pkgs.openssl ];
-          OPENSSL_NO_VENDOR = 1;                     # force using system OpenSSL
+          OPENSSL_NO_VENDOR = 1;
         };
         buildInputs = with pkgs; [
           # Cli
           leptos
+
+          clang
+          glibc.dev
+          gcc
+          binutils
+
 
           bacon
           cargo-binutils
@@ -190,9 +197,6 @@
               languages.rust = {
                 enable = true;
                 channel = "nightly";
-                # toolchain = {
-                #   rustc = pkgs.rustc;
-                # };
                 targets = ["wasm32-unknown-unknown"];
               };
 

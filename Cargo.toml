@@ -25,17 +25,18 @@ leptos-use = "0.13.5"
 codee = { version = "0.2.0", features = ["base64", "json_serde", "json_serde_wasm"] }
 tower = "0.5.1"
 tower-http = "0.5"
+wasm-bindgen = { version = "0.2.108", optional = true}
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 inquire = "0.7.5"
 async-stripe = { version = "*", features = ["runtime-tokio-hyper-rustls"]}
 tower-http = { version = "0.5", features = ["fs"]}
-# surrealdb = "1.5.4"
 axum-extra = "0.9.3"
 tokio = { version = "1.39.2", default-features = true, features = ["rt", "rt-multi-thread"], optional = true }
+sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite"] }
 
 [features]
-hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
+hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate", "dep:wasm-bindgen"]
 ssr = [
     "axum",
     "dep:tokio",

@@ -104,7 +104,7 @@ pub fn CancelCheckout() -> impl IntoView {
 }
 
 #[component]
-pub fn ShoppingCart() -> impl IntoView {
+pub fn ShoppingCartPage() -> impl IntoView {
     let stripe_data = expect_context::<StripeDataRes>();
     provide_context(stripe_data);
 

@@ -12,12 +12,12 @@ Project summary
 Current goals (v1)
 - Refactor the code cleanly and cut prototyping stuff
 - Product catalog stored in the local database (name, description, price, images, category, availability).
+- Database is the source of truth; Stripe catalog/payment data is derived from DB (one-way sync).
 - Develop tooling to interact with the database cleanly inside the website itself (maybe inside admin panel)
 - Products displayed + detail pages info read from the database.
 - Cart + order creation stored in the database, but cart items may be stored locally for performance reasons.
 - Customer records (email, address, phone) with order history in database.
 - Delivery rules: Hobart local delivery and Saturday market pickup (details TBD later).
-- Basic admin CRUD for products, orders, and customers.
 
 Non-goals for now
 - Refactor the design and pages front-end to suit the new back-end code.
@@ -30,15 +30,17 @@ Working agreements
 - Try think about performance concerns and whiether adding heavy dependencies or changing core stack is actually needed.
 - Make the changes to the project managable, not implement unneeded features, current thought process is to refactor the project into managable state.
 - Keep SSR/CSR parity in Leptos; use server functions for DB access.
+- Minimize server requests; keep UI state local (cart, toggles) and cache catalog data (restart/manual refresh is acceptable).
 
 Open decisions
-- Database choice (SQLite vs Postgres).
 - DB library/tooling (SQLx, SeaORM, Diesel, etc.).
 - Exact delivery rules and pricing.
 
 Current tasks (update as we go)
 - [ ] Refactor the code into more managable state, cutting stuff that's unneeded
 - [ ] Decide DB + ORM/tooling.
+- [ ] Replace JSON products_config pipeline with DB reads/writes.
+- [ ] Define DB -> Stripe sync strategy for products/prices used in checkout.
 - [ ] Define schema for products, customers, orders, order_items, delivery.
 - [ ] Add migrations and seed data.
 - [ ] Build product list + detail views from DB.

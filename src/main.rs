@@ -73,6 +73,14 @@ async fn main() {
 
     let stripe_client = stripe::Client::new(key.clone());
 
+    let db = match farmtasker_au::db::init_db().await {
+        Ok(pool) => pool,
+        Err(err) => {
+            tracing::error!("Failed to initialize database: {}", err);
+            return;
+        }
+    };
+
     let appstate = farmtasker_au::AppState {
         stripe_data: match farmtasker_au::StripeData::new_fetch().await {
             Ok(ok) => Some(ok),
@@ -163,6 +171,7 @@ async fn main() {
         )
         .fallback(file_and_error_handler)
         .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
+        .layer(Extension(db.clone()))
         .layer(Extension(appstate.clone()))
         .with_state(leptos_options);
 

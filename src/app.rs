@@ -233,7 +233,7 @@ pub fn Routerer() -> impl IntoView {
                     let setter = expect_context::<WriteSignal<CurrentPage>>();
                     setter.update(|page: &mut CurrentPage| *page = CURRENTPAGE);
                     view! {
-                        <Pager page=ShoppingCart currentpage=CURRENTPAGE/>
+                        <Pager page=ShoppingCartPage currentpage=CURRENTPAGE/>
                     }
                 }
             }/>
